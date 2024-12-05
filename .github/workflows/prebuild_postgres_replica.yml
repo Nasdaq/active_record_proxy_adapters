@@ -4,6 +4,7 @@ on:
   pull_request:
     paths:
       - 'postgres_replica.dockerfile'
+      - 'docker/postgres_replica/cmd.sh'
 
 jobs:
   export_variables:
@@ -22,7 +23,13 @@ jobs:
 
     - name: Calculate SHA256 for postgres_replica.dockerfile
       id: calculate_replica_sha
-      run: echo "REPLICA_SHA=$(sha256sum postgres_replica.dockerfile | awk '{ print substr($1, 1, 12) }')" >> $GITHUB_OUTPUT
+      run: |
+        checksum () {
+          sha256sum $@ | awk '{print substr($1, 1, 12)}'
+        }
+        REPLICA_DOCKERFILE_SHA=$(checksum postgres_replica.dockerfile)
+        REPLICA_CMD_SHA=$(checksum docker/postgres_replica/cmd.sh)
+        echo "REPLICA_SHA=$(echo \"${REPLICA_DOCKERFILE_SHA}-${REPLICA_CMD_SHA}\" | checksum)" >> $GITHUB_OUTPUT
 
   prebuild_replica:
     needs: export_variables
