@@ -16,7 +16,7 @@ module ActiveRecordProxyAdapters
       /\A\s*select.+(nextval|currval|lastval|get_lock|release_lock|pg_advisory_lock|pg_advisory_unlock)\(/i
     ].map(&:freeze).freeze
     # All queries that match these patterns should be sent to the replica database
-    SQL_REPLICA_MATCHERS     = [/\A\s*(select|with[\s\S]*\)\s*select)\s/i].map(&:freeze).freeze
+    SQL_REPLICA_MATCHERS     = [/\A\s*(select|with\s[\s\S]*\)\s*select)\s/i].map(&:freeze).freeze
     # All queries that match these patterns should be sent to all databases
     SQL_ALL_MATCHERS         = [/\A\s*set\s/i].map(&:freeze).freeze
     # Local sets queries should not be sent to all datbases
