@@ -1,0 +1,21 @@
+test:
+  postgresql_primary: &postgresql_primary
+    adapter: postgresql_proxy
+    username: <%= ENV.fetch("PG_PRIMARY_USER", "postgres") %>
+    password: <%= ENV.fetch("PG_PRIMARY_PASSWORD", "postgres") %>
+    host: <%= ENV.fetch("PG_PRIMARY_HOST", "localhost") %>
+    port: <%= Integer(ENV.fetch("PG_PRIMARY_PORT", 5432)) %>
+    database: primary_replica_proxy_test
+
+  postgresql_replica:
+    adapter: postgresql
+    username: <%= ENV.fetch("PG_REPLICA_USER", "postgres") %>
+    password: <%= ENV.fetch("PG_REPLICA_PASSWORD", "postgres") %>
+    host: <%= ENV.fetch("PG_REPLICA_HOST", "postgres_replica") %>
+    port: <%= Integer(ENV.fetch("PG_REPLICA_PORT", 5433)) %>
+    database: primary_replica_proxy_test
+    replica: true
+
+  postgresql_database_tasks:
+    <<: *postgresql_primary
+    database: primary_replica_proxy_database_tasks_test

@@ -135,6 +135,7 @@ jobs:
 
       - name: Run RSpec tests
         env:
+          RAILS_ENV: test
           PG_PRIMARY_USER: postgres_primary_test
           PG_PRIMARY_PASSWORD: postgres_primary_test
           PG_PRIMARY_HOST: localhost
@@ -144,7 +145,11 @@ jobs:
           PG_REPLICA_HOST: localhost
           PG_REPLICA_PORT: 5433
 
-        run: RUBY_VERSION="${{ matrix.ruby }}" RAILS_VERSION="${{ matrix.rails }}"  bundle exec rspec --format progress
+        run: |
+          export RUBY_VERSION="${{ matrix.ruby }}"
+          export RAILS_VERSION="${{ matrix.rails }}"
+          bundle exec rake db:setup
+          bundle exec rspec --format progress
 
       - name: Upload Coverage Report
         uses: actions/upload-artifact@v4

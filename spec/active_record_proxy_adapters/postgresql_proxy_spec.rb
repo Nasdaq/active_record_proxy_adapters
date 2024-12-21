@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-RSpec.describe ActiveRecordProxyAdapters::PostgreSQLProxy do
+RSpec.describe ActiveRecordProxyAdapters::PostgreSQLProxy do # rubocop:disable RSpec/SpecFilePathFormat
   attr_reader :primary_adapter
 
   let(:replica_pool) { TestHelper.replica_pool }
@@ -14,6 +14,8 @@ RSpec.describe ActiveRecordProxyAdapters::PostgreSQLProxy do
 
       @primary_adapter = nil
     end
+
+    TestHelper.truncate_database
   end
 
   def create_dummy_user
@@ -54,7 +56,7 @@ RSpec.describe ActiveRecordProxyAdapters::PostgreSQLProxy do
         it "reroutes query to the primary" do
           allow(primary_adapter).to receive(:"#{method_name}_unproxied").and_call_original
 
-          ActiveRecord::Base.transaction { run_test }
+          primary_adapter.transaction { run_test }
 
           expect(primary_adapter).to have_received(:"#{method_name}_unproxied").with(sql, any_args).once
         end
@@ -62,7 +64,7 @@ RSpec.describe ActiveRecordProxyAdapters::PostgreSQLProxy do
         it "does not checkout a connection from the replica pool" do
           allow(replica_pool).to receive(:checkout).and_call_original
 
-          ActiveRecord::Base.transaction { run_test }
+          primary_adapter.transaction { run_test }
 
           expect(replica_pool).not_to have_received(:checkout)
         end

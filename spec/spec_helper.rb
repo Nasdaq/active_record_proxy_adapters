@@ -27,11 +27,14 @@ SimpleCov.start do
   coverage_dir "coverage/#{coverage_path}"
   command_name "Ruby-#{ruby_version}-AR-#{ar_version}"
 end
+
 require "active_record_proxy_adapters"
 require "active_record_proxy_adapters/connection_handling"
 require_relative "test_helper"
 
 ActiveRecord::Base.extend ActiveRecordProxyAdapters::ConnectionHandling
+
+ENV["RAILS_ENV"] ||= TestHelper.env_name
 
 RSpec.configure do |config|
   # Enable flags like --only-failures and --next-failure
@@ -44,12 +47,7 @@ RSpec.configure do |config|
     c.syntax = :expect
   end
 
-  config.before(:suite) do
-    TestHelper.setup_active_record_config
-    TestHelper.establish_connections
-    TestHelper.reset_database
-    TestHelper.migrate_database
-  end
+  config.before(:suite) { TestHelper.setup_active_record_config }
 
   wrap_test_case_in_transaction = proc do |example|
     connection = ActiveRecord::Base.connection
@@ -62,6 +60,4 @@ RSpec.configure do |config|
   end
 
   config.around(:each, :transactional, &wrap_test_case_in_transaction)
-
-  config.before { TestHelper.truncate_database }
 end
