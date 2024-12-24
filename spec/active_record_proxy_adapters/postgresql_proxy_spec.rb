@@ -25,6 +25,7 @@ RSpec.describe ActiveRecordProxyAdapters::PostgreSQLProxy do # rubocop:disable R
     SQL
   end
 
+  # rubocop:disable RSpec/MultipleMemoizedHelpers
   shared_examples_for "a_proxied_method" do |method_name|
     subject(:run_test) { proxy.public_send(method_name, sql) }
 
@@ -154,6 +155,7 @@ RSpec.describe ActiveRecordProxyAdapters::PostgreSQLProxy do # rubocop:disable R
       end
     end
   end
+  # rubocop:enable RSpec/MultipleMemoizedHelpers
 
   describe "#execute" do
     it_behaves_like "a_proxied_method", :execute do
