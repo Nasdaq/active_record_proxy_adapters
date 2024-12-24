@@ -65,12 +65,12 @@ module ActiveRecordProxyAdapters
     delegate :connected_to_stack, to: :connection_class
     delegate :reading_role, :writing_role, to: :active_record_context
 
-    def connection_class
-      active_record_context.connection_class_for(primary_connection)
+    def replica_pool
+      connection_class.connected_to(role: reading_role) { connection_class.connection_pool }
     end
 
-    def replica_pool
-      ActiveRecord::Base.connected_to(role: reading_role) { ActiveRecord::Base.connection_pool }
+    def connection_class
+      active_record_context.connection_class_for(primary_connection)
     end
 
     def coerce_query_to_string(sql_or_arel)
