@@ -32,7 +32,6 @@ module ActiveRecordProxyAdapters
 
     private
 
-    delegate :config, to: :ActiveRecordProxyAdapters
     delegate :log_subscriber_primary_prefix, :log_subscriber_replica_prefix, to: :config
 
     def config
