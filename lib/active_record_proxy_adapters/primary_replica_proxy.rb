@@ -62,11 +62,11 @@ module ActiveRecordProxyAdapters
 
     attr_reader :primary_connection, :last_write_at, :active_record_context
 
-    delegate :connected_to_stack, to: :connection_class
+    delegate :connection_handler, :connected_to_stack, to: :connection_class
     delegate :reading_role, :writing_role, to: :active_record_context
 
     def replica_pool
-      connection_class.connected_to(role: reading_role) { connection_class.connection_pool }
+      connection_handler.retrieve_connection_pool(connection_class.name, role: reading_role)
     end
 
     def connection_class
