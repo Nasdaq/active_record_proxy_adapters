@@ -22,8 +22,14 @@ RSpec.describe ActiveRecord::Tasks::PostgreSQLProxyDatabaseTasks do # rubocop:di
 
   def schema_loaded?
     proc do
-      any_tables = TestHelper::PostgreSQLDatabaseTaskRecord.connection.tables.any?
-      TestHelper::PostgreSQLDatabaseTaskRecord.connection_pool.disconnect!
+      pool = ActiveRecord::Base.connection_handler.retrieve_connection_pool(
+        TestHelper::PostgreSQLDatabaseTaskRecord.name, role: TestHelper.writing_role
+      )
+      any_tables = TestHelper::PostgreSQLDatabaseTaskRecord.connected_to(role: TestHelper.writing_role) do
+        TestHelper::PostgreSQLDatabaseTaskRecord.connection.tables.any?
+      end
+
+      pool.disconnect!
 
       any_tables
     end

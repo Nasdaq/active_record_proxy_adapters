@@ -30,6 +30,7 @@ RSpec.describe ActiveRecordProxyAdapters::PostgreSQLProxy do # rubocop:disable R
 
     let(:proxy) { described_class.new(primary_adapter) }
     let(:read_only_error_class) { ActiveRecord::ReadOnlyError }
+    let(:model_class) { TestHelper::PostgreSQLRecord }
 
     context "when query is a select statement" do
       let(:sql) { "SELECT * from users" }
@@ -74,7 +75,7 @@ RSpec.describe ActiveRecordProxyAdapters::PostgreSQLProxy do # rubocop:disable R
         it "reroutes query to the primary" do
           allow(primary_adapter).to receive(:"#{method_name}_unproxied").and_call_original
 
-          ActiveRecord::Base.connected_to(role: TestHelper.writing_role) { run_test }
+          model_class.connected_to(role: TestHelper.writing_role) { run_test }
 
           expect(primary_adapter).to have_received(:"#{method_name}_unproxied").with(sql, any_args).once
         end
@@ -82,7 +83,7 @@ RSpec.describe ActiveRecordProxyAdapters::PostgreSQLProxy do # rubocop:disable R
         it "does not checkout a connection from the replica pool" do
           allow(replica_pool).to receive(:checkout).and_call_original
 
-          ActiveRecord::Base.connected_to(role: TestHelper.writing_role) { run_test }
+          model_class.connected_to(role: TestHelper.writing_role) { run_test }
 
           expect(replica_pool).not_to have_received(:checkout)
         end
@@ -109,7 +110,7 @@ RSpec.describe ActiveRecordProxyAdapters::PostgreSQLProxy do # rubocop:disable R
       context "when sticking to replica" do
         it "raises database error" do
           expect do
-            ActiveRecord::Base.connected_to(role: TestHelper.reading_role) { run_test }
+            model_class.connected_to(role: TestHelper.reading_role) { run_test }
           end.to raise_error(read_only_error_class)
         end
       end

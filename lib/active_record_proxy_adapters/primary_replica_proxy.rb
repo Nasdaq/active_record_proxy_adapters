@@ -65,6 +65,10 @@ module ActiveRecordProxyAdapters
     delegate :connection_handler, :connected_to_stack, to: :connection_class
     delegate :reading_role, :writing_role, to: :active_record_context
 
+    def replica_pool_unavailable?
+      !replica_pool
+    end
+
     def replica_pool
       connection_handler.retrieve_connection_pool(connection_class.name, role: reading_role)
     end
@@ -108,7 +112,7 @@ module ActiveRecordProxyAdapters
     end
 
     def connection_for(role, sql_string) # rubocop:disable Metrics/MethodLength
-      connection = if role == writing_role
+      connection = if role == writing_role || replica_pool_unavailable?
                      primary_connection
                    else
                      begin
