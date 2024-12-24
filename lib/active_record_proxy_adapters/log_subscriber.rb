@@ -13,7 +13,7 @@ module ActiveRecordProxyAdapters
         name = [database_instance_prefix_for(event), name].compact.join(" ")
         payload[:name] = name
       end
-      super(event)
+      super
     end
 
     protected
