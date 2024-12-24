@@ -1,6 +1,7 @@
 ## [Unreleased]
 
 - Fix replica connection pool getter when database configurations have multiple replicas
+- Retrieve replica pool without checking out a connection
 
 ## [0.1.2] - 2024-12-16
 
