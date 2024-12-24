@@ -50,6 +50,7 @@ services:
         - POSTGRES_LOG_STATEMENT=${POSTGRES_LOG_STATEMENT:-}
         - REPLICA_USER=replicator
         - REPLICA_PASSWORD=replicator
+    container_name: postgres_primary
     environment:
       POSTGRES_DB: postgres
       POSTGRES_USER: postgres_primary_test

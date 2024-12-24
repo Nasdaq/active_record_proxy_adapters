@@ -1,5 +1,6 @@
 ## [Unreleased]
 
+- Add custom log subscriber to tag queries based on the adapter being used
 - Fix replica connection pool getter when database configurations have multiple replicas
 - Retrieve replica pool without checking out a connection
 
