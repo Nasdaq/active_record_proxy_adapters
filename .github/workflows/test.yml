@@ -149,7 +149,7 @@ jobs:
       - name: Upload Coverage Report
         uses: actions/upload-artifact@v4
         with:
-          name: ${{ env.RUN_UNIQUE_ID }}_artifact_${{ matrix.ruby }}_${{ matrix.rails }}
+          name: coverage_ruby_${{ matrix.ruby }}_rails_${{ matrix.rails }}
           path: coverage/
           include-hidden-files: true
           if-no-files-found: error
@@ -179,6 +179,14 @@ jobs:
 
       - name: Collate Partial Coverage Resultsets
         run: bundle exec rake coverage:report
+
+      - name: Upload Full Coverage Report
+        uses: actions/upload-artifact@v4
+        with:
+          name: coverage
+          path: coverage/
+          include-hidden-files: true
+          if-no-files-found: error
 
       - uses: joshmfrankel/simplecov-check-action@main
         with:
