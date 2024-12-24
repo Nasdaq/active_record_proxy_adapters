@@ -30,9 +30,11 @@ end
 
 require "active_record_proxy_adapters"
 require "active_record_proxy_adapters/connection_handling"
+require "active_record_proxy_adapters/log_subscriber"
 require_relative "test_helper"
 
 ActiveRecord::Base.extend ActiveRecordProxyAdapters::ConnectionHandling
+ActiveRecord::Base.logger = Logger.new(Tempfile.create)
 
 ENV["RAILS_ENV"] ||= TestHelper.env_name
 
