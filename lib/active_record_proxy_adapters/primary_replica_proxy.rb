@@ -70,7 +70,16 @@ module ActiveRecordProxyAdapters
     end
 
     def replica_pool
+      # use default handler if the connection pool for specific class is not found
+      specific_replica_pool || default_replica_pool
+    end
+
+    def specific_replica_pool
       connection_handler.retrieve_connection_pool(connection_class.name, role: reading_role)
+    end
+
+    def default_replica_pool
+      connection_handler.retrieve_connection_pool(ActiveRecord::Base.name, role: reading_role)
     end
 
     def connection_class
