@@ -1,5 +1,7 @@
 ## [Unreleased]
 
+- Fix replica connection pool getter when specific connection name is not found
+
 ## [0.2.0] - 2024-12-24
 
 - Add custom log subscriber to tag queries based on the adapter being used (68b8c1f4191388eb957bf12e0f84289da667e940)
