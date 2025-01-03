@@ -100,6 +100,7 @@ RSpec.describe ActiveRecord::Tasks::PostgreSQLProxyDatabaseTasks do # rubocop:di
     before do
       ActiveRecord::Tasks::DatabaseTasks.create(configuration)
       ActiveRecord::Tasks::DatabaseTasks.structure_load(configuration, dump_in)
+      ActiveRecord::Base.establish_connection(configuration)
     end
 
     after do
@@ -114,9 +115,7 @@ RSpec.describe ActiveRecord::Tasks::PostgreSQLProxyDatabaseTasks do # rubocop:di
   end
 
   describe "#purge" do
-    subject(:purge) do
-      ActiveRecord::Tasks::DatabaseTasks.purge(configuration)
-    end
+    subject(:purge) { ActiveRecord::Tasks::DatabaseTasks.purge(configuration) }
 
     before do
       ActiveRecord::Tasks::DatabaseTasks.create(configuration)

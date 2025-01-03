@@ -71,6 +71,7 @@ jobs:
         rails:
           - 7.0.0
           - 7.1.0
+          - 7.2.0
           - 8.0.0
         include:
           - ruby: 3.1.6
@@ -120,6 +121,14 @@ jobs:
         uses: ruby/setup-ruby@v1
         with:
           ruby-version: ${{ matrix.ruby }}
+
+      # Install PostgreSQL 17 client tools
+      - name: Add PostgreSQL 17 repository
+        run: |
+          sudo sh -c 'echo "deb http://apt.postgresql.org/pub/repos/apt/ $(lsb_release -cs)-pgdg main" > /etc/apt/sources.list.d/pgdg.list'
+          wget --quiet -O - https://www.postgresql.org/media/keys/ACCC4CF8.asc | sudo apt-key add -
+          sudo apt-get update
+          sudo apt-get install -y postgresql-client-17
 
       - name: Check if primary is available
         run: pg_isready -h localhost -U postgres_primary_test --dbname=postgres -p 5432

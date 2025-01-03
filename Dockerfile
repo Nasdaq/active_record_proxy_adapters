@@ -8,7 +8,7 @@ RUN apk --update add \
     build-base \
     git \
     postgresql-dev \
-    postgresql-client
+    postgresql17-client
 RUN gem install bundler -v 2.5.13
 
 COPY . /app

@@ -62,6 +62,11 @@ module TestHelper
     ActiveRecord::Tasks::DatabaseTasks.structure_load(primary_configuration, structure_path)
   end
 
+  def dump_schema(structure_path = "db/postgresql_structure.sql")
+    ActiveRecord::Base.establish_connection(primary_configuration)
+    ActiveRecord::Tasks::DatabaseTasks.structure_dump(primary_configuration, structure_path)
+  end
+
   def primary_configuration
     configuration_for(name: "postgresql_primary")
   end
