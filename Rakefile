@@ -56,6 +56,17 @@ namespace :db do # rubocop:disable Metrics/BlockLength
         TestHelper.load_schema(args.schema_path)
       end
     end
+
+    desc "Dumps all schemas onto their respective files"
+    task dump: %i[dump:postgresql]
+
+    namespace :dump do
+      desc "Dump the schema from the postgresql database onto schema_path. Default is db/postgresql_structure.sql"
+      task :postgresql, [:schema_path] => :environment do |_task, args|
+        args.with_defaults(schema_path: "db/postgresql_structure.sql")
+        TestHelper.dump_schema(args.schema_path)
+      end
+    end
   end
 
   desc "Creates a all databases and loads their schemas"

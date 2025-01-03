@@ -2,6 +2,7 @@
 
 # rubocop:disable RSpec/MultipleMemoizedHelpers
 RSpec.describe ActiveRecord::Tasks::PostgreSQLProxyDatabaseTasks do # rubocop:disable RSpec/SpecFilePathFormat
+  let(:database_tasks) { described_class.new(configuration) }
   let(:public_schema_config) do
     configuration.configuration_hash.merge(adapter: "postgresql", database: "postgres", schema_search_path: "public")
   end
@@ -100,6 +101,7 @@ RSpec.describe ActiveRecord::Tasks::PostgreSQLProxyDatabaseTasks do # rubocop:di
     before do
       ActiveRecord::Tasks::DatabaseTasks.create(configuration)
       ActiveRecord::Tasks::DatabaseTasks.structure_load(configuration, dump_in)
+      ActiveRecord::Base.establish_connection(configuration)
     end
 
     after do
@@ -115,7 +117,7 @@ RSpec.describe ActiveRecord::Tasks::PostgreSQLProxyDatabaseTasks do # rubocop:di
 
   describe "#purge" do
     subject(:purge) do
-      ActiveRecord::Tasks::DatabaseTasks.purge(configuration)
+      database_tasks.purge # ActiveRecord::Tasks::DatabaseTasks.purge(configuration)
     end
 
     before do
