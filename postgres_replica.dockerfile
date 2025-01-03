@@ -1,4 +1,4 @@
-FROM docker.io/postgres:14-alpine
+FROM docker.io/postgres:17-alpine
 
 ENV PRIMARY_DATABASE_HOST=localhost
 ENV PRIMARY_DATABASE_PORT=5432
