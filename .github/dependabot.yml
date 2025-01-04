@@ -1,0 +1,10 @@
+version: 2
+updates:
+  - package-ecosystem: bundler
+    directory: "/"
+    schedule:
+      interval: daily
+      time: "08:00"
+    open-pull-requests-limit: 5
+    allow:
+      - dependency-type: "direct"
