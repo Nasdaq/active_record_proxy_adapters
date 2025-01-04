@@ -1,5 +1,7 @@
 ## [Unreleased]
 
+- Stick to same connection throughout request span
+
 ## [0.2.1] - 2025-01-02
 
 - Fix replica connection pool getter when specific connection name is not found https://github.com/Nasdaq/active_record_proxy_adapters/commit/847e150dd21c5bc619745ee1d9d8fcaa9b8f2eea
