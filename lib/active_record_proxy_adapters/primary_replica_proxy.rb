@@ -124,13 +124,19 @@ module ActiveRecordProxyAdapters
       connection = primary_connection if role == writing_role || replica_pool_unavailable?
       connection ||= checkout_replica_connection
 
-      result = yield(connection)
+      result = connected_to(role:) { yield connection }
 
       update_primary_latest_write_timestamp if !replica_connection?(connection) && write_statement?(sql_string)
 
       result
     ensure
       replica_connection?(connection) && replica_pool.checkin(connection)
+    end
+
+    def connected_to(role:, &block)
+      return block.call unless connection_class.respond_to?(:connected_to)
+
+      connection_class.connected_to(role:, &block)
     end
 
     def replica_connection?(connection)
