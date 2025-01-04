@@ -9,7 +9,7 @@ gem "rake", "~> 13.0"
 group :test do
   gem "rspec", "~> 3.0"
   gem "rubocop", "~> 1.21"
-  gem "rubocop-rspec", "~> 3.1.0"
+  gem "rubocop-rspec", "~> 3.3.0"
   gem "simplecov"
   gem "simplecov-cobertura"
 end
