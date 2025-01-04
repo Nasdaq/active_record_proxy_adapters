@@ -2,7 +2,7 @@
 
 require "erb"
 
-module TestHelper
+module TestHelper # rubocop:disable Metrics/ModuleLength
   module_function
 
   class PostgreSQLRecord < ActiveRecord::Base
@@ -114,6 +114,35 @@ module TestHelper
         SQL
       end
     end
+  end
+
+  def with_temporary_pool(model_class, &)
+    config = model_class.connection_db_config
+    if active_record_context.active_record_v7_2_or_greater?
+      with_rails_v7_2_or_greater_temporary_pool(config, &)
+    elsif active_record_context.active_record_v7_1_or_greater?
+      with_rails_v7_1_temporary_pool(config, &)
+    else
+      with_rails_v7_0_temporary_pool(model_class, &)
+    end
+  end
+
+  def with_rails_v7_2_or_greater_temporary_pool(config)
+    ActiveRecord::PendingMigrationConnection.with_temporary_pool(config) do |pool|
+      yield(pool, pool.schema_migration, pool.internal_metadata)
+    end
+  end
+
+  def with_rails_v7_1_temporary_pool(config)
+    ActiveRecord::PendingMigrationConnection.establish_temporary_connection(config) do |conn|
+      yield(conn.pool, conn.schema_migration, conn.internal_metadata)
+    end
+  end
+
+  def with_rails_v7_0_temporary_pool(model_class)
+    conn = model_class.connection
+
+    yield(conn.pool, conn.schema_migration, nil)
   end
 
   def active_record_context

@@ -1,5 +1,7 @@
 # ActiveRecordProxyAdapters
 
+[![Run Test Suite](https://github.com/Nasdaq/active_record_proxy_adapters/actions/workflows/test.yml/badge.svg?branch=main)](https://github.com/Nasdaq/active_record_proxy_adapters/actions/workflows/test.yml)
+
 A set of ActiveRecord adapters that leverage Rails native multiple database setup to allow automatic connection switching from _one_ primary pool to _one_ replica pool at the database statement level.
 
 ## Installation

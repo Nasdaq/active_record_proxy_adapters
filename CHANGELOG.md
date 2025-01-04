@@ -1,5 +1,6 @@
 ## [Unreleased]
 
+- Handle PendingMigrationConnection introduced by Rails 7.2 and backported to Rails 7.1
 - Stick to same connection throughout request span
 
 ## [0.2.1] - 2025-01-02

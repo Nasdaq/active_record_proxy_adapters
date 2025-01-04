@@ -62,7 +62,7 @@ module ActiveRecordProxyAdapters
 
     attr_reader :primary_connection, :last_write_at, :active_record_context
 
-    delegate :connection_handler, :connected_to_stack, to: :connection_class
+    delegate :connection_handler, to: :connection_class
     delegate :reading_role, :writing_role, to: :active_record_context
 
     def replica_pool_unavailable?
@@ -118,6 +118,20 @@ module ActiveRecordProxyAdapters
       return unless role.present?
 
       [reading_role, writing_role].include?(role) ? role : nil
+    end
+
+    def connected_to_stack
+      return connection_class.connected_to_stack if connection_class.respond_to?(:connected_to_stack)
+
+      # handle Rails 7.2+ pending migrations Connection
+      return [{ role: writing_role }] if pending_migration_connection?
+
+      []
+    end
+
+    def pending_migration_connection?
+      active_record_context.active_record_v7_1_or_greater? &&
+        connection_class.name == "ActiveRecord::PendingMigrationConnection"
     end
 
     def connection_for(role, sql_string)
