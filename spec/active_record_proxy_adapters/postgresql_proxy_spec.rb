@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-require_relative "shared_examples/a_proxied_method"
+require "shared_examples/a_proxied_method"
 
 RSpec.describe ActiveRecordProxyAdapters::PostgreSQLProxy do # rubocop:disable RSpec/SpecFilePathFormat
   attr_reader :primary_adapter
@@ -30,15 +30,11 @@ RSpec.describe ActiveRecordProxyAdapters::PostgreSQLProxy do # rubocop:disable R
   end
 
   describe "#execute" do
-    it_behaves_like "a_proxied_method", :execute do
-      subject(:run_test) { proxy.execute(sql) }
-    end
+    it_behaves_like "a_proxied_method", :execute
   end
 
   describe "#exec_query" do
-    it_behaves_like "a_proxied_method", :exec_query do
-      subject(:run_test) { proxy.exec_query(sql) }
-    end
+    it_behaves_like "a_proxied_method", :exec_query
   end
 
   unless TestHelper.active_record_context.active_record_v8_0_or_greater?

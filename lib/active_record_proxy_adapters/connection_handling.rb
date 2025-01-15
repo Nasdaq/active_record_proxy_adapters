@@ -1,6 +1,7 @@
 # frozen_string_literal: true
 
 require "active_record/connection_adapters/postgresql_proxy_adapter"
+require "active_record/connection_adapters/mysql2_proxy_adapter"
 
 module ActiveRecordProxyAdapters
   # Module to extend ActiveRecord::Base with the connection handling methods.
@@ -30,6 +31,10 @@ module ActiveRecordProxyAdapters
         conn_params,
         config
       )
+    end
+
+    def mysql2_proxy_adapter_class
+      ::ActiveRecord::ConnectionAdapters::Mysql2ProxyAdapter
     end
   end
 end

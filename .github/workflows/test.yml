@@ -113,6 +113,19 @@ jobs:
           --health-timeout 5s
           --health-retries 5
 
+      mysql:
+        image: mariadb:11.4
+        ports:
+          - 3306:3306
+        env:
+          MARIADB_ALLOW_EMPTY_ROOT_PASSWORD: true
+          MARIADB_DATABASE: mysql
+        options: >-
+          --health-cmd "mariadb-admin ping"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
@@ -122,20 +135,21 @@ jobs:
         with:
           ruby-version: ${{ matrix.ruby }}
 
-      # Install PostgreSQL 17 client tools
+
       - name: Add PostgreSQL 17 repository
         run: |
           sudo sh -c 'echo "deb http://apt.postgresql.org/pub/repos/apt/ $(lsb_release -cs)-pgdg main" > /etc/apt/sources.list.d/pgdg.list'
           wget --quiet -O - https://www.postgresql.org/media/keys/ACCC4CF8.asc | sudo apt-key add -
-          sudo apt-get update
-          sudo apt-get install -y postgresql-client-17
 
-      - name: Check if primary is available
-        run: pg_isready -h localhost -U postgres_primary_test --dbname=postgres -p 5432
+      - name: Update apt-get index
+        run: sudo apt-get update
 
-      - name: Check if replica is available
-        # run: pg_isready -h localhost -U replicator --dbname=postgres -p 5433
-        run: pg_isready -h localhost -U postgres_primary_test --dbname=postgres -p 5433
+      # Install PostgreSQL 17 client tools
+      - name: Install PostgreSQL 17 client
+        run: sudo apt-get install -y postgresql-client-17
+
+      - name: Install MySQL client
+        run: sudo apt-get install -y mysql-client libmysqlclient-dev
 
       - name: Install dependencies
         env:
@@ -155,6 +169,14 @@ jobs:
           PG_REPLICA_PASSWORD: postgres_primary_test
           PG_REPLICA_HOST: localhost
           PG_REPLICA_PORT: 5433
+          MYSQL_PRIMARY_USER: mysql
+          MYSQL_PRIMARY_PASSWORD:
+          MYSQL_PRIMARY_HOST: localhost
+          MYSQL_PRIMARY_PORT: 3306
+          MYSQL_REPLICA_USER: mysql
+          MYSQL_REPLICA_PASSWORD:
+          MYSQL_REPLICA_HOST: mysql_replica
+          MYSQL_REPLICA_PORT: 3307
 
         run: |
           export RUBY_VERSION="${{ matrix.ruby }}"

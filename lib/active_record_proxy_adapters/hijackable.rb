@@ -8,7 +8,7 @@ module ActiveRecordProxyAdapters
   module Hijackable
     extend ActiveSupport::Concern
 
-    class_methods do
+    class_methods do # rubocop:disable Metrics/BlockLength
       # Renames the methods from the original Adapter using the proxy suffix (_unproxied)
       # and delegate the original method name to the proxy.
       # Example: delegate_to_proxy(:execute) creates a method `execute_unproxied`,

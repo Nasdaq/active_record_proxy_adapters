@@ -26,28 +26,38 @@ end
 
 namespace :db do # rubocop:disable Metrics/BlockLength
   desc "Drops all databases"
-  task drop: %i[drop:postgresql]
+  task drop: %i[drop:postgresql drop:mysql2]
 
   namespace :drop do
     desc "Drops the postgresql database"
     task postgresql: :environment do
       TestHelper.drop_postgresql_database
     end
+
+    desc "Drops the mysql database"
+    task mysql2: :environment do
+      TestHelper.drop_mysql2_database
+    end
   end
 
   desc "Creates all databases"
-  task create: %i[create:postgresql]
+  task create: %i[create:postgresql create:mysql2]
 
   namespace :create do
     desc "Creates the postgresql database"
     task postgresql: :environment do
       TestHelper.create_postgresql_database
     end
+
+    desc "Creates the mysql database"
+    task mysql2: :environment do
+      TestHelper.create_mysql2_database
+    end
   end
 
-  namespace :schema do
+  namespace :schema do # rubocop:disable Metrics/BlockLength
     desc "Loads all schemas onto their respective databases"
-    task load: %i[load:postgresql]
+    task load: %i[load:postgresql load:mysql2]
 
     namespace :load do
       desc "Loads the schema into the postgresql database from schema_path. Default is db/postgresql_structure.sql"
@@ -55,16 +65,28 @@ namespace :db do # rubocop:disable Metrics/BlockLength
         args.with_defaults(schema_path: "db/postgresql_structure.sql")
         TestHelper.load_postgresql_schema(args.schema_path)
       end
+
+      desc "Loads the schema into the mysql database from schema_path. Default is db/mysql_structure.sql"
+      task :mysql2, [:schema_path] => :environment do |_task, args|
+        args.with_defaults(schema_path: "db/mysql_structure.sql")
+        TestHelper.load_mysql2_schema(args.schema_path)
+      end
     end
 
     desc "Dumps all schemas onto their respective files"
-    task dump: %i[dump:postgresql]
+    task dump: %i[dump:postgresql dump:mysql2]
 
     namespace :dump do
       desc "Dump the schema from the postgresql database onto schema_path. Default is db/postgresql_structure.sql"
       task :postgresql, [:schema_path] => :environment do |_task, args|
         args.with_defaults(schema_path: "db/postgresql_structure.sql")
         TestHelper.dump_postgresql_schema(args.schema_path)
+      end
+
+      desc "Dump the schema from the mysql database onto schema_path. Default is db/mysql_structure.sql"
+      task :mysql2, [:schema_path] => :environment do |_task, args|
+        args.with_defaults(schema_path: "db/mysql_structure.sql")
+        TestHelper.dump_mysql2_schema(args.schema_path)
       end
     end
   end
@@ -75,6 +97,9 @@ namespace :db do # rubocop:disable Metrics/BlockLength
   namespace :setup do
     desc "Creates the postgresql database and loads the schema"
     task postgresql: %i[create:postgresql schema:load:postgresql]
+
+    desc "Creates the mysql2 database and loads the schema"
+    task mysql2: %i[create:mysql2 schema:load:mysql2]
   end
 end
 

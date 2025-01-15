@@ -32,8 +32,6 @@ module ActiveRecordProxyAdapters
     # ActiveRecord::PostgreSQLAdapter methods that should be proxied.
     hijack_method :execute, :exec_query
 
-    hijack_method :exec_no_cache, :exec_cache unless ActiveRecordContext.active_record_v8_0_or_greater?
-
     def self.hijacked_methods
       @hijacked_methods.to_a
     end

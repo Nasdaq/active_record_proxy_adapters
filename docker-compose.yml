@@ -31,12 +31,22 @@ services:
       PG_REPLICA_PASSWORD: postgres_primary_test
       PG_REPLICA_HOST: postgres_replica
       PG_REPLICA_PORT: 5432
+      MYSQL_PRIMARY_USER: root
+      MYSQL_PRIMARY_PASSWORD: mysql
+      MYSQL_PRIMARY_HOST: mysql_primary
+      MYSQL_PRIMARY_PORT: 3306
+      MYSQL_REPLICA_USER: root
+      MYSQL_REPLICA_PASSWORD: mysql
+      MYSQL_REPLICA_HOST: mysql_primary
+      MYSQL_REPLICA_PORT: 3306
     depends_on:
       - postgres_primary
       - postgres_replica
+      - mariadb
     networks:
       - app
       - postgres
+      - mariadb
     volumes:
       - .:/app
   postgres_primary:
@@ -70,9 +80,19 @@ services:
       PRIMARY_DATABASE_HOST: postgres_primary
     depends_on:
       - postgres_primary
+  # TODO: create mysql replica images
+  mariadb:
+    image: mariadb:11.4
+    container_name: mysql_primary
+    environment:
+      MARIADB_ROOT_PASSWORD: mysql
+      MARIADB_DATABASE: mysql
+    ports:
+      - "3306:3306"
+    networks:
+      - mariadb
+
 networks:
   app:
   postgres:
-
-volumes:
-  postgres_primary:
+  mariadb:
