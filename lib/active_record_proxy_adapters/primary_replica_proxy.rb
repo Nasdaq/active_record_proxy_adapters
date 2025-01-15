@@ -5,11 +5,14 @@ require "active_support/core_ext/module/delegation"
 require "active_support/core_ext/object/blank"
 require "concurrent-ruby"
 require "active_record_proxy_adapters/active_record_context"
+require "active_record_proxy_adapters/hijackable"
 
 module ActiveRecordProxyAdapters
   # This is the base class for all proxies. It defines the methods that should be proxied
   # and the logic to determine which database to use.
   class PrimaryReplicaProxy # rubocop:disable Metrics/ClassLength
+    include Hijackable
+
     # All queries that match these patterns should be sent to the primary database
     SQL_PRIMARY_MATCHERS = [
       /\A\s*select.+for update\Z/i, /select.+lock in share mode\Z/i,
@@ -25,27 +28,11 @@ module ActiveRecordProxyAdapters
     # requests to the primary database so the replica has time to replicate
     WRITE_STATEMENT_MATCHERS = [/\ABEGIN/i, /\ACOMMIT/i, /INSERT\sINTO\s/i, /UPDATE\s/i, /DELETE\sFROM\s/i,
                                 /DROP\s/i].map(&:freeze).freeze
-    UNPROXIED_METHOD_SUFFIX  = "_unproxied"
 
-    # Defines which methods should be hijacked from the original adapter and use the proxy
-    # @param method_names [Array<Symbol>] the list of method names from the adapter
-    def self.hijack_method(*method_names) # rubocop:disable Metrics/MethodLength
-      @hijacked_methods ||= Set.new
-      @hijacked_methods += Set.new(method_names)
+    # ActiveRecord::PostgreSQLAdapter methods that should be proxied.
+    hijack_method :execute, :exec_query
 
-      method_names.each do |method_name|
-        define_method(method_name) do |*args, **kwargs, &block|
-          proxy_bypass_method = "#{method_name}#{UNPROXIED_METHOD_SUFFIX}"
-          sql_string          = coerce_query_to_string(args.first)
-
-          appropriate_connection(sql_string) do |conn|
-            method_to_call = conn == primary_connection ? proxy_bypass_method : method_name
-
-            conn.send(method_to_call, *args, **kwargs, &block)
-          end
-        end
-      end
-    end
+    hijack_method :exec_no_cache, :exec_cache unless ActiveRecordContext.active_record_v8_0_or_greater?
 
     def self.hijacked_methods
       @hijacked_methods.to_a
