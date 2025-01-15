@@ -5,8 +5,8 @@ require_relative "shared_examples/a_proxied_method"
 RSpec.describe ActiveRecordProxyAdapters::PostgreSQLProxy do # rubocop:disable RSpec/SpecFilePathFormat
   attr_reader :primary_adapter
 
-  let(:replica_pool) { TestHelper.replica_pool }
-  let(:primary_pool) { TestHelper.primary_pool }
+  let(:replica_pool) { TestHelper.postgresql_replica_pool }
+  let(:primary_pool) { TestHelper.postgresql_primary_pool }
   let(:adapter_class) { ActiveRecord::ConnectionAdapters::PostgreSQLAdapter }
   let(:model_class) { TestHelper::PostgreSQLRecord }
 
@@ -19,7 +19,7 @@ RSpec.describe ActiveRecordProxyAdapters::PostgreSQLProxy do # rubocop:disable R
       @primary_adapter = nil
     end
 
-    TestHelper.truncate_database
+    TestHelper.truncate_postgresql_database
   end
 
   def create_dummy_user

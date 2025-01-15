@@ -31,7 +31,7 @@ namespace :db do # rubocop:disable Metrics/BlockLength
   namespace :drop do
     desc "Drops the postgresql database"
     task postgresql: :environment do
-      TestHelper.drop_database
+      TestHelper.drop_postgresql_database
     end
   end
 
@@ -41,7 +41,7 @@ namespace :db do # rubocop:disable Metrics/BlockLength
   namespace :create do
     desc "Creates the postgresql database"
     task postgresql: :environment do
-      TestHelper.create_database
+      TestHelper.create_postgresql_database
     end
   end
 
@@ -53,7 +53,7 @@ namespace :db do # rubocop:disable Metrics/BlockLength
       desc "Loads the schema into the postgresql database from schema_path. Default is db/postgresql_structure.sql"
       task :postgresql, [:schema_path] => :environment do |_task, args|
         args.with_defaults(schema_path: "db/postgresql_structure.sql")
-        TestHelper.load_schema(args.schema_path)
+        TestHelper.load_postgresql_schema(args.schema_path)
       end
     end
 
@@ -64,7 +64,7 @@ namespace :db do # rubocop:disable Metrics/BlockLength
       desc "Dump the schema from the postgresql database onto schema_path. Default is db/postgresql_structure.sql"
       task :postgresql, [:schema_path] => :environment do |_task, args|
         args.with_defaults(schema_path: "db/postgresql_structure.sql")
-        TestHelper.dump_schema(args.schema_path)
+        TestHelper.dump_postgresql_schema(args.schema_path)
       end
     end
   end

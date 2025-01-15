@@ -33,45 +33,45 @@ module TestHelper # rubocop:disable Metrics/ModuleLength
     active_record_context.writing_role
   end
 
-  def primary_pool
+  def postgresql_primary_pool
     ActiveRecord::Base
       .connection_handler
       .retrieve_connection_pool(PostgreSQLRecord.name, role: writing_role)
   end
 
-  def replica_pool
+  def postgresql_replica_pool
     ActiveRecord::Base
       .connection_handler
       .retrieve_connection_pool(PostgreSQLRecord.name, role: reading_role)
   end
 
   def reset_database
-    drop_database
-    create_database
+    drop_postgresql_database
+    create_postgresql_database
   end
 
-  def drop_database
-    ActiveRecord::Tasks::DatabaseTasks.drop(primary_configuration)
+  def drop_postgresql_database
+    ActiveRecord::Tasks::DatabaseTasks.drop(postgresql_primary_configuration)
   end
 
-  def create_database
-    ActiveRecord::Tasks::DatabaseTasks.create(primary_configuration)
+  def create_postgresql_database
+    ActiveRecord::Tasks::DatabaseTasks.create(postgresql_primary_configuration)
   end
 
-  def load_schema(structure_path = "db/postgresql_structure.sql")
-    ActiveRecord::Tasks::DatabaseTasks.structure_load(primary_configuration, structure_path)
+  def load_postgresql_schema(structure_path = "db/postgresql_structure.sql")
+    ActiveRecord::Tasks::DatabaseTasks.structure_load(postgresql_primary_configuration, structure_path)
   end
 
-  def dump_schema(structure_path = "db/postgresql_structure.sql")
-    ActiveRecord::Base.establish_connection(primary_configuration)
-    ActiveRecord::Tasks::DatabaseTasks.structure_dump(primary_configuration, structure_path)
+  def dump_postgresql_schema(structure_path = "db/postgresql_structure.sql")
+    ActiveRecord::Base.establish_connection(postgresql_primary_configuration)
+    ActiveRecord::Tasks::DatabaseTasks.structure_dump(postgresql_primary_configuration, structure_path)
   end
 
-  def primary_configuration
+  def postgresql_primary_configuration
     configuration_for(name: "postgresql_primary")
   end
 
-  def replica_configuration
+  def postgresql_replica_configuration
     configuration_for(name: "postgresql_replica", include_hidden: true)
   end
 
@@ -106,8 +106,8 @@ module TestHelper # rubocop:disable Metrics/ModuleLength
     YAML.safe_load(erb.result, aliases: true)
   end
 
-  def truncate_database
-    primary_pool.with_connection do |connection|
+  def truncate_postgresql_database
+    postgresql_primary_pool.with_connection do |connection|
       connection.tables.each do |table|
         connection.execute_unproxied <<~SQL.squish
           TRUNCATE TABLE #{table} RESTART IDENTITY CASCADE;
