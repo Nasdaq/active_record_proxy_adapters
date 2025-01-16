@@ -118,8 +118,11 @@ jobs:
         ports:
           - 3306:3306
         env:
-          MARIADB_ALLOW_EMPTY_ROOT_PASSWORD: true
+          MARIADB_HOST: 127.0.0.1
           MARIADB_DATABASE: mysql
+          MARIADB_ALLOW_EMPTY_ROOT_PASSWORD: true
+          MARIADB_USER: root
+          MARIADB_PASSWORD:
         options: >-
           --health-cmd "mariadb-admin ping"
           --health-interval 10s
@@ -149,7 +152,7 @@ jobs:
         run: sudo apt-get install -y postgresql-client-17
 
       - name: Install MySQL client
-        run: sudo apt-get install -y mysql-client libmysqlclient-dev
+        run: sudo apt-get install -y mariadb-client libmariadb-dev
 
       - name: Install dependencies
         env:
@@ -169,14 +172,14 @@ jobs:
           PG_REPLICA_PASSWORD: postgres_primary_test
           PG_REPLICA_HOST: localhost
           PG_REPLICA_PORT: 5433
-          MYSQL_PRIMARY_USER: mysql
+          MYSQL_PRIMARY_USER: root
           MYSQL_PRIMARY_PASSWORD:
-          MYSQL_PRIMARY_HOST: localhost
+          MYSQL_PRIMARY_HOST: 127.0.0.1
           MYSQL_PRIMARY_PORT: 3306
-          MYSQL_REPLICA_USER: mysql
+          MYSQL_REPLICA_USER: root
           MYSQL_REPLICA_PASSWORD:
-          MYSQL_REPLICA_HOST: mysql_replica
-          MYSQL_REPLICA_PORT: 3307
+          MYSQL_REPLICA_HOST: 127.0.0.1
+          MYSQL_REPLICA_PORT: 3306
 
         run: |
           export RUBY_VERSION="${{ matrix.ruby }}"
