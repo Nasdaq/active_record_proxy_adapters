@@ -25,6 +25,10 @@ RSpec.shared_examples_for "a database task" do
     end
   end
 
+  def schema_matches?
+    proc { temp_file.read == schema }
+  end
+
   def with_master_connection(&)
     pool = ActiveRecord::Base.connection_handler.establish_connection(public_schema_config,
                                                                       role: :admin)
@@ -98,9 +102,7 @@ RSpec.shared_examples_for "a database task" do
     end
 
     it "dumps the schema onto the given path" do
-      schema_matches = proc { temp_file.read == schema }
-
-      expect { structure_dump }.to change(&schema_matches).from(false).to(true)
+      expect { structure_dump }.to change(&schema_matches?).from(false).to(true)
     end
   end
 

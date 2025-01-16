@@ -13,6 +13,7 @@ RSpec.describe ActiveRecord::Tasks::PostgreSQLProxyDatabaseTasks do # rubocop:di
 
     let(:model_class) { TestHelper::PostgreSQLDatabaseTaskRecord }
     let(:structure_path) { "db/postgresql_structure.sql" }
+    let(:schema) { File.read(structure_path) }
 
     def database_exists?
       proc do

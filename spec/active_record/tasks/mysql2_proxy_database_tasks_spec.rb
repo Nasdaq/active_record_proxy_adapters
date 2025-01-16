@@ -27,5 +27,13 @@ RSpec.describe ActiveRecord::Tasks::Mysql2ProxyDatabaseTasks do
         end
       end
     end
+
+    def schema_matches?
+      proc { strip_comments(temp_file.read) == strip_comments(schema) }
+    end
+
+    def strip_comments(string)
+      string.gsub(%r{/\*.+?\*/;?\s+}, "").strip
+    end
   end
 end
