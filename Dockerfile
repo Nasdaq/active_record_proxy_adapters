@@ -9,9 +9,8 @@ RUN apk --update add \
     git \
     postgresql-dev \
     postgresql17-client \
-    mysql-client \
-    mysql-dev \
-    mariadb-connector-c
+    mariadb-client \
+    mariadb-dev
 RUN gem install bundler -v 2.5.13
 
 COPY . /app
