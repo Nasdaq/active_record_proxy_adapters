@@ -30,10 +30,10 @@ RSpec.describe ActiveRecordProxyAdapters::Mysql2Proxy do
   end
 
   describe "#execute" do
-    it_behaves_like "a_proxied_method", :execute
+    it_behaves_like "a proxied method", :execute
   end
 
   describe "#exec_query" do
-    it_behaves_like "a_proxied_method", :exec_query
+    it_behaves_like "a proxied method", :exec_query
   end
 end

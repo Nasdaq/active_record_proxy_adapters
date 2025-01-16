@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-RSpec.shared_examples_for "a_proxied_method" do |method_name|
+RSpec.shared_examples_for "a proxied method" do |method_name|
   subject(:run_test) { proxy.public_send(method_name, sql) }
 
   let(:proxy) { described_class.new(primary_adapter) }
