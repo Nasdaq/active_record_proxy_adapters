@@ -14,6 +14,10 @@ SimpleCov.start do
     [/postgresql/, /postgre_sql/].any? { |pattern| pattern.match?(src_file.filename) }
   end
 
+  add_group "MySQL2" do |src_file|
+    [/mysql2/, /my_sql2/].any? { |pattern| pattern.match?(src_file.filename) }
+  end
+
   sanitize      = ->(filename) { filename.tr(".", "_").tr("~>", "").strip }
   ruby_version  = sanitize.call(ENV.fetch("RUBY_VERSION", ""))
   ar_version    = sanitize.call(ENV.fetch("RAILS_VERSION", ""))
