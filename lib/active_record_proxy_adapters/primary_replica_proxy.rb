@@ -29,7 +29,7 @@ module ActiveRecordProxyAdapters
     WRITE_STATEMENT_MATCHERS = [/\ABEGIN/i, /\ACOMMIT/i, /INSERT\sINTO\s/i, /UPDATE\s/i, /DELETE\sFROM\s/i,
                                 /DROP\s/i].map(&:freeze).freeze
 
-    # ActiveRecord::PostgreSQLAdapter methods that should be proxied.
+    # Abstract adapter methods that should be proxied.
     hijack_method :execute, :exec_query
 
     def self.hijacked_methods

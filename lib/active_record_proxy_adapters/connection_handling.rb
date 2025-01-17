@@ -37,7 +37,7 @@ module ActiveRecordProxyAdapters
       ::ActiveRecord::ConnectionAdapters::Mysql2ProxyAdapter
     end
 
-    # This method is a copy and paste from Rails' postgresql_connection,
+    # This method is a copy and paste from Rails' mysql2_connection,
     # replacing Mysql2Adapter by Mysql2ProxyAdapter
     # This is required by ActiveRecord versions <= 7.2.x to establish a connection using the adapter.
     def mysql2_proxy_connection(config) # rubocop:disable Metrics/MethodLength
