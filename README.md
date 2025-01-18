@@ -33,8 +33,19 @@ If bundler is not being used to manage dependencies, install the gem by executin
 
 ### On Rails
 
-In `config/database.yml`, use `postgresql_proxy` as the adapter for the `primary` database, and keep `postgresql` for the replica database.
+In `config/database.yml`, use `{your_database_adapter}_proxy` as the adapter for the `primary` database, and keep `{your_database_adapter}` for the replica database.
 
+Currently supported adapters:
+
+- `postgresql`
+- `mysql2`
+
+Coming soon:
+- `trilogy`
+- `sqlite`
+
+
+#### PostgreSQL
 ```yaml
 # config/database.yml
 development:
@@ -44,6 +55,20 @@ development:
 
   primary_replica:
     adapter: postgresql
+    replica: true
+    # your replica credentials here
+```
+
+#### MySQL
+```yaml
+# config/database.yml
+development:
+  primary:
+    adapter: mysql2_proxy
+    # your primary credentials here
+
+  primary_replica:
+    adapter: mysql2
     replica: true
     # your replica credentials here
 ```
@@ -90,7 +115,7 @@ end
 
 ## Configuration
 
-The gem comes preconfigured out of the box. However, if default configuration does not suit your needs, you can modify them by using a `.configure` block:
+The gem comes preconfigured out of the box. However, if default configuration does not suit your needs, you can modify it by using a `.configure` block:
 
 ```ruby
 # config/initializers/active_record_proxy_adapters.rb
@@ -239,6 +264,7 @@ end
 
 # app/models/portal.rb
 class Portal < ApplicationRecord
+  validates :name, uniqueness: true
 end
 
 # in rails console -e test
@@ -246,13 +272,17 @@ ActiveRecord::Base.logger.formatter = proc do |_severity, _time, _progname, msg|
   "[#{Time.current.iso8601} THREAD #{Thread.current[:name]}] #{msg}\n"
 end
 
+ActiveRecordProxyAdapters.configure do |config|
+  config.proxy_delay = 2.seconds
+end
+
 def read_your_own_writes
   proc do
     Portal.all.count # should go to the replica
-    FactoryBot.create(:portal)
+    Portal.create(name: 'Read your own write')
 
     5.times do
-      Portal.all.count # first one goes the primary, last 3 should go to the replica
+      Portal.all.count # first one goes the primary, last 4 should go to the replica
       sleep(3)
     end
   end
@@ -297,9 +327,8 @@ irb(main):051:0> test_multithread_queries
 [2024-12-24T13:52:40-05:00 THREAD USE REPLICA]   [PostgreSQL Replica] Portal Count (1.4ms)  SELECT COUNT(*) FROM "portals"
 [2024-12-24T13:52:40-05:00 THREAD READ YOUR OWN WRITES]   [PostgreSQL Replica] Portal Count (0.4ms)  SELECT COUNT(*) FROM "portals"
 [2024-12-24T13:52:40-05:00 THREAD READ YOUR OWN WRITES]   [PostgreSQLProxy Primary] TRANSACTION (0.5ms)  BEGIN
-[2024-12-24T13:52:40-05:00 THREAD READ YOUR OWN WRITES]   [PostgreSQLProxy Primary] Portal Exists? (1.2ms)  SELECT 1 AS one FROM "portals" WHERE "portals"."id" IS NOT NULL AND "portals"."slug" = $1 LIMIT $2  [["slug", "portal-e065948fbbee73d3b2c576b48c2b37e021115158edc6a92390d613640460e1d4"], ["LIMIT", 1]]
-[2024-12-24T13:52:40-05:00 THREAD READ YOUR OWN WRITES]   [PostgreSQLProxy Primary] Portal Exists? (0.4ms)  SELECT 1 AS one FROM "portals" WHERE "portals"."name" = $1 LIMIT $2  [["name", "Portal-e065948fbbee73d3b2c576b48c2b37e021115158edc6a92390d613640460e1d4"], ["LIMIT", 1]]
-[2024-12-24T13:52:40-05:00 THREAD READ YOUR OWN WRITES]   [PostgreSQLProxy Primary] Portal Create (0.8ms)  INSERT INTO "portals" ("name", "slug", "logo", "created_at", "updated_at", "visible") VALUES ($1, $2, $3, $4, $5, $6) RETURNING "id"  [["name", "Portal-e065948fbbee73d3b2c576b48c2b37e021115158edc6a92390d613640460e1d4"], ["slug", "portal-e065948fbbee73d3b2c576b48c2b37e021115158edc6a92390d613640460e1d4"], ["logo", nil], ["created_at", "2024-12-24 18:52:40.428383"], ["updated_at", "2024-12-24 18:52:40.428383"], ["visible", true]]
+[2024-12-24T13:52:40-05:00 THREAD READ YOUR OWN WRITES]   [PostgreSQLProxy Primary] Portal Exists? (0.4ms)  SELECT 1 AS one FROM "portals" WHERE "portals"."name" = $1 LIMIT $2  [["name", "Read your own write"], ["LIMIT", 1]]
+[2024-12-24T13:52:40-05:00 THREAD READ YOUR OWN WRITES]   [PostgreSQLProxy Primary] Portal Create (0.8ms)  INSERT INTO "portals" ("name", "created_at", "updated_at") VALUES ($1, $2, $3) RETURNING "id"  [["name", "Read your own write"], ["created_at", "2024-12-24 18:52:40.428383"], ["updated_at", "2024-12-24 18:52:40.428383"]]
 [2024-12-24T13:52:40-05:00 THREAD READ YOUR OWN WRITES]   [PostgreSQLProxy Primary] TRANSACTION (0.7ms)  COMMIT
 [2024-12-24T13:52:40-05:00 THREAD READ YOUR OWN WRITES]   [PostgreSQLProxy Primary] Portal Count (0.6ms)  SELECT COUNT(*) FROM "portals"
 [2024-12-24T13:52:41-05:00 THREAD USE REPLICA]   [PostgreSQL Replica] Portal Count (4.4ms)  SELECT COUNT(*) FROM "portals"
