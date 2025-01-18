@@ -1,5 +1,7 @@
 ## [Unreleased]
 
+- Add Mysql2ProxyAdapter
+
 ## [0.2.2, 0.1.5] - 2025-01-02
 
 - Handle PendingMigrationConnection introduced by Rails 7.2 and backported to Rails 7.1 https://github.com/Nasdaq/active_record_proxy_adapters/commit/793562694c05d554bad6e14637b34e5f9ffd2fc5
