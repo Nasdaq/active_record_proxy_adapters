@@ -12,7 +12,7 @@ gem "concurrent-ruby", "1.3.4" # TODO: delete this line once Rails 7.0 is no lon
 group :test do
   gem "rspec", "~> 3.0"
   gem "rubocop", "~> 1.21"
-  gem "rubocop-rspec", "~> 3.3.0"
+  gem "rubocop-rspec", "~> 3.4.0"
   gem "simplecov"
   gem "simplecov-cobertura"
 end
