@@ -1,5 +1,7 @@
 ## [Unreleased]
 
+- Fix Active Record adapters dependency loading
+
 ## [0.3.0] - 2025-01-17
 
 - Add Mysql2ProxyAdapter https://github.com/Nasdaq/active_record_proxy_adapters/commit/7481b79dc93114f9b3b40faa8f3eecce90fe9104
