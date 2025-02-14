@@ -69,15 +69,15 @@ jobs:
           - 3.2.6
           - 3.3.6
         rails:
-          - 7.0.0
-          - 7.1.0
-          - 7.2.0
-          - 8.0.0
+          - 7.0
+          - 7.1
+          - 7.2
+          - 8.0
         include:
           - ruby: 3.1.6
-            rails: 7.0.0
+            rails: 7.0
           - ruby: 3.1.6
-            rails: 7.1.0
+            rails: 7.1
 
     name: Ruby ${{ matrix.ruby }} / ActiveRecord ${{ matrix.rails }}
     services:
@@ -157,9 +157,11 @@ jobs:
       - name: Install dependencies
         env:
           RAILS_VERSION: ${{ matrix.rails }}
+          BUNDLE_GEMFILE: gemfiles/rails_${{ matrix.rails }}.gemfile
         run: |
           gem install bundler
           bundle install
+
 
       - name: Run RSpec tests
         env:
@@ -180,10 +182,11 @@ jobs:
           MYSQL_REPLICA_PASSWORD:
           MYSQL_REPLICA_HOST: 127.0.0.1
           MYSQL_REPLICA_PORT: 3306
+          BUNDLE_GEMFILE: gemfiles/rails_${{ matrix.rails }}.gemfile
+          RUBY_VERSION: ${{ matrix.ruby }}
+          RAILS_VERSION: ${{ matrix.rails }}
 
         run: |
-          export RUBY_VERSION="${{ matrix.ruby }}"
-          export RAILS_VERSION="${{ matrix.rails }}"
           bundle exec rake db:setup
           bundle exec rspec --format progress
 

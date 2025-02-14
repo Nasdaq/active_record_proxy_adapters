@@ -16,29 +16,29 @@ services:
     build:
       args:
         - RUBY_VERSION=${RUBY_VERSION:-3.3.6}
-        - RAILS_VERSION=${RAILS_VERSION:-8.0.0}
     container_name: app
     image: active_record_proxy_adapters-app:${ENV_TAG:-latest}
     tty: true
     stdin_open: true
     environment:
-      PGHOST: postgres_primary
-      PG_PRIMARY_USER: postgres_primary_test
-      PG_PRIMARY_PASSWORD: postgres_primary_test
-      PG_PRIMARY_HOST: postgres_primary
-      PG_PRIMARY_PORT: 5432
-      PG_REPLICA_USER: postgres_primary_test
-      PG_REPLICA_PASSWORD: postgres_primary_test
-      PG_REPLICA_HOST: postgres_replica
-      PG_REPLICA_PORT: 5432
-      MYSQL_PRIMARY_USER: root
-      MYSQL_PRIMARY_PASSWORD: mysql
-      MYSQL_PRIMARY_HOST: mysql_primary
-      MYSQL_PRIMARY_PORT: 3306
-      MYSQL_REPLICA_USER: root
-      MYSQL_REPLICA_PASSWORD: mysql
-      MYSQL_REPLICA_HOST: mysql_primary
-      MYSQL_REPLICA_PORT: 3306
+      - RAILS_VERSION=${RAILS_VERSION:-8.0.0}
+      - PGHOST=postgres_primary
+      - PG_PRIMARY_USER=postgres_primary_test
+      - PG_PRIMARY_PASSWORD=postgres_primary_test
+      - PG_PRIMARY_HOST=postgres_primary
+      - PG_PRIMARY_PORT=5432
+      - PG_REPLICA_USER=postgres_primary_test
+      - PG_REPLICA_PASSWORD=postgres_primary_test
+      - PG_REPLICA_HOST=postgres_replica
+      - PG_REPLICA_PORT=5432
+      - MYSQL_PRIMARY_USER=root
+      - MYSQL_PRIMARY_PASSWORD=mysql
+      - MYSQL_PRIMARY_HOST=mysql_primary
+      - MYSQL_PRIMARY_PORT=3306
+      - MYSQL_REPLICA_USER=root
+      - MYSQL_REPLICA_PASSWORD=mysql
+      - MYSQL_REPLICA_HOST=mysql_primary
+      - MYSQL_REPLICA_PORT=3306
     depends_on:
       - postgres_primary
       - postgres_replica
