@@ -11,7 +11,7 @@ gem "appraisal"
 
 group :test do
   gem "rspec", "~> 3.0"
-  gem "rubocop", "~> 1.21"
+  gem "rubocop", "~> 1.72"
   gem "rubocop-rspec", "~> 3.4.0"
   gem "simplecov"
   gem "simplecov-cobertura"
