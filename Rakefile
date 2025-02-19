@@ -25,7 +25,6 @@ task :environment do
     end
 
     require "active_record_proxy_adapters/connection_handling"
-    ActiveRecord::Base.extend(ActiveRecordProxyAdapters::ConnectionHandling)
 
     TestHelper.setup_active_record_config
 

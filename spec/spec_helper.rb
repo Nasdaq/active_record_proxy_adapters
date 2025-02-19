@@ -43,10 +43,9 @@ end
 
 require "active_record_proxy_adapters"
 
+require "active_record_proxy_adapters/connection_handling"
 ActiveSupport.on_load(:active_record) do
-  require "active_record_proxy_adapters/connection_handling"
   require "active_record_proxy_adapters/log_subscriber"
-  ActiveRecord::Base.extend ActiveRecordProxyAdapters::ConnectionHandling
 end
 
 require_relative "test_helper"
