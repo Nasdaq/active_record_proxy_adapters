@@ -11,7 +11,7 @@ module ActiveRecordProxyAdapters
   # Module to extend ActiveRecord::Base with the connection handling methods.
   # Required to make adapter work in ActiveRecord versions <= 7.2.x
   module PostgreSQL
-    module ConnectionHandling
+    module ConnectionHandling # rubocop:disable Style/Documentation
       def postgresql_proxy_adapter_class
         ::ActiveRecord::ConnectionAdapters::PostgreSQLProxyAdapter
       end
