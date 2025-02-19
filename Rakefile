@@ -22,14 +22,16 @@ task :environment do
   require "active_record_proxy_adapters"
   require_relative "spec/test_helper"
 
-  ActiveSupport.on_load(:active_record) do
-    if trilogy_loaded
+  if trilogy_loaded
+    ActiveSupport.on_load(:active_record) do
       require "trilogy_adapter/connection"
       ActiveRecord::Base.extend TrilogyAdapter::Connection
     end
+  end
 
-    require "active_record_proxy_adapters/connection_handling"
+  require "active_record_proxy_adapters/connection_handling"
 
+  ActiveSupport.on_load(:active_record) do
     TestHelper.setup_active_record_config
 
     $stdout.puts "Environment loaded: #{TestHelper.env_name}"
