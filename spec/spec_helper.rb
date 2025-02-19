@@ -4,6 +4,7 @@ require "simplecov"
 require "simplecov_json_formatter"
 require "active_support/core_ext/object/blank"
 require "simple_cov_groups"
+require "active_record"
 
 simple_cov_formatters = [SimpleCov::Formatter::JSONFormatter]
 simple_cov_formatters << SimpleCov::Formatter::HTMLFormatter unless ENV["CI"]
@@ -14,8 +15,8 @@ SimpleCov.start do
   SIMPLE_COV_GROUPS.call
 
   sanitize      = ->(filename) { filename.tr(".", "_").tr("~>", "").strip }
-  ruby_version  = sanitize.call(ENV.fetch("RUBY_VERSION", ""))
-  ar_version    = sanitize.call(ENV.fetch("RAILS_VERSION", ""))
+  ruby_version  = sanitize.call(RUBY_VERSION)
+  ar_version    = sanitize.call(ActiveRecord.version.to_s)
   coverage_path = [
     "ruby",
     ruby_version,
