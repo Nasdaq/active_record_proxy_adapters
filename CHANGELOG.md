@@ -1,5 +1,7 @@
 ## [Unreleased]
 
+- Add TrilogyProxyAdapter
+
 ## [0.3.1] - 2025-02-12
 - Fix Active Record adapters dependency loading https://github.com/Nasdaq/active_record_proxy_adapters/commit/b729f8bdb517cdc80f348c00e1fe4c5b56b76143
 

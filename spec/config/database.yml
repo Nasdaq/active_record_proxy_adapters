@@ -40,3 +40,24 @@ test:
   mysql2_database_tasks:
     <<: *mysql_primary
     database: mysql_primary_replica_proxy_database_tasks_test
+
+  trilogy_primary: &trilogy_primary
+    adapter: trilogy_proxy
+    username: <%= ENV.fetch("MYSQL_PRIMARY_USER", "mysql") %>
+    password: <%= ENV.fetch("MYSQL_PRIMARY_PASSWORD", "mysql") %>
+    host: <%= ENV.fetch("MYSQL_PRIMARY_HOST", "localhost") %>
+    port: <%= Integer(ENV.fetch("MYSQL_PRIMARY_PORT", 3306)) %>
+    database: trilogy_primary_replica_proxy_test
+
+  trilogy_replica:
+    adapter: trilogy
+    username: <%= ENV.fetch("MYSQL_REPLICA_USER", "mysql") %>
+    password: <%= ENV.fetch("MYSQL_REPLICA_PASSWORD", "mysql") %>
+    host: <%= ENV.fetch("MYSQL_REPLICA_HOST", "mysql_replica") %>
+    port: <%= Integer(ENV.fetch("MYSQL_REPLICA_PORT", 3307)) %>
+    database: trilogy_primary_replica_proxy_test
+    replica: true
+
+  trilogy_database_tasks:
+    <<: *trilogy_primary
+    database: trilogy_primary_replica_proxy_database_tasks_test

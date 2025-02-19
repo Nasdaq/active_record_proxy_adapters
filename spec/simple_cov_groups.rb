@@ -8,4 +8,8 @@ SIMPLE_COV_GROUPS = proc do
   add_group "MySQL2" do |src_file|
     /mysql2/.match?(src_file.filename)
   end
+
+  add_group "Trilogy" do |src_file|
+    /trilogy/.match?(src_file.filename)
+  end
 end

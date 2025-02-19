@@ -21,6 +21,14 @@ module TestHelper # rubocop:disable Metrics/ModuleLength
     self.abstract_class = true
   end
 
+  class TrilogyRecord < ActiveRecord::Base
+    self.abstract_class = true
+  end
+
+  class TrilogyDatabaseTaskRecord < ActiveRecord::Base
+    self.abstract_class = true
+  end
+
   def env_name
     ENV["RAILS_ENV"] || "test"
   end
@@ -67,11 +75,25 @@ module TestHelper # rubocop:disable Metrics/ModuleLength
       .retrieve_connection_pool(Mysql2Record.name, role: reading_role)
   end
 
+  def trilogy_primary_pool
+    ActiveRecord::Base
+      .connection_handler
+      .retrieve_connection_pool(TrilogyRecord.name, role: writing_role)
+  end
+
+  def trilogy_replica_pool
+    ActiveRecord::Base
+      .connection_handler
+      .retrieve_connection_pool(TrilogyRecord.name, role: reading_role)
+  end
+
   def reset_database
     drop_postgresql_database
     create_postgresql_database
     drop_mysql2_database
     create_mysql2_database
+    drop_trilogy_database
+    create_trilogy_database
   end
 
   def drop_postgresql_database
@@ -90,6 +112,14 @@ module TestHelper # rubocop:disable Metrics/ModuleLength
     ActiveRecord::Tasks::DatabaseTasks.create(mysql2_primary_configuration)
   end
 
+  def drop_trilogy_database
+    ActiveRecord::Tasks::DatabaseTasks.drop(trilogy_primary_configuration)
+  end
+
+  def create_trilogy_database
+    ActiveRecord::Tasks::DatabaseTasks.create(trilogy_primary_configuration)
+  end
+
   def load_postgresql_schema(structure_path = "db/postgresql_structure.sql")
     ActiveRecord::Tasks::DatabaseTasks.structure_load(postgresql_primary_configuration, structure_path)
   end
@@ -106,6 +136,15 @@ module TestHelper # rubocop:disable Metrics/ModuleLength
   def dump_mysql2_schema(structure_path = "db/mysql_structure.sql")
     ActiveRecord::Base.establish_connection(mysql2_primary_configuration)
     ActiveRecord::Tasks::DatabaseTasks.structure_dump(mysql2_primary_configuration, structure_path)
+  end
+
+  def load_trilogy_schema(structure_path = "db/mysql_structure.sql")
+    ActiveRecord::Tasks::DatabaseTasks.structure_load(trilogy_primary_configuration, structure_path)
+  end
+
+  def dump_trilogy_schema(structure_path = "db/mysql_structure.sql")
+    ActiveRecord::Base.establish_connection(trilogy_primary_configuration)
+    ActiveRecord::Tasks::DatabaseTasks.structure_dump(trilogy_primary_configuration, structure_path)
   end
 
   def postgresql_primary_configuration
@@ -132,6 +171,18 @@ module TestHelper # rubocop:disable Metrics/ModuleLength
     configuration_for(name: "mysql2_database_tasks")
   end
 
+  def trilogy_primary_configuration
+    configuration_for(name: "trilogy_primary")
+  end
+
+  def trilogy_replica_configuration
+    configuration_for(name: "trilogy_replica", include_hidden: true)
+  end
+
+  def trilogy_database_tasks_configuration
+    configuration_for(name: "trilogy_database_tasks")
+  end
+
   def configuration_for(name:, include_hidden: false)
     configurations = ActiveRecord::Base.configurations
 
@@ -148,11 +199,25 @@ module TestHelper # rubocop:disable Metrics/ModuleLength
 
   def load_configurations
     ActiveRecord::Base.configurations = database_config
+
+    load_postgresql_configuration
+    load_mysql2_configuration
+    load_trilogy_configuration
+  end
+
+  def load_postgresql_configuration
     PostgreSQLRecord.connects_to(database: { writing_role => :postgresql_primary, reading_role => :postgresql_replica })
     PostgreSQLDatabaseTaskRecord.connects_to(database: { writing_role => :postgresql_database_tasks })
+  end
 
+  def load_mysql2_configuration
     Mysql2Record.connects_to(database: { writing_role => :mysql2_primary, reading_role => :mysql2_replica })
     Mysql2DatabaseTaskRecord.connects_to(database: { writing_role => :mysql2_database_tasks })
+  end
+
+  def load_trilogy_configuration
+    TrilogyRecord.connects_to(database: { writing_role => :trilogy_primary, reading_role => :trilogy_replica })
+    TrilogyDatabaseTaskRecord.connects_to(database: { writing_role => :trilogy_database_tasks })
   end
 
   def database_config
@@ -168,6 +233,10 @@ module TestHelper # rubocop:disable Metrics/ModuleLength
 
   def truncate_mysql2_database
     truncate_database(mysql2_primary_pool)
+  end
+
+  def truncate_trilogy_database
+    truncate_database(trilogy_primary_pool)
   end
 
   def truncate_database(pool, suffix: "")
