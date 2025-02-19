@@ -5,10 +5,10 @@ require "shared_examples/a_proxied_method"
 RSpec.shared_examples "a MySQL proxy" do
   attr_reader :primary_adapter
 
-  let(:replica_pool) {}
-  let(:primary_pool) {}
-  let(:adapter_class) {}
-  let(:model_class) {}
+  let(:replica_pool) { nil }
+  let(:primary_pool) { nil }
+  let(:adapter_class) { nil }
+  let(:model_class) { nil }
 
   around do |example|
     primary_pool.with_connection do |connection|
