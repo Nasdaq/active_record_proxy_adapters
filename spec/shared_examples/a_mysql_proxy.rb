@@ -10,6 +10,8 @@ RSpec.shared_examples "a MySQL proxy" do
   let(:adapter_class) { nil }
   let(:model_class) { nil }
 
+  let(:truncate_database) { nil }
+
   around do |example|
     primary_pool.with_connection do |connection|
       @primary_adapter = connection
@@ -19,7 +21,7 @@ RSpec.shared_examples "a MySQL proxy" do
       @primary_adapter = nil
     end
 
-    TestHelper.truncate_mysql2_database
+    truncate_database
   end
 
   def create_dummy_user

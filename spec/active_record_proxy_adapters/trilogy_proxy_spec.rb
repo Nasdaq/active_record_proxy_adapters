@@ -8,5 +8,6 @@ RSpec.describe ActiveRecordProxyAdapters::TrilogyProxy do
     let(:primary_pool) { TestHelper.trilogy_primary_pool }
     let(:adapter_class) { ActiveRecord::ConnectionAdapters::TrilogyAdapter }
     let(:model_class) { TestHelper::TrilogyRecord }
+    let(:truncate_database) { TestHelper.truncate_trilogy_database }
   end
 end
