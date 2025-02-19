@@ -13,7 +13,11 @@ task default: %i[spec rubocop]
 
 desc "Prepares the database environment for use"
 task :environment do
-  trilogy_loaded = require "activerecord-trilogy-adapter"
+  trilogy_loaded = begin
+    require "activerecord-trilogy-adapter"
+  rescue LoadError
+    false
+  end
   $LOAD_PATH << File.expand_path("lib", __dir__)
   require "active_record_proxy_adapters"
   require_relative "spec/test_helper"
