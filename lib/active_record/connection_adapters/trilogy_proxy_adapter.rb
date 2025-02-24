@@ -26,7 +26,17 @@ module ActiveRecord
       private
 
       attr_reader :proxy
+      ActiveRecord::Type.register(:immutable_string, adapter: :trilogy_proxy) do |_, **args|
+        Type::ImmutableString.new(true: "1", false: "0", **args)
+      end
+
+      ActiveRecord::Type.register(:string, adapter: :trilogy_proxy) do |_, **args|
+        Type::String.new(true: "1", false: "0", **args)
+      end
+
+      ActiveRecord::Type.register(:unsigned_integer, Type::UnsignedInteger, adapter: :trilogy_proxy)
     end
+    ActiveSupport.run_load_hooks(:active_record_trilogyproxyadapter, TrilogyProxyAdapter)
   end
 end
 
