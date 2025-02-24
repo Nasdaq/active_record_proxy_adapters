@@ -37,3 +37,5 @@ if ActiveRecordProxyAdapters::ActiveRecordContext.active_record_v7_2_or_greater?
     "active_record/connection_adapters/mysql2_proxy_adapter"
   )
 end
+
+ActiveSupport.run_load_hooks(:active_record_mysql2proxyadapter, ActiveRecord::ConnectionAdapters::Mysql2ProxyAdapter)

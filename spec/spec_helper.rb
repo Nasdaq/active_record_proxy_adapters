@@ -48,6 +48,11 @@ ActiveSupport.on_load(:active_record) do
   require "active_record_proxy_adapters/log_subscriber"
 end
 
+adapter_loaded = proc { |adapter| $stdout.puts "#{adapter} loaded" }
+ActiveSupport.on_load(:active_record_postgresqlproxyadapter, &adapter_loaded)
+ActiveSupport.on_load(:active_record_mysql2proxyadapter, &adapter_loaded)
+ActiveSupport.on_load(:active_record_trilogyproxyadapter, &adapter_loaded)
+
 require_relative "test_helper"
 
 ActiveRecord::Base.logger = Logger.new(Tempfile.create)

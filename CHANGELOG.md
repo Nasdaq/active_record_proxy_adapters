@@ -1,5 +1,6 @@
 ## [Unreleased]
 
+- Add load hooks for proxy adapters
 - Add TrilogyProxyAdapter
 
 ## [0.3.1] - 2025-02-12
