@@ -1,5 +1,7 @@
 ## [Unreleased]
 
+- Trim down gem size by preventing unnecessary files from packing
+
 ## [0.4.1] - 2025-02-24
 
 - Pack gem without appraisals
