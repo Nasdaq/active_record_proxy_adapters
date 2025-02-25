@@ -1,6 +1,8 @@
 ## [Unreleased]
 
-- Trim down gem size by preventing unnecessary files from packing
+## [0.4.2, 0.3.2, 0.1.6] - 2025-02-25
+
+- Trim down gem size by preventing unnecessary files from packing https://github.com/Nasdaq/active_record_proxy_adapters/commit/6638d26c1e0ff299ac9882caf3953e3572f4668d
 
 ## [0.4.1] - 2025-02-24
 
