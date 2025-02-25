@@ -39,9 +39,9 @@ Currently supported adapters:
 
 - `postgresql`
 - `mysql2`
+- `trilogy`
 
 Coming soon:
-- `trilogy`
 - `sqlite`
 
 
@@ -87,11 +87,7 @@ end
 ```ruby
 # In your application setup
 require "active_record_proxy_adapters"
-
-ActiveSupport.on_load :active_record do
-  require "active_record_proxy_adapters/connection_handling"
-  ActiveRecord::Base.extend(ActiveRecordProxyAdapters::ConnectionHandling)
-end
+require "active_record_proxy_adapters/connection_handling"
 
 # in your base model
 class ApplicationRecord << ActiveRecord::Base
