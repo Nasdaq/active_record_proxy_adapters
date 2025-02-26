@@ -26,7 +26,18 @@ module ActiveRecord
       private
 
       attr_reader :proxy
+      ActiveRecord::Type.register(:immutable_string, adapter: :mysql2_proxy) do |_, **args|
+        Type::ImmutableString.new(true: "1", false: "0", **args)
+      end
+
+      ActiveRecord::Type.register(:string, adapter: :mysql2_proxy) do |_, **args|
+        Type::String.new(true: "1", false: "0", **args)
+      end
+
+      ActiveRecord::Type.register(:unsigned_integer, Type::UnsignedInteger, adapter: :mysql2_proxy)
     end
+
+    ActiveSupport.run_load_hooks(:active_record_mysql2proxyadapter, Mysql2ProxyAdapter)
   end
 end
 
