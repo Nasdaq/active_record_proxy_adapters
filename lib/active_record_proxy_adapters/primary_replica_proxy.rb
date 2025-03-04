@@ -45,7 +45,7 @@ module ActiveRecordProxyAdapters
 
     private
 
-    attr_reader :last_write_at, :active_record_context
+    attr_reader :primary_connection, :last_write_at, :active_record_context
 
     delegate :connection_handler, to: :connection_class
     delegate :reading_role, :writing_role, to: :active_record_context
@@ -58,11 +58,11 @@ module ActiveRecordProxyAdapters
     # But there is tight coupling between methods in ActiveRecord::ConnectionAdapters::AbstractAdapter and
     # its descendants which will require significant refactoring to be decoupled.
     # See https://github.com/rails/rails/issues/51780
-    def primary_connection
-      @verified_primary_connection ||= begin # rubocop:disable Naming/MemoizedInstanceVariableName
-        @primary_connection.verify!
+    def verified_primary_connection
+      @verified_primary_connection ||= begin
+        connected_to(role: writing_role) { primary_connection.verify! }
 
-        @primary_connection
+        primary_connection
       end
     end
 
@@ -136,7 +136,8 @@ module ActiveRecordProxyAdapters
     end
 
     def connection_for(role, sql_string)
-      connection = primary_connection if role == writing_role || replica_pool_unavailable?
+      connection = verified_primary_connection if role == writing_role || replica_pool_unavailable?
+
       connection ||= checkout_replica_connection
 
       result = connected_to(role:) { yield connection }
