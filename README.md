@@ -246,9 +246,6 @@ Since Rails already leases exactly one connection per thread from the pool and t
 
 As long as you're not writing thread unsafe code that handles connections from the pool directly, or you don't have any other gem depenencies that write thread unsafe pool operations, you're all set.
 
-There is, however, an open bug in `ActiveRecord::ConnectionAdapters::PostgreSQLAdapter` for Rails versions 7.1 and greater that can cause random race conditions, but it's not caused by this gem (More info [here](https://github.com/rails/rails/issues/51780)).
-Rails 7.0 works as expected.
-
 Multi-threaded queries example:
 ```ruby
 # app/models/application_record.rb
