@@ -1,6 +1,11 @@
 ## [Unreleased]
 
-## [0.4.2, 0.3.2, 0.1.6] - 2025-02-25
+## [0.4.3, 0.3.3, 0.2.4, 0.1.7] - 2025-03-03
+
+- Call verify! on primary connection before running any query against it https://github.com/Nasdaq/active_record_proxy_adapters/commit/0c9bafe363280ce32db25e08756e7ff6395c5c91
+- Stick to primary when verifying connection from the pool https://github.com/Nasdaq/active_record_proxy_adapters/commit/00acbacb93a825bb700fdd4901a5b42568236ca2
+
+## [0.4.2, 0.3.2, 0.2.3, 0.1.6] - 2025-02-25
 
 - Trim down gem size by preventing unnecessary files from packing https://github.com/Nasdaq/active_record_proxy_adapters/commit/6638d26c1e0ff299ac9882caf3953e3572f4668d
 
