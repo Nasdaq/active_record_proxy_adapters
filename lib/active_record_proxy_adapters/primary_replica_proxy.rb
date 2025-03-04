@@ -60,10 +60,26 @@ module ActiveRecordProxyAdapters
 
     private
 
-    attr_reader :primary_connection, :last_write_at, :active_record_context
+    attr_reader :last_write_at, :active_record_context
 
     delegate :connection_handler, to: :connection_class
     delegate :reading_role, :writing_role, to: :active_record_context
+
+    # We need to call .verify! to ensure `configure_connection` is called on the instance before attempting to use it.
+    # This is necessary because the connection may have been lazily initialized and is an unintended side effect from a
+    # change in Rails to defer connection verification: https://github.com/rails/rails/pull/44576
+    # verify! cannot be called before the object is initialized and because of how the proxy hooks into the connection
+    # instance, it has to be done lazily (hence the memoization). Ideally, we shouldn't have to worry about this at all
+    # But there is tight coupling between methods in ActiveRecord::ConnectionAdapters::AbstractAdapter and
+    # its descendants which will require significant refactoring to be decoupled.
+    # See https://github.com/rails/rails/issues/51780
+    def primary_connection
+      @verified_primary_connection ||= begin # rubocop:disable Naming/MemoizedInstanceVariableName
+        @primary_connection.verify!
+
+        @primary_connection
+      end
+    end
 
     def replica_pool_unavailable?
       !replica_pool
