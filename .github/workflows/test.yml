@@ -4,6 +4,8 @@ on:
   pull_request:
     branches:
       - main
+      - v0.1
+      - v0.2
   push:
     branches:
       - main
