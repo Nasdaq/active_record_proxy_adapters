@@ -15,7 +15,7 @@ module ActiveRecord
 
       ADAPTER_NAME = "PostgreSQLProxy"
 
-      delegate_to_proxy :execute, :exec_query
+      delegate_to_proxy(*ActiveRecordProxyAdapters::ActiveRecordContext.hijackable_methods)
 
       unless ActiveRecordProxyAdapters::ActiveRecordContext.active_record_v8_0_or_greater?
         delegate_to_proxy :exec_no_cache, :exec_cache
