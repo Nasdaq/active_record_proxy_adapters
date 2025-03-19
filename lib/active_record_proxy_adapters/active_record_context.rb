@@ -23,6 +23,8 @@ module ActiveRecordProxyAdapters
     end
 
     def connection_class_for(connection)
+      return connection.connection_descriptor.name.constantize if active_record_v8_0_2_or_greater?
+
       connection.connection_class || ActiveRecord::Base
     end
 
@@ -31,6 +33,18 @@ module ActiveRecordProxyAdapters
       return NullConnectionHandlingContext.new if active_record_v7_1_or_greater?
 
       ActiveRecord
+    end
+
+    def hijackable_methods
+      hijackable = %i[execute exec_query]
+
+      hijackable << :internal_exec_query if active_record_v8_0_or_greater?
+
+      hijackable
+    end
+
+    def active_record_v7?
+      active_record_version >= Gem::Version.new("7.0") && active_record_version < Gem::Version.new("8.0")
     end
 
     def active_record_v7_1_or_greater?
@@ -43,6 +57,10 @@ module ActiveRecordProxyAdapters
 
     def active_record_v8_0_or_greater?
       active_record_version >= Gem::Version.new("8.0")
+    end
+
+    def active_record_v8_0_2_or_greater?
+      active_record_version >= Gem::Version.new("8.0.2")
     end
   end
 end

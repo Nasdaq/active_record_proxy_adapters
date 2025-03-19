@@ -169,7 +169,7 @@ RSpec.describe ActiveRecordProxyAdapters::PostgreSQLProxy do # rubocop:disable R
     end
   end
 
-  unless TestHelper.active_record_context.active_record_v8_0_or_greater?
+  if TestHelper.active_record_context.active_record_v7?
     describe "#exec_no_cache" do
       it_behaves_like "a_proxied_method", :exec_no_cache do
         subject(:run_test) do
@@ -196,6 +196,12 @@ RSpec.describe ActiveRecordProxyAdapters::PostgreSQLProxy do # rubocop:disable R
 
         let(:read_only_error_class) { ActiveRecord::StatementInvalid }
       end
+    end
+  end
+
+  if TestHelper.active_record_context.active_record_v8_0_or_greater?
+    describe "#internal_exec_query" do
+      it_behaves_like "a_proxied_method", :internal_exec_query
     end
   end
 end
