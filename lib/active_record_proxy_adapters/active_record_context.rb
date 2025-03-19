@@ -23,6 +23,8 @@ module ActiveRecordProxyAdapters
     end
 
     def connection_class_for(connection)
+      return connection.connection_descriptor.name.constantize if active_record_v8_0_2_or_greater?
+
       connection.connection_class || ActiveRecord::Base
     end
 
@@ -55,6 +57,10 @@ module ActiveRecordProxyAdapters
 
     def active_record_v8_0_or_greater?
       active_record_version >= Gem::Version.new("8.0")
+    end
+
+    def active_record_v8_0_2_or_greater?
+      active_record_version >= Gem::Version.new("8.0.2")
     end
   end
 end
