@@ -30,7 +30,7 @@ module ActiveRecordProxyAdapters
                                 /DROP\s/i].map(&:freeze).freeze
 
     # Abstract adapter methods that should be proxied.
-    hijack_method :execute, :exec_query
+    hijack_method(*ActiveRecordContext.hijackable_methods)
 
     def self.hijacked_methods
       @hijacked_methods.to_a
