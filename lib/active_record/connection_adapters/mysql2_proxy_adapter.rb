@@ -15,7 +15,7 @@ module ActiveRecord
 
       ADAPTER_NAME = "Mysql2Proxy"
 
-      delegate_to_proxy :execute, :exec_query
+      delegate_to_proxy(*ActiveRecordProxyAdapters::ActiveRecordContext.hijackable_methods)
 
       def initialize(...)
         @proxy = ActiveRecordProxyAdapters::Mysql2Proxy.new(self)

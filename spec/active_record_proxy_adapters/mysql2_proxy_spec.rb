@@ -36,4 +36,10 @@ RSpec.describe ActiveRecordProxyAdapters::Mysql2Proxy do
   describe "#exec_query" do
     it_behaves_like "a proxied method", :exec_query
   end
+
+  if TestHelper.active_record_context.active_record_v8_0_or_greater?
+    describe "#internal_exec_query" do
+      it_behaves_like "a proxied method", :internal_exec_query
+    end
+  end
 end
