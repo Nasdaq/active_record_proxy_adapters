@@ -6,9 +6,7 @@ RSpec.shared_examples_for "a proxied method" do |method_name|
   let(:proxy) { described_class.new(primary_adapter) }
   let(:read_only_error_class) { ActiveRecord::ReadOnlyError }
 
-  context "when query is a select statement" do
-    let(:sql) { "SELECT * from users" }
-
+  shared_examples_for "a SQL read statement" do
     it "checks out a connection from the replica pool" do
       allow(replica_pool).to receive(:checkout).and_call_original
 
@@ -87,6 +85,12 @@ RSpec.shared_examples_for "a proxied method" do |method_name|
           model_class.connected_to(role: TestHelper.reading_role) { run_test }
         end.to raise_error(read_only_error_class)
       end
+    end
+  end
+
+  context "when query is a select statement" do
+    it_behaves_like "a SQL read statement" do
+      let(:sql) { "SELECT * from users" }
     end
   end
 
