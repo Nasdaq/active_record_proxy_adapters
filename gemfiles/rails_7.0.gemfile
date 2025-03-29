@@ -16,7 +16,7 @@ gem "activerecord-trilogy-adapter"
 
 group :test do
   gem "rspec", "~> 3.0"
-  gem "rubocop", "~> 1.74"
+  gem "rubocop", "~> 1.75"
   gem "rubocop-rspec", "~> 3.5.0"
   gem "simplecov"
   gem "simplecov-cobertura"
