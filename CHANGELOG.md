@@ -1,5 +1,7 @@
 ## [Unreleased]
 
+- Fix CTEs for a write being wrongly sent to the replica
+
 ## [0.4.4, 0.3.4, 0.2.5, 0.1.8] - 2025-03-19
 
 - Fix ActiveRecord 8 hijacked methods https://github.com/Nasdaq/active_record_proxy_adapters/commit/bef1de414dbe7c523c32d3f4bce1b266ab3286f1
