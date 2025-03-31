@@ -1,6 +1,8 @@
 ## [Unreleased]
 
-- Fix CTEs for a write being wrongly sent to the replica
+## [0.4.5, 0.3.5, 0.2.6, 0.1.9] - 2025-03-31
+
+- Fix CTEs for a write being wrongly sent to the replica https://github.com/Nasdaq/active_record_proxy_adapters/commit/551204e7a9beec4ce920268bb95203498f49ec61
 
 ## [0.4.4, 0.3.4, 0.2.5, 0.1.8] - 2025-03-19
 
