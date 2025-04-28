@@ -1,5 +1,9 @@
 ## [Unreleased]
 
+## [0.4.6, 0.3.6] - 2025-04-28
+
+- Fix loading of non PostgreSQL adapters https://github.com/Nasdaq/active_record_proxy_adapters/commit/1bf5ee9c6a21cb81d928e82b988c0a6e79ff878b
+
 ## [0.4.5, 0.3.5, 0.2.6, 0.1.9] - 2025-03-31
 
 - Fix CTEs for a write being wrongly sent to the replica https://github.com/Nasdaq/active_record_proxy_adapters/commit/551204e7a9beec4ce920268bb95203498f49ec61
