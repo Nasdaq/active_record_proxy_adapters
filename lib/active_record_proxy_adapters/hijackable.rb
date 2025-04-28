@@ -1,8 +1,5 @@
 # frozen_string_literal: true
 
-require "active_record/tasks/postgresql_proxy_database_tasks"
-require "active_record/connection_adapters/postgresql_adapter"
-
 module ActiveRecordProxyAdapters
   # Defines mixins to delegate specific methods from the proxy to the adapter.
   module Hijackable
