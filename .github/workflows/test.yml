@@ -53,7 +53,7 @@ jobs:
     needs: [export_variables]
 
     container:
-      image: ${{ needs.export_variables.outputs.app_image }}-3.1.6
+      image: ${{ needs.export_variables.outputs.app_image }}-3.4.1
       volumes:
         - .:/app
 
@@ -207,23 +207,30 @@ jobs:
           if-no-files-found: error
 
   coverage_report:
-    needs: [rspec]
+    needs:
+      - export_variables
+      - rspec
     runs-on: ubuntu-latest
     permissions: write-all
+
+    container:
+      image: ${{ needs.export_variables.outputs.app_image }}-3.4.1
+      volumes:
+        - .:/app
 
     steps:
       - name: Checkout Repository
         uses: actions/checkout@v4
 
-      - name: Set up Ruby
-        uses: ruby/setup-ruby@v1
-        with:
-          ruby-version: 3.3.5
+      # - name: Set up Ruby
+      #   uses: ruby/setup-ruby@v1
+      #   with:
+      #     ruby-version: 3.3.5
 
-      - name: Install Dependencies
-        run: |
-          gem install bundler
-          bundle install
+      # - name: Install Dependencies
+      #   run: |
+      #     gem install bundler
+      #     bundle install
 
       - name: Download Partial Coverage Resultsets
         uses: actions/download-artifact@v4
