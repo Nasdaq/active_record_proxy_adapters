@@ -1,0 +1,46 @@
+name: Prebuild App Image
+
+on:
+  pull_request:
+    paths:
+      - 'Dockerfile'
+
+jobs:
+  export_variables:
+    runs-on: ubuntu-latest
+
+    outputs:
+      app_image: ${{ steps.compute_container_registry_name.outputs.CR_NAME }}/app:${{ steps.calculate_app_sha.outputs.APP_SHA }}
+
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v4
+
+    - name: Compute container registry name
+      id: compute_container_registry_name
+      run: echo "CR_NAME=$(echo ghcr.io/${{ github.repository }} | tr '[:upper:]' '[:lower:]')" >> $GITHUB_OUTPUT
+
+    - name: Calculate SHA256 for Dockerfile
+      id: calculate_app_sha
+      run: echo "APP_SHA=$(sha256sum Dockerfile | awk '{ print substr($1, 1, 12) }')" >> $GITHUB_OUTPUT
+
+  prebuild_app:
+    needs: export_variables
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v4
+
+    - name: Log in to GitHub Container Registry
+      uses: docker/login-action@v2
+      with:
+        registry: ghcr.io
+        username: ${{ github.actor }}
+        password: ${{ secrets.GITHUB_TOKEN }}
+
+    - name: Build and tag app Docker image
+      run: docker build -f Dockerfile -t ${{ needs.export_variables.outputs.app_image }} .
+
+    - name: Push app Docker image
+      run: docker push ${{ needs.export_variables.outputs.app_image }}
