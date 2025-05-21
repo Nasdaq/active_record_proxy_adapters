@@ -10,7 +10,7 @@ jobs:
     runs-on: ubuntu-latest
 
     outputs:
-      app_image: ${{ steps.compute_container_registry_name.outputs.CR_NAME }}/app:${{ steps.calculate_app_sha.outputs.APP_IMAGE_TAG }}
+      app_image: ${{ steps.compute_container_registry_name.outputs.CR_NAME }}/app:${{ steps.read_image_tag.outputs.APP_IMAGE_TAG }}
 
     steps:
     - name: Checkout repository
@@ -20,13 +20,20 @@ jobs:
       id: compute_container_registry_name
       run: echo "CR_NAME=$(echo ghcr.io/${{ github.repository }} | tr '[:upper:]' '[:lower:]')" >> $GITHUB_OUTPUT
 
-    - name: Calculate SHA256 for Dockerfile
-      id: calculate_app_sha
+    - name: Read image tag for app
+      id: read_image_tag
       run: echo "APP_IMAGE_TAG=$(cat .app-image-tag)" >> $GITHUB_OUTPUT
 
   prebuild_app:
     needs: export_variables
     runs-on: ubuntu-latest
+
+    strategy:
+      matrix:
+        ruby:
+          - 3.2.6
+          - 3.3.6
+          - 3.4.1
 
     steps:
     - name: Checkout repository
@@ -40,7 +47,7 @@ jobs:
         password: ${{ secrets.GITHUB_TOKEN }}
 
     - name: Build and tag app Docker image
-      run: docker build -f Dockerfile -t ${{ needs.export_variables.outputs.app_image }} .
+      run: docker build --build-arg RUBY_VERSION=${{ matrix.ruby }} -f Dockerfile -t ${{ needs.export_variables.outputs.app_image }}-${{ matrix.ruby }} .
 
     - name: Push app Docker image
-      run: docker push ${{ needs.export_variables.outputs.app_image }}
+      run: docker push ${{ needs.export_variables.outputs.app_image }}-${{ matrix.ruby }}
