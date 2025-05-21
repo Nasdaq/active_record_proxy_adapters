@@ -72,18 +72,18 @@ jobs:
           - 3.2.6
           - 3.3.6
           - 3.4.1
-        rails:
+        ar:
           - "7.0"
           - 7.1
           - 7.2
           - "8.0"
         include:
           - ruby: 3.1.6
-            rails: "7.0"
+            ar: "7.0"
           - ruby: 3.1.6
-            rails: 7.1
+            ar: 7.1
 
-    name: Ruby ${{ matrix.ruby }} / ActiveRecord ${{ matrix.rails }}
+    name: Ruby ${{ matrix.ruby }} / ActiveRecord ${{ matrix.ar }}
     services:
       postgres_primary:
         image: ${{ needs.export_variables.outputs.primary_image }}
@@ -160,8 +160,8 @@ jobs:
 
       - name: Install dependencies
         env:
-          RAILS_VERSION: ${{ matrix.rails }}
-          BUNDLE_GEMFILE: gemfiles/rails_${{ matrix.rails }}.gemfile
+          RAILS_VERSION: ${{ matrix.ar }}
+          BUNDLE_GEMFILE: gemfiles/ruby_${{ matrix.ruby }}_ar_${{ matrix.ar }}.gemfile
         run: |
           gem install bundler
           bundle install
@@ -186,9 +186,9 @@ jobs:
           MYSQL_REPLICA_PASSWORD:
           MYSQL_REPLICA_HOST: 127.0.0.1
           MYSQL_REPLICA_PORT: 3306
-          BUNDLE_GEMFILE: gemfiles/rails_${{ matrix.rails }}.gemfile
+          BUNDLE_GEMFILE: gemfiles/ruby_${{ matrix.ruby }}_ar_${{ matrix.ar }}.gemfile
           RUBY_VERSION: ${{ matrix.ruby }}
-          RAILS_VERSION: ${{ matrix.rails }}
+          RAILS_VERSION: ${{ matrix.ar }}
 
         run: |
           bundle exec rake db:setup
@@ -197,7 +197,7 @@ jobs:
       - name: Upload Coverage Report
         uses: actions/upload-artifact@v4
         with:
-          name: coverage_ruby_${{ matrix.ruby }}_rails_${{ matrix.rails }}
+          name: coverage_ruby_${{ matrix.ruby }}_ar_${{ matrix.ar }}
           path: coverage/
           include-hidden-files: true
           if-no-files-found: error
