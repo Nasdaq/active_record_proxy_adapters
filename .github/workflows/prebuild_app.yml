@@ -3,14 +3,14 @@ name: Prebuild App Image
 on:
   pull_request:
     paths:
-      - 'Dockerfile'
+      - '.app-image-tag'
 
 jobs:
   export_variables:
     runs-on: ubuntu-latest
 
     outputs:
-      app_image: ${{ steps.compute_container_registry_name.outputs.CR_NAME }}/app:${{ steps.calculate_app_sha.outputs.APP_SHA }}
+      app_image: ${{ steps.compute_container_registry_name.outputs.CR_NAME }}/app:${{ steps.calculate_app_sha.outputs.APP_IMAGE_TAG }}
 
     steps:
     - name: Checkout repository
@@ -22,7 +22,7 @@ jobs:
 
     - name: Calculate SHA256 for Dockerfile
       id: calculate_app_sha
-      run: echo "APP_SHA=$(sha256sum Dockerfile | awk '{ print substr($1, 1, 12) }')" >> $GITHUB_OUTPUT
+      run: echo "APP_IMAGE_TAG=$(cat .app-image-tag)" >> $GITHUB_OUTPUT
 
   prebuild_app:
     needs: export_variables
