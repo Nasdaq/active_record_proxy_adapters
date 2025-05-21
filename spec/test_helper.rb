@@ -29,6 +29,14 @@ module TestHelper # rubocop:disable Metrics/ModuleLength
     self.abstract_class = true
   end
 
+  class SQLite3Record < ActiveRecord::Base
+    self.abstract_class = true
+  end
+
+  class SQLite3DatabaseTaskRecord < ActiveRecord::Base
+    self.abstract_class = true
+  end
+
   def env_name
     ENV["RAILS_ENV"] || "test"
   end
@@ -87,6 +95,18 @@ module TestHelper # rubocop:disable Metrics/ModuleLength
       .retrieve_connection_pool(TrilogyRecord.name, role: reading_role)
   end
 
+  def sqlite3_primary_pool
+    ActiveRecord::Base
+      .connection_handler
+      .retrieve_connection_pool(SQLite3Record.name, role: writing_role)
+  end
+
+  def sqlite3_replica_pool
+    ActiveRecord::Base
+      .connection_handler
+      .retrieve_connection_pool(SQLite3Record.name, role: reading_role)
+  end
+
   def reset_database
     drop_postgresql_database
     create_postgresql_database
@@ -120,6 +140,14 @@ module TestHelper # rubocop:disable Metrics/ModuleLength
     ActiveRecord::Tasks::DatabaseTasks.create(trilogy_primary_configuration)
   end
 
+  def drop_sqlite3_database
+    ActiveRecord::Tasks::DatabaseTasks.drop(sqlite3_primary_configuration)
+  end
+
+  def create_sqlite3_database
+    ActiveRecord::Tasks::DatabaseTasks.create(sqlite3_primary_configuration)
+  end
+
   def load_postgresql_schema(structure_path = "db/postgresql_structure.sql")
     ActiveRecord::Tasks::DatabaseTasks.structure_load(postgresql_primary_configuration, structure_path)
   end
@@ -145,6 +173,15 @@ module TestHelper # rubocop:disable Metrics/ModuleLength
   def dump_trilogy_schema(structure_path = "db/mysql_structure.sql")
     ActiveRecord::Base.establish_connection(trilogy_primary_configuration)
     ActiveRecord::Tasks::DatabaseTasks.structure_dump(trilogy_primary_configuration, structure_path)
+  end
+
+  def load_sqlite3_schema(structure_path = "db/sqlite3_structure.sql")
+    ActiveRecord::Tasks::DatabaseTasks.structure_load(sqlite3_primary_configuration, structure_path)
+  end
+
+  def dump_sqlite3_schema(structure_path = "db/sqlite3_structure.sql")
+    ActiveRecord::Base.establish_connection(sqlite3_primary_configuration)
+    ActiveRecord::Tasks::DatabaseTasks.structure_dump(sqlite3_primary_configuration, structure_path)
   end
 
   def postgresql_primary_configuration
@@ -183,6 +220,18 @@ module TestHelper # rubocop:disable Metrics/ModuleLength
     configuration_for(name: "trilogy_database_tasks")
   end
 
+  def sqlite3_primary_configuration
+    configuration_for(name: "sqlite3_primary")
+  end
+
+  def sqlite3_replica_configuration
+    configuration_for(name: "sqlite3_replica")
+  end
+
+  def sqlite3_database_tasks_configuration
+    configuration_for(name: "sqlite3_database_tasks")
+  end
+
   def configuration_for(name:, include_hidden: false)
     configurations = ActiveRecord::Base.configurations
 
@@ -198,11 +247,13 @@ module TestHelper # rubocop:disable Metrics/ModuleLength
   end
 
   def load_configurations
+    ActiveRecord::Tasks::DatabaseTasks.root = File.expand_path("..", __dir__)
     ActiveRecord::Base.configurations = database_config
 
     load_postgresql_configuration
     load_mysql2_configuration
     load_trilogy_configuration
+    load_sqlite3_configuration
   end
 
   def load_postgresql_configuration
@@ -218,6 +269,11 @@ module TestHelper # rubocop:disable Metrics/ModuleLength
   def load_trilogy_configuration
     TrilogyRecord.connects_to(database: { writing_role => :trilogy_primary, reading_role => :trilogy_replica })
     TrilogyDatabaseTaskRecord.connects_to(database: { writing_role => :trilogy_database_tasks })
+  end
+
+  def load_sqlite3_configuration
+    SQLite3Record.connects_to(database: { writing_role => :sqlite3_primary, reading_role => :sqlite3_replica })
+    SQLite3DatabaseTaskRecord.connects_to(database: { writing_role => :sqlite3_database_tasks })
   end
 
   def database_config
@@ -237,6 +293,16 @@ module TestHelper # rubocop:disable Metrics/ModuleLength
 
   def truncate_trilogy_database
     truncate_database(trilogy_primary_pool)
+  end
+
+  def truncate_sqlite3_database
+    sqlite3_primary_pool.with_connection do |connection|
+      connection.tables.each do |table|
+        connection.execute_unproxied <<~SQL.squish
+          DELETE FROM #{table};
+        SQL
+      end
+    end
   end
 
   def truncate_database(pool, suffix: "")

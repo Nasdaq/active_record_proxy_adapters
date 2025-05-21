@@ -40,7 +40,7 @@ end
 
 namespace :db do # rubocop:disable Metrics/BlockLength
   desc "Drops all databases"
-  task drop: %i[drop:postgresql drop:mysql2 drop:trilogy]
+  task drop: %i[drop:postgresql drop:mysql2 drop:trilogy drop:sqlite3]
 
   namespace :drop do
     desc "Drops the postgresql database"
@@ -57,10 +57,15 @@ namespace :db do # rubocop:disable Metrics/BlockLength
     task trilogy: :environment do
       TestHelper.drop_trilogy_database
     end
+
+    desc "Drops the sqlite3 database"
+    task sqlite3: :environment do
+      TestHelper.drop_sqlite3_database
+    end
   end
 
   desc "Creates all databases"
-  task create: %i[create:postgresql create:mysql2 create:trilogy]
+  task create: %i[create:postgresql create:mysql2 create:trilogy create:sqlite3]
 
   namespace :create do
     desc "Creates the postgresql database"
@@ -77,11 +82,16 @@ namespace :db do # rubocop:disable Metrics/BlockLength
     task trilogy: :environment do
       TestHelper.create_trilogy_database
     end
+
+    desc "Creates the sqlite3 database"
+    task sqlite3: :environment do
+      TestHelper.create_sqlite3_database
+    end
   end
 
   namespace :schema do # rubocop:disable Metrics/BlockLength
     desc "Loads all schemas onto their respective databases"
-    task load: %i[load:postgresql load:mysql2 load:trilogy]
+    task load: %i[load:postgresql load:mysql2 load:trilogy load:sqlite3]
 
     namespace :load do
       desc "Loads the schema into the postgresql database from schema_path. Default is db/postgresql_structure.sql"
@@ -101,10 +111,16 @@ namespace :db do # rubocop:disable Metrics/BlockLength
         args.with_defaults(schema_path: "db/mysql_structure.sql")
         TestHelper.load_trilogy_schema(args.schema_path)
       end
+
+      desc "Loads the schema into the sqlite3 database from schema_path. Default is db/sqlite3_structure.sql"
+      task :sqlite3, [:schema_path] => :environment do |_task, args|
+        args.with_defaults(schema_path: "db/sqlite3_structure.sql")
+        TestHelper.load_sqlite3_schema(args.schema_path)
+      end
     end
 
     desc "Dumps all schemas onto their respective files"
-    task dump: %i[dump:postgresql dump:mysql2 dump:trilogy]
+    task dump: %i[dump:postgresql dump:mysql2 dump:trilogy dump:sqlite3]
 
     namespace :dump do
       desc "Dump the schema from the postgresql database onto schema_path. Default is db/postgresql_structure.sql"
@@ -123,6 +139,12 @@ namespace :db do # rubocop:disable Metrics/BlockLength
       task :trilogy, [:schema_path] => :environment do |_task, args|
         args.with_defaults(schema_path: "db/mysql_structure.sql")
         TestHelper.dump_trilogy_schema(args.schema_path)
+      end
+
+      desc "Dump the schema from the sqlite3 database onto schema_path. Default is db/sqlite3_structure.sql"
+      task :sqlite3, [:schema_path] => :environment do |_task, args|
+        args.with_defaults(schema_path: "db/sqlite3_structure.sql")
+        TestHelper.dump_sqlite3_schema(args.schema_path)
       end
     end
   end

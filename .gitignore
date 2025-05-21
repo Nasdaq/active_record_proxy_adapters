@@ -8,7 +8,8 @@
 /tmp/
 .env
 gemfiles/*.lock
-
+db/*.sqlite3
+db/*.sqlite3-*
 # rspec failure tracking
 .rspec_status
 .irb_history
