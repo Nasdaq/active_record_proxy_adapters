@@ -1,7 +1,6 @@
-ARG RUBY_VERSION=3.2.3
+ARG RUBY_VERSION=3.3.6
 ARG DOCKER_REGISTRY=docker.io
 FROM $DOCKER_REGISTRY/ruby:$RUBY_VERSION-alpine
-ENV RAILS_VERSION="8.0.0"
 ENV RAILS_ENV=test
 
 RUN apk --update add \
@@ -18,4 +17,3 @@ WORKDIR /app
 
 RUN bundle install
 RUN bundle exec appraisal install
-
