@@ -17,4 +17,3 @@ WORKDIR /app
 
 RUN bundle install
 RUN bundle exec appraisal install
-
