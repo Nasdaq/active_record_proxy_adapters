@@ -115,8 +115,6 @@ jobs:
     services:
       postgres_primary:
         image: ${{ needs.export_variables.outputs.primary_image }}
-        # ports:
-        #   - 5432:5432
         env:
           POSTGRES_DB: postgres_primary_test
           POSTGRES_USER: postgres_primary_test
@@ -131,8 +129,6 @@ jobs:
 
       postgres_replica:
         image: ${{ needs.export_variables.outputs.replica_image }}
-        # ports:
-        #   - 5433:5432
         env:
           PGUSER: replicator
           PGPASSWORD: replicator
@@ -147,8 +143,6 @@ jobs:
 
       mysql:
         image: mariadb:11.4
-        # ports:
-        #   - 3306:3306
         env:
           MARIADB_HOST: mysql
           MARIADB_DATABASE: mysql
@@ -162,36 +156,6 @@ jobs:
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
-
-      # - name: Set up Ruby
-      #   uses: ruby/setup-ruby@v1
-      #   with:
-      #     ruby-version: ${{ matrix.ruby }}
-
-
-      # - name: Add PostgreSQL 17 repository
-      #   run: |
-      #     sudo sh -c 'echo "deb http://apt.postgresql.org/pub/repos/apt/ $(lsb_release -cs)-pgdg main" > /etc/apt/sources.list.d/pgdg.list'
-      #     wget --quiet -O - https://www.postgresql.org/media/keys/ACCC4CF8.asc | sudo apt-key add -
-
-      # - name: Update apt-get index
-      #   run: sudo apt-get update
-
-      # # Install PostgreSQL 17 client tools
-      # - name: Install PostgreSQL 17 client
-      #   run: sudo apt-get install -y postgresql-client-17
-
-      # - name: Install MySQL client
-      #   run: sudo apt-get install -y mariadb-client libmariadb-dev
-
-      # - name: Install dependencies
-      #   env:
-      #     RAILS_VERSION: ${{ matrix.ar }}
-      #     BUNDLE_GEMFILE: gemfiles/ruby_${{ matrix.ruby }}_ar_${{ matrix.ar }}.gemfile
-      #   run: |
-      #     gem install bundler
-      #     bundle install
-
 
       - name: Run RSpec tests
         run: |
@@ -221,16 +185,6 @@ jobs:
     steps:
       - name: Checkout Repository
         uses: actions/checkout@v4
-
-      # - name: Set up Ruby
-      #   uses: ruby/setup-ruby@v1
-      #   with:
-      #     ruby-version: 3.3.5
-
-      # - name: Install Dependencies
-      #   run: |
-      #     gem install bundler
-      #     bundle install
 
       - name: Download Partial Coverage Resultsets
         uses: actions/download-artifact@v4
