@@ -4,9 +4,8 @@ source "https://rubygems.org"
 
 gem "mysql2", "~> 0.5"
 gem "pg", "~> 1.5"
-gem "trilogy", "~> 2.9"
-
 gem "rake", "~> 13.0"
+gem "trilogy", "~> 2.9"
 
 gem "appraisal"
 

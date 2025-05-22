@@ -1,5 +1,7 @@
 ## [Unreleased]
 
+- Add SQLite3ProxyAdapter
+
 ## [0.4.6, 0.3.6] - 2025-04-28
 
 - Fix loading of non PostgreSQL adapters https://github.com/Nasdaq/active_record_proxy_adapters/commit/1bf5ee9c6a21cb81d928e82b988c0a6e79ff878b

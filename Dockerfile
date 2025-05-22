@@ -9,7 +9,9 @@ RUN apk --update add \
     postgresql-dev \
     postgresql17-client \
     mariadb-client \
-    mariadb-dev
+    mariadb-dev \
+    sqlite \
+    sqlite-dev
 RUN gem install bundler -v 2.5.13
 
 COPY . /app

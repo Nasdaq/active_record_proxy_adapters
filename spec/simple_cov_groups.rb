@@ -12,4 +12,8 @@ SIMPLE_COV_GROUPS = proc do
   add_group "Trilogy" do |src_file|
     /trilogy/.match?(src_file.filename)
   end
+
+  add_group "SQLite3" do |src_file|
+    /sqlite3/.match?(src_file.filename)
+  end
 end
