@@ -90,7 +90,7 @@ jobs:
         MYSQL_REPLICA_PASSWORD: root
         MYSQL_REPLICA_HOST: mysql
         MYSQL_REPLICA_PORT: 3306
-        BUNDLE_GEMFILE: gemfiles/ruby_${{ matrix.ruby }}_ar_${{ matrix.ar }}.gemfile
+        BUNDLE_GEMFILE: gemfiles/ar_${{ matrix.ar }}.gemfile
         RUBY_VERSION: ${{ matrix.ruby }}
         RAILS_VERSION: ${{ matrix.ar }}
 
