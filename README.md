@@ -363,7 +363,173 @@ irb(main):051:0> test_multithread_queries
 
 ## Building your own proxy
 
-TODO: update instructions
+These instructions assume an active record adapter `ActiveRecord::ConnectionAdapters::FoobarAdapter` already exists and is properly loaded in your environment.
+
+To create a proxy adapter for an existing database `FoobarAdapter`, follow these steps under the lib folder of your rails application source code:
+
+1. **Create database tasks for your proxy adapter** to allow Rails tasks like `db:create` and `db:migrate` to work:
+
+   ```ruby
+   # lib/active_record/tasks/foobar_proxy_database_tasks.rb
+
+   require "active_record_proxy_adapters/database_tasks"
+
+   module ActiveRecord
+     module Tasks
+       class FoobarProxyDatabaseTasks < FoobarDatabaseTasks
+         include ActiveRecordProxyAdapters::DatabaseTasks
+       end
+     end
+   end
+
+   ActiveRecord::Tasks::DatabaseTasks.register_task(
+     /foobar_proxy/,
+     "ActiveRecord::Tasks::FoobarProxyDatabaseTasks"
+   )
+   ```
+
+2. **Create the proxy implementation class** that will handle the routing logic:
+
+   ```ruby
+   # lib/active_record_proxy_adapters/foobar_proxy.rb
+
+   require "active_record_proxy_adapters/primary_replica_proxy"
+
+   module ActiveRecordProxyAdapters
+     class FoobarProxy < PrimaryReplicaProxy
+       # Override or hijack extra methods here if you need custom behavior
+       # For most adapters, the default behavior works fine
+     end
+   end
+   ```
+
+3. **Create the proxy adapter class** that inherits from the underlying adapter, including the `Hijackable` concern. You need to require the database tasks source, the original adapter source, and the proxy source:
+
+   ```ruby
+   # lib/active_record/connection_adapters/foobar_proxy_adapter.rb
+
+   require "active_record/tasks/foobar_proxy_database_tasks"
+   require "active_record/connection_adapters/foobar_adapter"
+   require "active_record_proxy_adapters/active_record_context"
+   require "active_record_proxy_adapters/hijackable"
+   require "active_record_proxy_adapters/foobar_proxy"
+
+   module ActiveRecord
+     module ConnectionAdapters
+       class FoobarProxyAdapter < FoobarAdapter
+         include ActiveRecordProxyAdapters::Hijackable
+
+         ADAPTER_NAME = "FoobarProxy" # This is only an ActiveRecord convention and is not required to work
+
+         delegate_to_proxy(*ActiveRecordProxyAdapters::ActiveRecordContext.hijackable_methods)
+
+         def initialize(...)
+           @proxy = ActiveRecordProxyAdapters::FoobarProxy.new(self)
+
+           super
+         end
+
+         private
+
+         attr_reader :proxy
+       end
+     end
+   end
+
+   # This is only required for Rails 7.2 or greater.
+   if ActiveRecordProxyAdapters::ActiveRecordContext.active_record_v7_2_or_greater?
+     ActiveRecord::ConnectionAdapters.register(
+       "foobar_proxy",
+       "ActiveRecord::ConnectionAdapters::FoobarProxyAdapter",
+       "active_record/connection_adapters/foobar_proxy_adapter"
+     )
+   end
+
+   ActiveSupport.run_load_hooks(:active_record_foobarproxyadapter,
+                                ActiveRecord::ConnectionAdapters::FoobarProxyAdapter)
+   ```
+
+4. **Create connection handling module** for ActiveRecord integration:
+
+   ```ruby
+   # lib/active_record_proxy_adapters/connection_handling/foobar.rb
+
+   begin
+     require "active_record/connection_adapters/foobar_proxy_adapter"
+   rescue LoadError
+     # foobar not available
+     return
+   end
+
+   # This is only required for Rails 7.0 or earlier.
+   module ActiveRecordProxyAdapters
+     module Foobar
+       module ConnectionHandling
+         def foobar_proxy_adapter_class
+           ActiveRecord::ConnectionAdapters::FoobarProxyAdapter
+         end
+
+         def foobar_proxy_connection(config)
+            # copy and paste the contents of the original method foobar_connection here.
+            # If the contents contain a hardcoded FooBarAdapter.new instance,
+            # replace it with foobar_proxy_adapter_class.new
+         end
+       end
+     end
+   end
+
+   ActiveSupport.on_load(:active_record) do
+     ActiveRecord::Base.extend(ActiveRecordProxyAdapters::Foobar::ConnectionHandling)
+   end
+   ```
+
+5. **In your initializer, load the custom adapter** when the parent adapter is fully loaded:
+
+   ```ruby
+   # config/initializers/active_record_proxy_adapters.rb
+
+   # The parent adapter should have a load hook already. If not, you might need to monkey patch it.
+   ActiveSupport.on_load(:active_record_foobaradapter) do
+     require "active_record_proxy_adapters/connection_handling/foobar"
+   end
+   ```
+
+6. **Add a custom Zeitwerk inflection rule** if your adapter file paths do not follow Rails conventions. You can skip this if it does:
+
+   ```ruby
+   # config/initializers/active_record_proxy_adapters.rb
+
+   Rails.autoloaders.each do |autoloader|
+     autoloader.inflector.inflect(
+       "foobar_proxy_adapter" => "FoobarProxyAdapter"
+     )
+   end 
+   ```
+
+7. **Configure your database.yml** to use your new adapter:
+
+   ```yaml
+   development:
+     primary:
+       adapter: foobar_proxy
+       # primary database configuration
+
+     primary_replica:
+       adapter: foobar
+       replica: true
+       # replica database configuration
+   ```
+
+8. **Set up your model to use both connections**:
+
+   ```ruby
+   class ApplicationRecord < ActiveRecord::Base
+     self.abstract_class = true
+     connects_to database: { writing: :primary, reading: :primary_replica }
+   end
+   ```
+
+For testing your adapter, follow the examples in the test suite by creating spec files that match the pattern used for the other adapters.
 
 ## Development
 
