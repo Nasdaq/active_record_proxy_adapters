@@ -40,9 +40,7 @@ Currently supported adapters:
 - `postgresql`
 - `mysql2`
 - `trilogy`
-
-Coming soon:
-- `sqlite`
+- `sqlite3`
 
 
 #### PostgreSQL
@@ -73,6 +71,34 @@ development:
     # your replica credentials here
 ```
 
+#### Trilogy
+```yaml
+# config/database.yml
+development:
+  primary:
+    adapter: trilogy_proxy
+    # your primary credentials here
+
+  primary_replica:
+    adapter: trilogy
+    replica: true
+    # your replica credentials here
+```
+
+#### SQLite
+```yaml
+# config/database.yml
+development:
+  primary:
+    adapter: sqlite3_proxy
+    # your primary credentials here
+
+  primary_replica:
+    adapter: sqlite3
+    replica: true
+    # your replica credentials here
+```
+
 ```ruby
 # app/models/application_record.rb
 class ApplicationRecord < ActiveRecord::Base
@@ -93,7 +119,7 @@ require "active_record_proxy_adapters/connection_handling"
 class ApplicationRecord << ActiveRecord::Base
     establish_connection(
         {
-            adapter: 'postgresql_proxy',
+            adapter: 'postgresql_proxy', # or any of the following: mysql2_proxy, trilogy_proxy, sqlite3_proxy
             # your primary credentials here
         },
         role: :writing
@@ -101,7 +127,7 @@ class ApplicationRecord << ActiveRecord::Base
 
     establish_connection(
         {
-            adapter: 'postgresql',
+            adapter: 'postgresql',  # or any of the following: mysql2, trilogy, sqlite3
             # your replica credentials here
         },
         role: :reading
@@ -195,7 +221,7 @@ production:
 Then set `PRIMARY_DATABASE_ADAPTER=postgresql_proxy` to enable the proxy.
 That way you can redeploy your application disabling the proxy completely, without any code change.
 
-### Sticking to the primary database manually
+### Sticking to a database manually
 
 The proxy respects ActiveRecord's `#connected_to_stack` and will use it if present.
 You can use that to force connection to the primary or replica and bypass the proxy entirely.
