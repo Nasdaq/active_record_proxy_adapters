@@ -22,7 +22,7 @@ jobs:
 
     - name: Read image tag for app
       id: read_image_tag
-      run: echo "APP_IMAGE_TAG=$(cat .app-image-tag)" >> $GITHUB_OUTPUT
+      run: echo "APP_IMAGE_TAG=$(head -n1 .app-image-tag)" >> $GITHUB_OUTPUT
 
   prebuild_app:
     needs: export_variables
