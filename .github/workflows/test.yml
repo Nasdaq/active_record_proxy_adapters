@@ -32,7 +32,7 @@ jobs:
 
     - name: Read app image tag
       id: read_app_image_tag
-      run: echo "APP_IMAGE_TAG=$(cat .app-image-tag)" >> $GITHUB_OUTPUT
+      run: echo "APP_IMAGE_TAG=$(head -n1 .app-image-tag)" >> $GITHUB_OUTPUT
 
     - name: Calculate SHA256 for docker/postgres_primary.dockerfile
       id: calculate_primary_sha
