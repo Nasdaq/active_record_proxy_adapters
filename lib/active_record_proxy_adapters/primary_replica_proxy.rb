@@ -110,15 +110,22 @@ module ActiveRecordProxyAdapters
       end.last
     end
 
-    def roles_for(sql_string)
+    def roles_for(sql_string) # rubocop:disable Metrics/MethodLength,Metrics/AbcSize
       return [top_of_connection_stack_role] if top_of_connection_stack_role.present?
+      return [writing_role] if recent_write_to_primary? || in_transaction?
 
-      if need_all?(sql_string)
-        [reading_role, writing_role]
-      elsif need_primary?(sql_string)
-        [writing_role]
-      else
-        [reading_role]
+      cache_key = cache_key_for(sql_string)
+      cache_store.fetch(cache_key) do
+        ActiveSupport::Notifications.instrument("active_record_proxy_adapters.cache_miss",
+                                                cache_key: cache_key, sql: sql_string) do
+          if need_all?(sql_string)
+            [reading_role, writing_role]
+          elsif need_primary?(sql_string)
+            [writing_role]
+          else
+            [reading_role]
+          end
+        end
       end
     end
 
@@ -130,6 +137,10 @@ module ActiveRecordProxyAdapters
       return unless role.present?
 
       [reading_role, writing_role].include?(role) ? role : nil
+    end
+
+    def cache_key_for(sql_string)
+      cache_config.key_builder.call(sql_string).prepend(cache_config.key_prefix)
     end
 
     def connected_to_stack
@@ -182,9 +193,7 @@ module ActiveRecordProxyAdapters
     # @return [TrueClass] if there has been a write within the last {#proxy_delay} seconds
     # @return [TrueClass] if sql_string matches a write statement (i.e. INSERT, UPDATE, DELETE, SELECT FOR UPDATE)
     # @return [FalseClass] if sql_string matches a read statement (i.e. SELECT)
-    def need_primary?(sql_string) # rubocop:disable Metrics/CyclomaticComplexity
-      return true  if recent_write_to_primary?
-      return true  if in_transaction?
+    def need_primary?(sql_string)
       return true  if cte_for_write?(sql_string)
       return true  if SQL_PRIMARY_MATCHERS.any?(&match_sql?(sql_string))
       return false if SQL_REPLICA_MATCHERS.any?(&match_sql?(sql_string))
@@ -224,6 +233,14 @@ module ActiveRecordProxyAdapters
 
     def update_primary_latest_write_timestamp
       @last_write_at = Concurrent.monotonic_time
+    end
+
+    def cache_store
+      cache_config.store
+    end
+
+    def cache_config
+      proxy_config.cache
     end
 
     def proxy_delay

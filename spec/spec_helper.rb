@@ -86,4 +86,6 @@ RSpec.configure do |config|
   end
 
   config.around(:each, :transactional, &wrap_test_case_in_transaction)
+
+  RSpec::Matchers.define_negated_matcher :not_change, :change
 end
