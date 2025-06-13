@@ -297,16 +297,16 @@ end
 ### How Caching Works
 The caching system stores the results of SQL pattern matching operations to determine whether a query should be routed to a primary or replica database. This improves performance by avoiding repeated pattern matching on identical SQL strings.
 
-Cache keys are generated using the configured `key_builder` (SHA2 digest by default)
-All keys are prefixed with the configured `key_prefix` ("arpa_" by default)
-Cache misses are instrumented with the `active_record_proxy_adapters.cache_miss` notification. They can be monitored by subscribing to that topic:
-```ruby
-ActiveSupport::Notifications.subscribe("active_record_proxy_adapters.cache_miss") do |event|
-  cache_key, sql = event[:payload].values_at(:cache_key, :sql)
+- Cache keys are generated using the configured `key_builder` (SHA2 digest by default).
+- All keys are prefixed with the configured `key_prefix` ("arpa_" by default).
+- Cache misses are instrumented with the `active_record_proxy_adapters.cache_miss` notification. They can be monitored by subscribing to that topic:
+  ```ruby
+  ActiveSupport::Notifications.subscribe("active_record_proxy_adapters.cache_miss") do |event|
+    cache_key, sql = event[:payload].values_at(:cache_key, :sql)
 
-  logger.info("Cache miss for SQL: #{sql.inspect} with cache key: #{cache_key.inspec}")
-end
-```
+    logger.info("Cache miss for SQL: #{sql.inspect} with cache key: #{cache_key.inspec}")
+  end
+  ```
 
 ### Busting the cache
 
