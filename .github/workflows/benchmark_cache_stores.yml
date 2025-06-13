@@ -1,0 +1,127 @@
+name: Run Cache store Benchmarks
+
+on: workflow_dispatch
+
+jobs:
+  export_variables:
+    runs-on: ubuntu-latest
+
+    outputs:
+      app_image: ${{ steps.compute_container_registry_name.outputs.CR_NAME }}/app:${{ steps.read_app_image_tag.outputs.APP_IMAGE_TAG }}
+      primary_image: ${{ steps.compute_container_registry_name.outputs.CR_NAME }}/postgres_primary:${{ steps.calculate_primary_sha.outputs.PRIMARY_SHA }}
+      replica_image: ${{ steps.compute_container_registry_name.outputs.CR_NAME }}/postgres_replica:${{ steps.calculate_replica_sha.outputs.REPLICA_SHA }}
+
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v4
+
+    - name: Compute container registry name
+      id: compute_container_registry_name
+      run: echo "CR_NAME=$(echo ghcr.io/${{ github.repository }} | tr '[:upper:]' '[:lower:]')" >> $GITHUB_OUTPUT
+
+    - name: Read app image tag
+      id: read_app_image_tag
+      run: echo "APP_IMAGE_TAG=$(head -n1 .app-image-tag)" >> $GITHUB_OUTPUT
+
+    - name: Calculate SHA256 for docker/postgres_primary.dockerfile
+      id: calculate_primary_sha
+      run: echo "PRIMARY_SHA=$(sha256sum docker/postgres_primary.dockerfile | awk '{ print substr($1, 1, 12) }')" >> $GITHUB_OUTPUT
+
+    - name: Calculate SHA256 for docker/postgres_replica.dockerfile
+      id: calculate_replica_sha
+      run: |
+        checksum () {
+          sha256sum $@ | awk '{print substr($1, 1, 12)}'
+        }
+        REPLICA_DOCKERFILE_SHA=$(checksum docker/postgres_replica.dockerfile)
+        REPLICA_CMD_SHA=$(checksum docker/postgres_replica/cmd.sh)
+        echo "REPLICA_SHA=$(echo \"${REPLICA_DOCKERFILE_SHA}-${REPLICA_CMD_SHA}\" | checksum)" >> $GITHUB_OUTPUT
+
+  benchmark_cache_stores:
+    needs: [export_variables]
+    runs-on: ubuntu-latest
+
+    container:
+      image: ${{ needs.export_variables.outputs.app_image }}-${{ matrix.ruby }}
+      volumes:
+        - .:/app
+      env:
+        RAILS_ENV: test
+        PG_PRIMARY_USER: postgres_primary_test
+        PG_PRIMARY_PASSWORD: postgres_primary_test
+        PG_PRIMARY_HOST: postgres_primary
+        PG_PRIMARY_PORT: 5432
+        PG_REPLICA_USER: postgres_primary_test
+        PG_REPLICA_PASSWORD: postgres_primary_test
+        PG_REPLICA_HOST: postgres_replica
+        PG_REPLICA_PORT: 5432
+        MYSQL_PRIMARY_USER: root
+        MYSQL_PRIMARY_PASSWORD: root
+        MYSQL_PRIMARY_HOST: mysql
+        MYSQL_PRIMARY_PORT: 3306
+        MYSQL_REPLICA_USER: root
+        MYSQL_REPLICA_PASSWORD: root
+        MYSQL_REPLICA_HOST: mysql
+        MYSQL_REPLICA_PORT: 3306
+        BUNDLE_GEMFILE: gemfiles/ar_${{ matrix.ar }}.gemfile
+        RUBY_VERSION: ${{ matrix.ruby }}
+        RAILS_VERSION: ${{ matrix.ar }}
+        REDIS_URL: "redis://redis:6379/0"
+
+    strategy:
+      matrix:
+        ruby:
+          - 3.4.4
+        ar:
+          - "8.0"
+        cache_store:
+          - "null"
+          - memory
+          - file
+          - redis
+          - memcached
+
+    name: Ruby ${{ matrix.ruby }} / ActiveRecord ${{ matrix.ar }}
+    services:
+      postgres_primary:
+        image: ${{ needs.export_variables.outputs.primary_image }}
+        env:
+          POSTGRES_DB: postgres_primary_test
+          POSTGRES_USER: postgres_primary_test
+          POSTGRES_PASSWORD: postgres_primary_test
+          POSTGRES_HOST_AUTH_METHOD: "scram-sha-256\nhost replication all 0.0.0.0/0 md5"
+          POSTGRES_INITDB_ARGS: "--auth-host=scram-sha-256"
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+
+      postgres_replica:
+        image: ${{ needs.export_variables.outputs.replica_image }}
+        env:
+          PGUSER: replicator
+          PGPASSWORD: replicator
+          PGPORT: 5432
+          PRIMARY_DATABASE_HOST: postgres_primary
+          PRIMARY_DATABASE_PORT: 5432
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+
+      redis:
+        image: redis:latest
+        ports:
+          - "6379:6379"
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Prepare databases
+        run: bundle exec appraisal ar-${{ matrix.ar }} rake db:setup:postgresql
+
+      - name: Run Benchmark
+        run: bundle exec appraisal ar-${{ matrix.ar }} rake benchmark:cache_store:${{ matrix.cache_store }}:run[1000000] || true

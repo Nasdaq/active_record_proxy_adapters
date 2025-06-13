@@ -40,6 +40,13 @@ services:
       - MYSQL_REPLICA_PASSWORD=mysql
       - MYSQL_REPLICA_HOST=mysql_primary
       - MYSQL_REPLICA_PORT=3306
+      - REDIS_HOST=redis
+      - REDIS_PORT=6379
+      - REDIS_DATABASE=0
+      - REDIS_URL=${REDIS_URL:-redis://${REDIS_HOST:-redis}:${REDIS_PORT:-6379}/${REDIS_DATABASE:-0}}
+      - MEMCACHED_HOST=memcached
+      - MEMCACHED_PORT=11211
+      - MEMCACHED_URL=${MEMCACHED_URL:-${MEMCACHED_HOST:-memcached}:${MEMCACHED_PORT:-11211}}
     depends_on:
       - postgres_primary
       - postgres_replica
@@ -93,7 +100,29 @@ services:
     networks:
       - mariadb
 
+  redis:
+    image: redis:latest
+    container_name: redis
+    restart: always
+    ports:
+      - "6379:6379"
+    networks:
+      - redis
+      - app
+
+  memcached:
+    image: memcached:latest
+    container_name: memcached
+    restart: always
+    ports:
+      - "11211:11211"
+    networks:
+      - app
+      - memcached
+
 networks:
   app:
   postgres:
   mariadb:
+  redis:
+  memcached:

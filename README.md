@@ -266,6 +266,84 @@ class SayHelloJob < ApplicationJob
 end
 ```
 
+## Caching Configuration
+
+ActiveRecordProxyAdapters supports caching of SQL pattern matching results to improve performance for frequently executed queries.
+
+### Enabling Caching
+
+By default, caching is disabled (using `NullStore`). To enable caching:
+
+```ruby
+ActiveRecordProxyAdapters.configure do |config|
+  # Configure the cache store
+  config.cache do |cache|
+    # Use a specific cache implementation
+    # Notice that if using a Memcached or a Redis store, the network latency may outweigh the benefits you would get from caching the pattern matching
+    cache.store = ActiveSupport::Cache::MemoryStore.new(size: 64.megabytes)
+
+    # Optional: Customize the cache key prefix (default: "arpa_")
+    cache.key_prefix = "custom_prefix_"
+
+    # Optional: Customize the cache key generation (default: SHA2 hexdigest)
+    cache.key_builder = ->(sql) { "sql_#{Digest::MD5.hexdigest(sql)}" }
+  end
+end
+```
+
+### How Caching Works
+The caching system stores the results of SQL pattern matching operations to determine whether a query should be routed to a primary or replica database. This improves performance by avoiding repeated pattern matching on identical SQL strings.
+
+- Cache keys are generated using the configured `key_builder` (SHA2 digest by default).
+- All keys are prefixed with the configured `key_prefix` ("arpa_" by default).
+- Cache misses are instrumented with the `active_record_proxy_adapters.cache_miss` notification. They can be monitored by subscribing to that topic:
+  ```ruby
+  ActiveSupport::Notifications.subscribe("active_record_proxy_adapters.cache_miss") do |event|
+    cache_key, sql = event[:payload].values_at(:cache_key, :sql)
+
+    logger.info("Cache miss for SQL: #{sql.inspect} with cache key: #{cache_key.inspec}")
+  end
+  ```
+
+### Busting the cache
+
+If you ever need to manually clear the cached SQL patterns:
+
+```ruby
+# This will clear all cached entries with the configured prefix
+ActiveRecordProxyAdapters.bust_query_cache
+```
+
+### Performance Considerations
+For applications with a high volume of repetitive queries, enabling caching can significantly reduce CPU overhead from SQL parsing. However, this comes with the tradeoff of increased memory usage in your cache store.
+
+For optimal results:
+- Consider enabling prepared statements as that will increase cache hit rate, and decrease cache growth rate
+  ```ruby
+  irb(main):001> (1..10).each { |i| User.where(id: i).exists? }
+  ```
+  _Without_ Prepared statements yields
+  ```
+  Cache miss for SQL: "SELECT 1 AS one FROM \"users\" WHERE \"users\".\"id\" = 1 LIMIT 1" with cache key: "arpa_9fa3972e45b27985eef6bfb4aa6269c12d43363c60e7aa67fb290ec317503710"
+  Cache miss for SQL: "SELECT 1 AS one FROM \"users\" WHERE \"users\".\"id\" = 2 LIMIT 1" with cache key: "arpa_0e51756270138442ad26087dffcfb53c21df4a430961f1ca3b4270183f4b066d"
+  Cache miss for SQL: "SELECT 1 AS one FROM \"users\" WHERE \"users\".\"id\" = 3 LIMIT 1" with cache key: "arpa_db5b8c323ee2c284ba96adc6e20b7ea1373ca07fa9b09969f5207d467bd895b6"
+  Cache miss for SQL: "SELECT 1 AS one FROM \"users\" WHERE \"users\".\"id\" = 4 LIMIT 1" with cache key: "arpa_129459a1ba342cad3dbd4458cd8eacda4ed641a94a5d1e6cc23604495e44b565"
+  Cache miss for SQL: "SELECT 1 AS one FROM \"users\" WHERE \"users\".\"id\" = 5 LIMIT 1" with cache key: "arpa_9817a74a6f162ea110ed14cef79e95aa78830ff19266cdce75668e0c9c5ccef7"
+  Cache miss for SQL: "SELECT 1 AS one FROM \"users\" WHERE \"users\".\"id\" = 6 LIMIT 1" with cache key: "arpa_610e37a117abc81ec1afebafa0f36b35547f57879536ca7535475075ea08d8ac"
+  Cache miss for SQL: "SELECT 1 AS one FROM \"users\" WHERE \"users\".\"id\" = 7 LIMIT 1" with cache key: "arpa_79e172d168c59c4e5befbe954861ff9076000f955719dd3cca1423b68fb5f319"
+  Cache miss for SQL: "SELECT 1 AS one FROM \"users\" WHERE \"users\".\"id\" = 8 LIMIT 1" with cache key: "arpa_fb29367bdae3e2a48d1fa63cca00fd611c0b6dc84c9f5fd985b9222d49f1f7d9"
+  Cache miss for SQL: "SELECT 1 AS one FROM \"users\" WHERE \"users\".\"id\" = 9 LIMIT 1" with cache key: "arpa_e6e9a73cf9066077893b21dde038e5a616bf25731aeb5a4a9cdb41b7d84d1ece"
+  Cache miss for SQL: "SELECT 1 AS one FROM \"users\" WHERE \"users\".\"id\" = 10 LIMIT 1" with cache key: "arpa_8c94cdae65b6d529364d6ae8cf68f0e827566d471d2bd1107d6bdca29345759e"
+  ```
+
+  _With_ prepared statments yields
+  ```
+  Cache miss for SQL: "SELECT 1 AS one FROM \"users\" WHERE \"users\".\"id\" = $1 LIMIT $2" with cache key: "arpa_3c2ef2bb9a5f370adf63eac3bc9994c054554798d31d247818049c8c21cb68be"
+  ```
+- Use a cache store with an appropriate size limit, and low latency (Memory Store has lower latency than Memcached or Redis)
+- Monitor cache hit/miss rates using the instrumentation events
+- Consider occasionally busting the cache during low-traffic periods to prevent stale entries, or setting a reasonable expiry window for cached values
+
 ### Thread safety
 
 Since Rails already leases exactly one connection per thread from the pool and the adapter operates on that premise, it is safe to use it in multi-threaded servers such as Puma.
@@ -503,7 +581,7 @@ To create a proxy adapter for an existing database `FoobarAdapter`, follow these
      autoloader.inflector.inflect(
        "foobar_proxy_adapter" => "FoobarProxyAdapter"
      )
-   end 
+   end
    ```
 
 7. **Configure your database.yml** to use your new adapter:

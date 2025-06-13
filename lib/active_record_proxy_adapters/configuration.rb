@@ -1,10 +1,14 @@
 # frozen_string_literal: true
 
 require "active_support/core_ext/integer/time"
+require "active_record_proxy_adapters/synchronizable_configuration"
+require "active_record_proxy_adapters/cache_configuration"
 
 module ActiveRecordProxyAdapters
   # Provides a global configuration object to configure how the proxy should behave.
   class Configuration
+    include SynchronizableConfiguration
+
     PROXY_DELAY                   = 2.seconds.freeze
     CHECKOUT_TIMEOUT              = 2.seconds.freeze
     LOG_SUBSCRIBER_PRIMARY_PREFIX = proc { |event| "#{event.payload[:connection].class::ADAPTER_NAME} Primary" }.freeze
@@ -30,6 +34,7 @@ module ActiveRecordProxyAdapters
       self.checkout_timeout              = CHECKOUT_TIMEOUT
       self.log_subscriber_primary_prefix = LOG_SUBSCRIBER_PRIMARY_PREFIX
       self.log_subscriber_replica_prefix = LOG_SUBSCRIBER_REPLICA_PREFIX
+      self.cache_configuration           = CacheConfiguration.new(@lock)
     end
 
     def log_subscriber_primary_prefix=(prefix)
@@ -60,17 +65,18 @@ module ActiveRecordProxyAdapters
       end
     end
 
+    def cache
+      block_given? ? yield(cache_configuration) : cache_configuration
+    end
+
     private
 
-    def synchronize_update(attribute, from:, to:, &block)
-      ActiveSupport::Notifications.instrument(
-        "active_record_proxy_adapters.configuration_update",
-        attribute:,
-        who: Thread.current,
-        from:,
-        to:
-      ) do
-        @lock.synchronize(&block)
+    # @return [CacheConfiguration] The cache configuration for the proxy adapters.
+    attr_reader :cache_configuration
+
+    def cache_configuration=(cache_configuration)
+      synchronize_update(:cache_configuration, from: @cache_configuration, to: cache_configuration) do
+        @cache_configuration = cache_configuration
       end
     end
   end
