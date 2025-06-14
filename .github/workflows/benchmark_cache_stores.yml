@@ -45,7 +45,7 @@ jobs:
         REPLICA_CMD_SHA=$(checksum docker/postgres_replica/cmd.sh)
         echo "REPLICA_SHA=$(echo \"${REPLICA_DOCKERFILE_SHA}-${REPLICA_CMD_SHA}\" | checksum)" >> $GITHUB_OUTPUT
 
-  rspec:
+  benchmark_cache_stores:
     needs: [export_variables]
     runs-on: ubuntu-latest
 
@@ -74,6 +74,7 @@ jobs:
         BUNDLE_GEMFILE: gemfiles/ar_${{ matrix.ar }}.gemfile
         RUBY_VERSION: ${{ matrix.ruby }}
         RAILS_VERSION: ${{ matrix.ar }}
+        REDIS_URL: "redis://redis:6379/0"
 
     strategy:
       matrix:
@@ -81,9 +82,8 @@ jobs:
           - 3.4.4
         ar:
           - "8.0"
-
-        store:
-          - null
+        cache_store:
+          - "null"
           - memory
           - file
           - redis
@@ -118,9 +118,17 @@ jobs:
           --health-timeout 5s
           --health-retries 5
 
+      redis:
+        image: redis:latest
+        ports:
+          - "6379:6379"
+
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
 
+      - name: Prepare databases
+        run: bundle exec appraisal ar-${{ matrix.ar }} rake db:setup:postgresql
+
       - name: Run Benchmark
-        run: bundle exec appraisal ar-${{ matrix.ar }} rake benchmark:cache_store:${{ matrix.store }}:run[1000000]
+        run: bundle exec appraisal ar-${{ matrix.ar }} rake benchmark:cache_store:${{ matrix.cache_store }}:run[1000000]
