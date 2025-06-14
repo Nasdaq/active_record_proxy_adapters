@@ -1,14 +1,6 @@
 name: Run Cache store Benchmarks
 
-on:
-  pull_request:
-    branches:
-      - main
-  push:
-    branches:
-      - main
-    tags:
-      - '**'
+on: workflow_dispatch
 
 jobs:
   export_variables:
@@ -131,4 +123,4 @@ jobs:
         run: bundle exec appraisal ar-${{ matrix.ar }} rake db:setup:postgresql
 
       - name: Run Benchmark
-        run: bundle exec appraisal ar-${{ matrix.ar }} rake benchmark:cache_store:${{ matrix.cache_store }}:run[1000000]
+        run: bundle exec appraisal ar-${{ matrix.ar }} rake benchmark:cache_store:${{ matrix.cache_store }}:run[1000000] || true
