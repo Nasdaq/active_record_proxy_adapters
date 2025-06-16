@@ -1,5 +1,9 @@
 ## [Unreleased]
 
+## [0.6.0] - 2025-06-16
+
+- Add optional support for caching SQL pattern matching [c1f6ff9](https://github.com/Nasdaq/active_record_proxy_adapters/commit/c1f6ff9bb211b1e7b8fea4b138e4c13fb6378cbe)
+
 ## [0.5.0] - 2025-05-22
 
 - Add SQLite3ProxyAdapter [e9bb853](https://github.com/Nasdaq/active_record_proxy_adapters/commit/e9bb8536123ee7c14960bf802d43be4c7ce6d1ee)
