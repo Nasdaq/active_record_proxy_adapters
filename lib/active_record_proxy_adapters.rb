@@ -14,6 +14,10 @@ module ActiveRecordProxyAdapters
     yield(config)
   end
 
+  def bust_query_cache
+    config.cache.bust
+  end
+
   def config
     @config ||= Configuration.new
   end
