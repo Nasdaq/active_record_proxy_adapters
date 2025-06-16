@@ -67,6 +67,7 @@ jobs:
         RUBY_VERSION: ${{ matrix.ruby }}
         RAILS_VERSION: ${{ matrix.ar }}
         REDIS_URL: "redis://redis:6379/0"
+        MEMCACHED_URL: "memcached:11211"
 
     strategy:
       matrix:
@@ -81,7 +82,7 @@ jobs:
           - redis
           - memcached
 
-    name: Ruby ${{ matrix.ruby }} / ActiveRecord ${{ matrix.ar }}
+    name: Benchmark ${{ matrix.cache_store }} cache.
     services:
       postgres_primary:
         image: ${{ needs.export_variables.outputs.primary_image }}
@@ -115,6 +116,11 @@ jobs:
         image: redis:latest
         ports:
           - "6379:6379"
+
+      memcached:
+        image: memcached:latest
+        ports:
+          - "11211:11211"
 
     steps:
       - name: Checkout repository
