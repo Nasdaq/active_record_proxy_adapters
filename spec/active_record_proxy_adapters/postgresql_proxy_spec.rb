@@ -1,6 +1,7 @@
 # frozen_string_literal: true
 
 require "shared_examples/a_proxied_method"
+require "shared_examples/a_transaction_block_proxy_bypass"
 
 RSpec.describe ActiveRecordProxyAdapters::PostgreSQLProxy do # rubocop:disable RSpec/SpecFilePathFormat
   attr_reader :primary_adapter
@@ -73,6 +74,8 @@ RSpec.describe ActiveRecordProxyAdapters::PostgreSQLProxy do # rubocop:disable R
       end
     end
   end
+
+  it_behaves_like "a transaction block proxy bypass"
 
   describe "#execute" do
     it_behaves_like "a proxied method", :execute do

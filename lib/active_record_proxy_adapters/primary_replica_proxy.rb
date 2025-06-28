@@ -34,6 +34,7 @@ module ActiveRecordProxyAdapters
     WRITE_STATEMENT_MATCHERS = [
       /\ABEGIN/i,
       /\ACOMMIT/i,
+      /\AROLLBACK/i,
       /INSERT\s[\s\S]*INTO\s[\s\S]*/i,
       /UPDATE\s[\s\S]*/i,
       /DELETE\s[\s\S]*FROM\s[\s\S]*/i,
