@@ -1,5 +1,9 @@
 ## [Unreleased]
 
+## [0.6.1, 0.5.1, 0.4.7] - 2025-06-27
+
+- Bypass proxy when opening a transaction in ActiveRecord 7.0.x [d03adf6](https://github.com/Nasdaq/active_record_proxy_adapters/commit/d03adf61e284cc29f82879aefc4f087a91e01d33)
+
 ## [0.6.0] - 2025-06-16
 
 - Add optional support for caching SQL pattern matching [c1f6ff9](https://github.com/Nasdaq/active_record_proxy_adapters/commit/c1f6ff9bb211b1e7b8fea4b138e4c13fb6378cbe)
