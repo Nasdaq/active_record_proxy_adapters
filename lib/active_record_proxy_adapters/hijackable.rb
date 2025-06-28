@@ -52,8 +52,6 @@ module ActiveRecordProxyAdapters
         "_unproxied"
       end
 
-      private
-
       def proxy_method_name_for(method_name)
         :"#{method_name}#{unproxied_method_suffix}"
       end
@@ -62,6 +60,10 @@ module ActiveRecordProxyAdapters
     included do
       def unproxied_method_suffix
         self.class.unproxied_method_suffix
+      end
+
+      def proxy_method_name_for(method_name)
+        self.class.proxy_method_name_for(method_name)
       end
     end
   end
