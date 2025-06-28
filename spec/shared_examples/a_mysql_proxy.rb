@@ -1,6 +1,7 @@
 # frozen_string_literal: true
 
 require "shared_examples/a_proxied_method"
+require "shared_examples/a_transaction_block_proxy_bypass"
 
 RSpec.shared_examples "a MySQL proxy" do
   attr_reader :primary_adapter
@@ -30,6 +31,8 @@ RSpec.shared_examples "a MySQL proxy" do
       VALUES ('John Doe', 'john.doe@example.com');
     SQL
   end
+
+  it_behaves_like "a transaction block proxy bypass"
 
   describe "#execute" do
     it_behaves_like "a proxied method", :execute
