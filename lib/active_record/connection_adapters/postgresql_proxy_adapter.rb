@@ -1,10 +1,10 @@
 # frozen_string_literal: true
 
-require "active_record/tasks/postgresql_proxy_database_tasks"
-require "active_record/connection_adapters/postgresql_adapter"
 require "active_record_proxy_adapters/active_record_context"
 require "active_record_proxy_adapters/hijackable"
 require "active_record_proxy_adapters/postgresql_proxy"
+require "active_record/connection_adapters/postgresql_adapter"
+require "active_record/tasks/postgresql_proxy_database_tasks"
 
 module ActiveRecord
   module ConnectionAdapters
@@ -12,6 +12,12 @@ module ActiveRecord
     # ActiveRecordProxyAdapters::PrimaryReplicaProxy.
     class PostgreSQLProxyAdapter < PostgreSQLAdapter
       include ActiveRecordProxyAdapters::Hijackable
+
+      if ActiveRecordProxyAdapters::ActiveRecordContext.active_record_v7_0?
+        require "active_record_proxy_adapters/transactionable_proxy_a_r_70"
+
+        include ActiveRecordProxyAdapters::TransactionableProxyAR70
+      end
 
       ADAPTER_NAME = "PostgreSQLProxy"
 
