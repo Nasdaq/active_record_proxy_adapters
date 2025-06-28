@@ -8,6 +8,7 @@ on:
       - v0.2
       - v0.3
       - v-0-4-stable
+      - v-0-5-stable
   push:
     branches:
       - main
