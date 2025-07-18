@@ -1,17 +1,18 @@
 # frozen_string_literal: true
 
 module ActiveRecordProxyAdapters
-  module Contextualizer # rubocop:disable Style/Documentation
+  # A mixin for managing the context of current database connections.
+  module Contextualizer
     module_function
 
     # @return [ActiveRecordProxyAdapters::Context]
-    # Retrieves the current context for the thread.
+    # Retrieves the context for the current thread.
     def current_context
       Thread.current.thread_variable_get(:arpa_context)
     end
 
     # @param context [ActiveRecordProxyAdapters::Context]
-    # Sets the current context for the thread.
+    # Sets the context for the current thread.
     def current_context=(context)
       Thread.current.thread_variable_set(:arpa_context, context)
     end
