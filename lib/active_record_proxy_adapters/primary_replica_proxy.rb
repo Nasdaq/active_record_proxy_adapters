@@ -4,6 +4,7 @@ require "active_record_proxy_adapters/active_record_context"
 require "active_record_proxy_adapters/configuration"
 require "active_record_proxy_adapters/contextualizer"
 require "active_record_proxy_adapters/hijackable"
+require "active_record_proxy_adapters/mixin/configuration"
 require "active_support/core_ext/module/delegation"
 require "active_support/core_ext/object/blank"
 
@@ -13,6 +14,7 @@ module ActiveRecordProxyAdapters
   class PrimaryReplicaProxy # rubocop:disable Metrics/ClassLength
     include Hijackable
     include Contextualizer
+    include Mixin::Configuration
 
     # All queries that match these patterns should be sent to the primary database
     SQL_PRIMARY_MATCHERS = [
@@ -140,10 +142,6 @@ module ActiveRecordProxyAdapters
       [reading_role, writing_role].include?(role) ? role : nil
     end
 
-    def cache_key_for(sql_string)
-      cache_config.key_builder.call(sql_string).prepend(cache_config.key_prefix)
-    end
-
     def connected_to_stack
       return connection_class.connected_to_stack if connection_class.respond_to?(:connected_to_stack)
 
@@ -223,9 +221,7 @@ module ActiveRecordProxyAdapters
 
     # @return Boolean
     def recent_write_to_primary?
-      last_write_at = proxy_context[primary_connection_name]
-
-      now - last_write_at < proxy_delay
+      proxy_context.recent_write_to_primary?(primary_connection_name)
     end
 
     def in_transaction?
@@ -233,11 +229,7 @@ module ActiveRecordProxyAdapters
     end
 
     def update_primary_latest_write_timestamp
-      proxy_context[primary_connection_name] = now
-    end
-
-    def now
-      Time.now.utc.to_f
+      proxy_context.update_for(primary_connection_name)
     end
 
     def primary_connection_name
@@ -245,27 +237,7 @@ module ActiveRecordProxyAdapters
     end
 
     def proxy_context
-      self.current_context ||= proxy_config.context_store.new({})
-    end
-
-    def cache_store
-      cache_config.store
-    end
-
-    def cache_config
-      proxy_config.cache
-    end
-
-    def proxy_delay
-      proxy_config.proxy_delay
-    end
-
-    def checkout_timeout
-      proxy_config.checkout_timeout
-    end
-
-    def proxy_config
-      ActiveRecordProxyAdapters.config
+      self.current_context ||= context_store.new({})
     end
   end
 end
