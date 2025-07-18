@@ -1,5 +1,8 @@
 name: active_record_proxy_adapters
 
+x-app-common: &app-common
+  image: active_record_proxy_adapters-app:${ENV_TAG:-latest}
+
 x-postgres-common: &postgres-common
   restart: always
   user: postgres
@@ -13,12 +16,12 @@ x-postgres-common: &postgres-common
 
 services:
   app:
+    <<: *app-common
     build:
       args:
         - RUBY_VERSION=${RUBY_VERSION:-3.3.6}
         - DOCKER_REGISTRY=${DOCKER_REGISTRY:-docker.io}
     container_name: app
-    image: active_record_proxy_adapters-app:${ENV_TAG:-latest}
     tty: true
     stdin_open: true
     environment:
@@ -57,6 +60,9 @@ services:
       - mariadb
     volumes:
       - .:/app
+      - bundle:/usr/local/bundle
+    ports:
+      - 8808:8808
   postgres_primary:
     <<: *postgres-common
     build:
@@ -120,9 +126,24 @@ services:
       - app
       - memcached
 
+  yard:
+    <<: *app-common
+    container_name: yard
+    pull_policy: never
+    ports:
+      - 8808:8808
+    command: [ "bundle", "exec", "yard", "server", "--reload"]
+    volumes:
+      - .:/app
+      - yard:/app/.yardoc
+
 networks:
   app:
   postgres:
   mariadb:
   redis:
   memcached:
+
+volumes:
+  bundle:
+  yard:

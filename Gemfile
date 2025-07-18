@@ -11,6 +11,11 @@ gem "trilogy", "~> 2.9"
 
 gem "appraisal"
 
+# for documentation server
+gem "puma"
+gem "rack", "~> 2.2.0"
+gem "yard"
+
 group :test do
   gem "rspec", "~> 3.13"
   gem "rubocop", "~> 1.78"
