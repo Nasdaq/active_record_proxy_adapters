@@ -1,5 +1,7 @@
 ## [Unreleased]
 
+- Add support for configuring a Context API
+
 ## [0.6.1, 0.5.1, 0.4.7] - 2025-06-27
 
 - Bypass proxy when opening a transaction in ActiveRecord 7.0.x [d03adf6](https://github.com/Nasdaq/active_record_proxy_adapters/commit/d03adf61e284cc29f82879aefc4f087a91e01d33)
