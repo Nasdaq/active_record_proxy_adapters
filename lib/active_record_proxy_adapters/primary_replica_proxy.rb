@@ -1,17 +1,18 @@
 # frozen_string_literal: true
 
+require "active_record_proxy_adapters/active_record_context"
 require "active_record_proxy_adapters/configuration"
+require "active_record_proxy_adapters/contextualizer"
+require "active_record_proxy_adapters/hijackable"
 require "active_support/core_ext/module/delegation"
 require "active_support/core_ext/object/blank"
-require "concurrent-ruby"
-require "active_record_proxy_adapters/active_record_context"
-require "active_record_proxy_adapters/hijackable"
 
 module ActiveRecordProxyAdapters
   # This is the base class for all proxies. It defines the methods that should be proxied
   # and the logic to determine which database to use.
   class PrimaryReplicaProxy # rubocop:disable Metrics/ClassLength
     include Hijackable
+    include Contextualizer
 
     # All queries that match these patterns should be sent to the primary database
     SQL_PRIMARY_MATCHERS = [
@@ -51,13 +52,12 @@ module ActiveRecordProxyAdapters
     # @param primary_connection [ActiveRecord::ConnectionAdatpers::AbstractAdapter]
     def initialize(primary_connection)
       @primary_connection    = primary_connection
-      @last_write_at         = 0
       @active_record_context = ActiveRecordContext.new
     end
 
     private
 
-    attr_reader :primary_connection, :last_write_at, :active_record_context
+    attr_reader :primary_connection, :active_record_context
 
     delegate :connection_handler, to: :connection_class
     delegate :reading_role, :writing_role, to: :active_record_context
@@ -221,11 +221,11 @@ module ActiveRecordProxyAdapters
       proc { |matcher| matcher.match?(sql_string) }
     end
 
-    # TODO: implement a context API to re-route requests to the primary database if a recent query was sent to it to
-    # avoid replication delay issues
     # @return Boolean
     def recent_write_to_primary?
-      Concurrent.monotonic_time - last_write_at < proxy_delay
+      last_write_at = proxy_context[primary_connection_name]
+
+      now - last_write_at < proxy_delay
     end
 
     def in_transaction?
@@ -233,7 +233,19 @@ module ActiveRecordProxyAdapters
     end
 
     def update_primary_latest_write_timestamp
-      @last_write_at = Concurrent.monotonic_time
+      proxy_context[primary_connection_name] = now
+    end
+
+    def now
+      Time.now.utc.to_f
+    end
+
+    def primary_connection_name
+      @primary_connection_name ||= primary_connection.pool.try(:db_config).try(:name).try(:to_sym)
+    end
+
+    def proxy_context
+      self.current_context ||= proxy_config.context_store.new({})
     end
 
     def cache_store

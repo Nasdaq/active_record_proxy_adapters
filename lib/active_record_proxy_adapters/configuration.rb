@@ -3,6 +3,7 @@
 require "active_support/core_ext/integer/time"
 require "active_record_proxy_adapters/synchronizable_configuration"
 require "active_record_proxy_adapters/cache_configuration"
+require "active_record_proxy_adapters/context"
 
 module ActiveRecordProxyAdapters
   # Provides a global configuration object to configure how the proxy should behave.
@@ -27,6 +28,9 @@ module ActiveRecordProxyAdapters
     # @return [Proc] Prefix for the log subscriber when the replica database is used. Thread safe.
     attr_reader :log_subscriber_replica_prefix
 
+    # @return [Class] The context that is used to store the current request's state.
+    attr_reader :context_store
+
     def initialize
       @lock = Monitor.new
 
@@ -35,6 +39,7 @@ module ActiveRecordProxyAdapters
       self.log_subscriber_primary_prefix = LOG_SUBSCRIBER_PRIMARY_PREFIX
       self.log_subscriber_replica_prefix = LOG_SUBSCRIBER_REPLICA_PREFIX
       self.cache_configuration           = CacheConfiguration.new(@lock)
+      self.context_store                 = ActiveRecordProxyAdapters::Context
     end
 
     def log_subscriber_primary_prefix=(prefix)
@@ -62,6 +67,12 @@ module ActiveRecordProxyAdapters
     def checkout_timeout=(checkout_timeout)
       synchronize_update(:checkout_timeout, from: @checkout_timeout, to: checkout_timeout) do
         @checkout_timeout = checkout_timeout
+      end
+    end
+
+    def context_store=(context_store)
+      synchronize_update(:context_store, from: @context_store, to: context_store) do
+        @context_store = context_store
       end
     end
 
