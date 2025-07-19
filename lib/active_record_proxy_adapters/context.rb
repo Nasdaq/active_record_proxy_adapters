@@ -31,6 +31,10 @@ module ActiveRecordProxyAdapters
       timestamp_registry[connection_name] = timestamp
     end
 
+    def to_h
+      timestamp_registry.dup
+    end
+
     private
 
     attr_reader :timestamp_registry
