@@ -75,6 +75,10 @@ RSpec.configure do |config|
     ActiveSupport.on_load(:active_record) { TestHelper.setup_active_record_config }
   end
 
+  config.before do
+    ActiveRecordProxyAdapters::Contextualizer.current_context = ActiveRecordProxyAdapters.config.context_store.new({})
+  end
+
   wrap_test_case_in_transaction = proc do |example|
     connection = ActiveRecord::Base.connection
 
