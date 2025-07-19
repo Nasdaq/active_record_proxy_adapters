@@ -233,7 +233,7 @@ module ActiveRecordProxyAdapters
     end
 
     def primary_connection_name
-      @primary_connection_name ||= primary_connection.pool.try(:db_config).try(:name).try(:to_sym)
+      @primary_connection_name ||= primary_connection.pool.try(:db_config).try(:name).try(:to_s)
     end
 
     def proxy_context

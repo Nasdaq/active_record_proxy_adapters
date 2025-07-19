@@ -5,6 +5,7 @@ PATH
       activerecord (>= 7.0.0, < 8.1)
       activesupport (>= 7.0.0, < 8.1)
       digest (>= 3.1.0)
+      json
 
 GEM
   remote: https://rubygems.org/
