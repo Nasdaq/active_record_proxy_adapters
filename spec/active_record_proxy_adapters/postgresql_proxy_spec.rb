@@ -123,7 +123,7 @@ RSpec.describe ActiveRecordProxyAdapters::PostgreSQLProxy do # rubocop:disable R
     end
   end
 
-  if TestHelper.active_record_context.active_record_v8_0_or_greater?
+  if TestHelper.active_record_context.active_record_v7_1_or_greater?
     describe "#internal_exec_query" do
       it_behaves_like "a proxied method", :internal_exec_query do
         it_behaves_like "a PostgreSQL CTE"
