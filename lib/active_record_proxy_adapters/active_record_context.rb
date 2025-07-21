@@ -38,7 +38,7 @@ module ActiveRecordProxyAdapters
     def hijackable_methods
       hijackable = %i[execute exec_query]
 
-      hijackable << :internal_exec_query if active_record_v8_0_or_greater?
+      hijackable << :internal_exec_query if active_record_v7_1_or_greater?
 
       hijackable
     end
