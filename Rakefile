@@ -2,6 +2,8 @@
 
 require "bundler/gem_tasks"
 require "rspec/core/rake_task"
+require "uri"
+require "redis"
 
 RSpec::Core::RakeTask.new(:spec)
 
@@ -172,6 +174,91 @@ namespace :coverage do
 
     SimpleCov.collate Dir["coverage/**/.resultset.json"] do
       SIMPLE_COV_GROUPS.call
+    end
+  end
+end
+
+namespace :benchmark do # rubocop:disable Metrics/BlockLength
+  namespace :cache_store do # rubocop:disable Metrics/BlockLength
+    desc "Runs all cache store benchmark suites"
+    task :run, %i[iterations] => %i[environment] do |_, args|
+      iterations = args[:iterations]&.to_i
+
+      %w[null:run memory:run file:run redis:run memcached:run].each do |task_name|
+        task("benchmark:cache_store:#{task_name}").execute(iterations: iterations)
+        puts "\n" * 2
+        puts "=" * 83
+        puts "\n" * 2
+      end
+    end
+
+    namespace :null do
+      desc "Runs the NullStore benchmark suite"
+      task :run, %i[iterations] => %i[environment] do |_, args|
+        require_relative "spec/benchmark/cache_store"
+
+        store_class = ActiveSupport::Cache::NullStore
+        $stdout.puts "Benchmarking proxy pattern matching with #{store_class} cache store..."
+        CacheStoreBenchmark.run(store_class.new, iterations: args[:iterations]&.to_i)
+      end
+    end
+
+    namespace :memory do
+      desc "Runs the MemoryStore benchmark suite"
+      task :run, %i[iterations] => %i[environment] do |_, args|
+        require_relative "spec/benchmark/cache_store"
+
+        store_class = ActiveSupport::Cache::MemoryStore
+
+        CacheStoreBenchmark.run(store_class.new, iterations: args[:iterations]&.to_i)
+      end
+    end
+
+    namespace :file do
+      desc "Runs the FileStore benchmark suite"
+      task :run, %i[iterations] => %i[environment] do |_, args|
+        require_relative "spec/benchmark/cache_store"
+
+        store_class = ActiveSupport::Cache::FileStore
+
+        Dir.mktmpdir do |tempdir_path|
+          CacheStoreBenchmark.run(store_class.new(tempdir_path), iterations: args[:iterations]&.to_i)
+        end
+      end
+    end
+
+    namespace :redis do
+      desc "Runs the RedisCacheStore benchmark suite"
+      task :run, %i[iterations] => %i[environment] do |_, args|
+        require_relative "spec/benchmark/cache_store"
+
+        redis_uri = URI.parse(ENV.fetch("REDIS_URL", "redis://localhost:6379/0"))
+        redis = Redis.new(url: redis_uri.to_s)
+
+        redis_store = ActiveSupport::Cache::RedisCacheStore.new(redis: redis)
+        redis_store.read("connected?")
+
+        unless redis.connected?
+          abort("Redis is not connected. Please ensure Redis is running and accessible at #{redis_uri}.")
+        end
+
+        CacheStoreBenchmark.run(redis_store, iterations: args[:iterations]&.to_i)
+      end
+    end
+
+    namespace :memcached do
+      desc "Runs the MemCacheStore benchmark suite"
+      task :run, %i[iterations] => %i[environment] do |_, args|
+        require_relative "spec/benchmark/cache_store"
+
+        memcached_uri = URI.parse(ENV.fetch("MEMCACHED_URL", "localhost:11211"))
+
+        memcached_store = ActiveSupport::Cache::MemCacheStore.new(memcached_uri.to_s)
+
+        memcached_store.clear
+
+        CacheStoreBenchmark.run(memcached_store, iterations: args[:iterations]&.to_i)
+      end
     end
   end
 end

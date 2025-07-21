@@ -2,16 +2,23 @@
 
 source "https://rubygems.org"
 
+gem "dalli"
 gem "mysql2", "~> 0.5"
 gem "pg", "~> 1.5"
-gem "rake", "~> 13.0"
+gem "rake", "~> 13.3"
+gem "redis", "~> 5.4.1"
 gem "trilogy", "~> 2.9"
 
 gem "appraisal"
 
+# for documentation server
+gem "puma"
+gem "rack", "~> 2.2.0"
+gem "yard"
+
 group :test do
-  gem "rspec", "~> 3.0"
-  gem "rubocop", "~> 1.75"
+  gem "rspec", "~> 3.13"
+  gem "rubocop", "~> 1.78"
   gem "rubocop-rspec", "~> 3.6.0"
   gem "simplecov"
   gem "simplecov-cobertura"

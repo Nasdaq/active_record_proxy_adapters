@@ -1,17 +1,20 @@
 # frozen_string_literal: true
 
+require "active_record_proxy_adapters/active_record_context"
 require "active_record_proxy_adapters/configuration"
+require "active_record_proxy_adapters/contextualizer"
+require "active_record_proxy_adapters/hijackable"
+require "active_record_proxy_adapters/mixin/configuration"
 require "active_support/core_ext/module/delegation"
 require "active_support/core_ext/object/blank"
-require "concurrent-ruby"
-require "active_record_proxy_adapters/active_record_context"
-require "active_record_proxy_adapters/hijackable"
 
 module ActiveRecordProxyAdapters
   # This is the base class for all proxies. It defines the methods that should be proxied
   # and the logic to determine which database to use.
   class PrimaryReplicaProxy # rubocop:disable Metrics/ClassLength
     include Hijackable
+    include Contextualizer
+    include Mixin::Configuration
 
     # All queries that match these patterns should be sent to the primary database
     SQL_PRIMARY_MATCHERS = [
@@ -51,13 +54,12 @@ module ActiveRecordProxyAdapters
     # @param primary_connection [ActiveRecord::ConnectionAdatpers::AbstractAdapter]
     def initialize(primary_connection)
       @primary_connection    = primary_connection
-      @last_write_at         = 0
       @active_record_context = ActiveRecordContext.new
     end
 
     private
 
-    attr_reader :primary_connection, :last_write_at, :active_record_context
+    attr_reader :primary_connection, :active_record_context
 
     delegate :connection_handler, to: :connection_class
     delegate :reading_role, :writing_role, to: :active_record_context
@@ -111,15 +113,22 @@ module ActiveRecordProxyAdapters
       end.last
     end
 
-    def roles_for(sql_string)
+    def roles_for(sql_string) # rubocop:disable Metrics/MethodLength,Metrics/AbcSize
       return [top_of_connection_stack_role] if top_of_connection_stack_role.present?
+      return [writing_role] if recent_write_to_primary? || in_transaction?
 
-      if need_all?(sql_string)
-        [reading_role, writing_role]
-      elsif need_primary?(sql_string)
-        [writing_role]
-      else
-        [reading_role]
+      cache_key = cache_key_for(sql_string)
+      cache_store.fetch(cache_key) do
+        ActiveSupport::Notifications.instrument("active_record_proxy_adapters.cache_miss",
+                                                cache_key: cache_key, sql: sql_string) do
+          if need_all?(sql_string)
+            [reading_role, writing_role]
+          elsif need_primary?(sql_string)
+            [writing_role]
+          else
+            [reading_role]
+          end
+        end
       end
     end
 
@@ -183,9 +192,7 @@ module ActiveRecordProxyAdapters
     # @return [TrueClass] if there has been a write within the last {#proxy_delay} seconds
     # @return [TrueClass] if sql_string matches a write statement (i.e. INSERT, UPDATE, DELETE, SELECT FOR UPDATE)
     # @return [FalseClass] if sql_string matches a read statement (i.e. SELECT)
-    def need_primary?(sql_string) # rubocop:disable Metrics/CyclomaticComplexity
-      return true  if recent_write_to_primary?
-      return true  if in_transaction?
+    def need_primary?(sql_string)
       return true  if cte_for_write?(sql_string)
       return true  if SQL_PRIMARY_MATCHERS.any?(&match_sql?(sql_string))
       return false if SQL_REPLICA_MATCHERS.any?(&match_sql?(sql_string))
@@ -212,11 +219,9 @@ module ActiveRecordProxyAdapters
       proc { |matcher| matcher.match?(sql_string) }
     end
 
-    # TODO: implement a context API to re-route requests to the primary database if a recent query was sent to it to
-    # avoid replication delay issues
     # @return Boolean
     def recent_write_to_primary?
-      Concurrent.monotonic_time - last_write_at < proxy_delay
+      proxy_context.recent_write_to_primary?(primary_connection_name)
     end
 
     def in_transaction?
@@ -224,19 +229,15 @@ module ActiveRecordProxyAdapters
     end
 
     def update_primary_latest_write_timestamp
-      @last_write_at = Concurrent.monotonic_time
+      proxy_context.update_for(primary_connection_name)
     end
 
-    def proxy_delay
-      proxy_config.proxy_delay
+    def primary_connection_name
+      @primary_connection_name ||= primary_connection.pool.try(:db_config).try(:name).try(:to_sym)
     end
 
-    def checkout_timeout
-      proxy_config.checkout_timeout
-    end
-
-    def proxy_config
-      ActiveRecordProxyAdapters.config
+    def proxy_context
+      self.current_context ||= context_store.new({})
     end
   end
 end

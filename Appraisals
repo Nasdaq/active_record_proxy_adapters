@@ -22,7 +22,7 @@ appraise "ar-7.2" do
   gem "sqlite3", "~> 1.4", force_ruby_platform: true
 end
 
-if RUBY_VERSION != "3.1.6"
+if Gem::Version.new(RUBY_VERSION) >= Gem::Version.new("3.2")
   appraise "ar-8.0" do
     gem "activerecord", "~> 8.0.0"
     gem "activesupport", "~> 8.0.0"

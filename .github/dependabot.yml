@@ -3,8 +3,24 @@ updates:
   - package-ecosystem: bundler
     directory: "/"
     schedule:
-      interval: daily
+      interval: weekly
       time: "08:00"
     open-pull-requests-limit: 5
     allow:
       - dependency-type: "direct"
+    groups:
+      rubocop:
+        patterns:
+          - "^rubocop*"
+      rspec:
+        patterns:
+          - "^rspec*"
+      simplecov:
+        patterns:
+          - "^simplecov"
+      rails-ecosystem:
+        patterns:
+          - "active*"
+          - "action*"
+        update-types:
+          - "patch"

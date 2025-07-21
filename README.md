@@ -40,9 +40,7 @@ Currently supported adapters:
 - `postgresql`
 - `mysql2`
 - `trilogy`
-
-Coming soon:
-- `sqlite`
+- `sqlite3`
 
 
 #### PostgreSQL
@@ -73,6 +71,34 @@ development:
     # your replica credentials here
 ```
 
+#### Trilogy
+```yaml
+# config/database.yml
+development:
+  primary:
+    adapter: trilogy_proxy
+    # your primary credentials here
+
+  primary_replica:
+    adapter: trilogy
+    replica: true
+    # your replica credentials here
+```
+
+#### SQLite
+```yaml
+# config/database.yml
+development:
+  primary:
+    adapter: sqlite3_proxy
+    # your primary credentials here
+
+  primary_replica:
+    adapter: sqlite3
+    replica: true
+    # your replica credentials here
+```
+
 ```ruby
 # app/models/application_record.rb
 class ApplicationRecord < ActiveRecord::Base
@@ -93,7 +119,7 @@ require "active_record_proxy_adapters/connection_handling"
 class ApplicationRecord << ActiveRecord::Base
     establish_connection(
         {
-            adapter: 'postgresql_proxy',
+            adapter: 'postgresql_proxy', # or any of the following: mysql2_proxy, trilogy_proxy, sqlite3_proxy
             # your primary credentials here
         },
         role: :writing
@@ -101,7 +127,7 @@ class ApplicationRecord << ActiveRecord::Base
 
     establish_connection(
         {
-            adapter: 'postgresql',
+            adapter: 'postgresql',  # or any of the following: mysql2, trilogy, sqlite3
             # your replica credentials here
         },
         role: :reading
@@ -195,7 +221,7 @@ production:
 Then set `PRIMARY_DATABASE_ADAPTER=postgresql_proxy` to enable the proxy.
 That way you can redeploy your application disabling the proxy completely, without any code change.
 
-### Sticking to the primary database manually
+### Sticking to a database manually
 
 The proxy respects ActiveRecord's `#connected_to_stack` and will use it if present.
 You can use that to force connection to the primary or replica and bypass the proxy entirely.
@@ -239,6 +265,84 @@ class SayHelloJob < ApplicationJob
   end
 end
 ```
+
+## Caching Configuration
+
+ActiveRecordProxyAdapters supports caching of SQL pattern matching results to improve performance for frequently executed queries.
+
+### Enabling Caching
+
+By default, caching is disabled (using `NullStore`). To enable caching:
+
+```ruby
+ActiveRecordProxyAdapters.configure do |config|
+  # Configure the cache store
+  config.cache do |cache|
+    # Use a specific cache implementation
+    # Notice that if using a Memcached or a Redis store, the network latency may outweigh the benefits you would get from caching the pattern matching
+    cache.store = ActiveSupport::Cache::MemoryStore.new(size: 64.megabytes)
+
+    # Optional: Customize the cache key prefix (default: "arpa_")
+    cache.key_prefix = "custom_prefix_"
+
+    # Optional: Customize the cache key generation (default: SHA2 hexdigest)
+    cache.key_builder = ->(sql) { "sql_#{Digest::MD5.hexdigest(sql)}" }
+  end
+end
+```
+
+### How Caching Works
+The caching system stores the results of SQL pattern matching operations to determine whether a query should be routed to a primary or replica database. This improves performance by avoiding repeated pattern matching on identical SQL strings.
+
+- Cache keys are generated using the configured `key_builder` (SHA2 digest by default).
+- All keys are prefixed with the configured `key_prefix` ("arpa_" by default).
+- Cache misses are instrumented with the `active_record_proxy_adapters.cache_miss` notification. They can be monitored by subscribing to that topic:
+  ```ruby
+  ActiveSupport::Notifications.subscribe("active_record_proxy_adapters.cache_miss") do |event|
+    cache_key, sql = event[:payload].values_at(:cache_key, :sql)
+
+    logger.info("Cache miss for SQL: #{sql.inspect} with cache key: #{cache_key.inspec}")
+  end
+  ```
+
+### Busting the cache
+
+If you ever need to manually clear the cached SQL patterns:
+
+```ruby
+# This will clear all cached entries with the configured prefix
+ActiveRecordProxyAdapters.bust_query_cache
+```
+
+### Performance Considerations
+For applications with a high volume of repetitive queries, enabling caching can significantly reduce CPU overhead from SQL parsing. However, this comes with the tradeoff of increased memory usage in your cache store.
+
+For optimal results:
+- Consider enabling prepared statements as that will increase cache hit rate, and decrease cache growth rate
+  ```ruby
+  irb(main):001> (1..10).each { |i| User.where(id: i).exists? }
+  ```
+  _Without_ Prepared statements yields
+  ```
+  Cache miss for SQL: "SELECT 1 AS one FROM \"users\" WHERE \"users\".\"id\" = 1 LIMIT 1" with cache key: "arpa_9fa3972e45b27985eef6bfb4aa6269c12d43363c60e7aa67fb290ec317503710"
+  Cache miss for SQL: "SELECT 1 AS one FROM \"users\" WHERE \"users\".\"id\" = 2 LIMIT 1" with cache key: "arpa_0e51756270138442ad26087dffcfb53c21df4a430961f1ca3b4270183f4b066d"
+  Cache miss for SQL: "SELECT 1 AS one FROM \"users\" WHERE \"users\".\"id\" = 3 LIMIT 1" with cache key: "arpa_db5b8c323ee2c284ba96adc6e20b7ea1373ca07fa9b09969f5207d467bd895b6"
+  Cache miss for SQL: "SELECT 1 AS one FROM \"users\" WHERE \"users\".\"id\" = 4 LIMIT 1" with cache key: "arpa_129459a1ba342cad3dbd4458cd8eacda4ed641a94a5d1e6cc23604495e44b565"
+  Cache miss for SQL: "SELECT 1 AS one FROM \"users\" WHERE \"users\".\"id\" = 5 LIMIT 1" with cache key: "arpa_9817a74a6f162ea110ed14cef79e95aa78830ff19266cdce75668e0c9c5ccef7"
+  Cache miss for SQL: "SELECT 1 AS one FROM \"users\" WHERE \"users\".\"id\" = 6 LIMIT 1" with cache key: "arpa_610e37a117abc81ec1afebafa0f36b35547f57879536ca7535475075ea08d8ac"
+  Cache miss for SQL: "SELECT 1 AS one FROM \"users\" WHERE \"users\".\"id\" = 7 LIMIT 1" with cache key: "arpa_79e172d168c59c4e5befbe954861ff9076000f955719dd3cca1423b68fb5f319"
+  Cache miss for SQL: "SELECT 1 AS one FROM \"users\" WHERE \"users\".\"id\" = 8 LIMIT 1" with cache key: "arpa_fb29367bdae3e2a48d1fa63cca00fd611c0b6dc84c9f5fd985b9222d49f1f7d9"
+  Cache miss for SQL: "SELECT 1 AS one FROM \"users\" WHERE \"users\".\"id\" = 9 LIMIT 1" with cache key: "arpa_e6e9a73cf9066077893b21dde038e5a616bf25731aeb5a4a9cdb41b7d84d1ece"
+  Cache miss for SQL: "SELECT 1 AS one FROM \"users\" WHERE \"users\".\"id\" = 10 LIMIT 1" with cache key: "arpa_8c94cdae65b6d529364d6ae8cf68f0e827566d471d2bd1107d6bdca29345759e"
+  ```
+
+  _With_ prepared statments yields
+  ```
+  Cache miss for SQL: "SELECT 1 AS one FROM \"users\" WHERE \"users\".\"id\" = $1 LIMIT $2" with cache key: "arpa_3c2ef2bb9a5f370adf63eac3bc9994c054554798d31d247818049c8c21cb68be"
+  ```
+- Use a cache store with an appropriate size limit, and low latency (Memory Store has lower latency than Memcached or Redis)
+- Monitor cache hit/miss rates using the instrumentation events
+- Consider occasionally busting the cache during low-traffic periods to prevent stale entries, or setting a reasonable expiry window for cached values
 
 ### Thread safety
 
@@ -337,7 +441,173 @@ irb(main):051:0> test_multithread_queries
 
 ## Building your own proxy
 
-TODO: update instructions
+These instructions assume an active record adapter `ActiveRecord::ConnectionAdapters::FoobarAdapter` already exists and is properly loaded in your environment.
+
+To create a proxy adapter for an existing database `FoobarAdapter`, follow these steps under the lib folder of your rails application source code:
+
+1. **Create database tasks for your proxy adapter** to allow Rails tasks like `db:create` and `db:migrate` to work:
+
+   ```ruby
+   # lib/active_record/tasks/foobar_proxy_database_tasks.rb
+
+   require "active_record_proxy_adapters/database_tasks"
+
+   module ActiveRecord
+     module Tasks
+       class FoobarProxyDatabaseTasks < FoobarDatabaseTasks
+         include ActiveRecordProxyAdapters::DatabaseTasks
+       end
+     end
+   end
+
+   ActiveRecord::Tasks::DatabaseTasks.register_task(
+     /foobar_proxy/,
+     "ActiveRecord::Tasks::FoobarProxyDatabaseTasks"
+   )
+   ```
+
+2. **Create the proxy implementation class** that will handle the routing logic:
+
+   ```ruby
+   # lib/active_record_proxy_adapters/foobar_proxy.rb
+
+   require "active_record_proxy_adapters/primary_replica_proxy"
+
+   module ActiveRecordProxyAdapters
+     class FoobarProxy < PrimaryReplicaProxy
+       # Override or hijack extra methods here if you need custom behavior
+       # For most adapters, the default behavior works fine
+     end
+   end
+   ```
+
+3. **Create the proxy adapter class** that inherits from the underlying adapter, including the `Hijackable` concern. You need to require the database tasks source, the original adapter source, and the proxy source:
+
+   ```ruby
+   # lib/active_record/connection_adapters/foobar_proxy_adapter.rb
+
+   require "active_record/tasks/foobar_proxy_database_tasks"
+   require "active_record/connection_adapters/foobar_adapter"
+   require "active_record_proxy_adapters/active_record_context"
+   require "active_record_proxy_adapters/hijackable"
+   require "active_record_proxy_adapters/foobar_proxy"
+
+   module ActiveRecord
+     module ConnectionAdapters
+       class FoobarProxyAdapter < FoobarAdapter
+         include ActiveRecordProxyAdapters::Hijackable
+
+         ADAPTER_NAME = "FoobarProxy" # This is only an ActiveRecord convention and is not required to work
+
+         delegate_to_proxy(*ActiveRecordProxyAdapters::ActiveRecordContext.hijackable_methods)
+
+         def initialize(...)
+           @proxy = ActiveRecordProxyAdapters::FoobarProxy.new(self)
+
+           super
+         end
+
+         private
+
+         attr_reader :proxy
+       end
+     end
+   end
+
+   # This is only required for Rails 7.2 or greater.
+   if ActiveRecordProxyAdapters::ActiveRecordContext.active_record_v7_2_or_greater?
+     ActiveRecord::ConnectionAdapters.register(
+       "foobar_proxy",
+       "ActiveRecord::ConnectionAdapters::FoobarProxyAdapter",
+       "active_record/connection_adapters/foobar_proxy_adapter"
+     )
+   end
+
+   ActiveSupport.run_load_hooks(:active_record_foobarproxyadapter,
+                                ActiveRecord::ConnectionAdapters::FoobarProxyAdapter)
+   ```
+
+4. **Create connection handling module** for ActiveRecord integration:
+
+   ```ruby
+   # lib/active_record_proxy_adapters/connection_handling/foobar.rb
+
+   begin
+     require "active_record/connection_adapters/foobar_proxy_adapter"
+   rescue LoadError
+     # foobar not available
+     return
+   end
+
+   # This is only required for Rails 7.0 or earlier.
+   module ActiveRecordProxyAdapters
+     module Foobar
+       module ConnectionHandling
+         def foobar_proxy_adapter_class
+           ActiveRecord::ConnectionAdapters::FoobarProxyAdapter
+         end
+
+         def foobar_proxy_connection(config)
+            # copy and paste the contents of the original method foobar_connection here.
+            # If the contents contain a hardcoded FooBarAdapter.new instance,
+            # replace it with foobar_proxy_adapter_class.new
+         end
+       end
+     end
+   end
+
+   ActiveSupport.on_load(:active_record) do
+     ActiveRecord::Base.extend(ActiveRecordProxyAdapters::Foobar::ConnectionHandling)
+   end
+   ```
+
+5. **In your initializer, load the custom adapter** when the parent adapter is fully loaded:
+
+   ```ruby
+   # config/initializers/active_record_proxy_adapters.rb
+
+   # The parent adapter should have a load hook already. If not, you might need to monkey patch it.
+   ActiveSupport.on_load(:active_record_foobaradapter) do
+     require "active_record_proxy_adapters/connection_handling/foobar"
+   end
+   ```
+
+6. **Add a custom Zeitwerk inflection rule** if your adapter file paths do not follow Rails conventions. You can skip this if it does:
+
+   ```ruby
+   # config/initializers/active_record_proxy_adapters.rb
+
+   Rails.autoloaders.each do |autoloader|
+     autoloader.inflector.inflect(
+       "foobar_proxy_adapter" => "FoobarProxyAdapter"
+     )
+   end
+   ```
+
+7. **Configure your database.yml** to use your new adapter:
+
+   ```yaml
+   development:
+     primary:
+       adapter: foobar_proxy
+       # primary database configuration
+
+     primary_replica:
+       adapter: foobar
+       replica: true
+       # replica database configuration
+   ```
+
+8. **Set up your model to use both connections**:
+
+   ```ruby
+   class ApplicationRecord < ActiveRecord::Base
+     self.abstract_class = true
+     connects_to database: { writing: :primary, reading: :primary_replica }
+   end
+   ```
+
+For testing your adapter, follow the examples in the test suite by creating spec files that match the pattern used for the other adapters.
 
 ## Development
 

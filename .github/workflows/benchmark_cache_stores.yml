@@ -1,19 +1,6 @@
-name: Run Test Suite
+name: Run Cache store Benchmarks
 
-on:
-  pull_request:
-    branches:
-      - main
-      - v0.1
-      - v0.2
-      - v0.3
-      - v-0-4-stable
-      - v-0-5-stable
-  push:
-    branches:
-      - main
-    tags:
-      - '**'
+on: workflow_dispatch
 
 jobs:
   export_variables:
@@ -50,23 +37,7 @@ jobs:
         REPLICA_CMD_SHA=$(checksum docker/postgres_replica/cmd.sh)
         echo "REPLICA_SHA=$(echo \"${REPLICA_DOCKERFILE_SHA}-${REPLICA_CMD_SHA}\" | checksum)" >> $GITHUB_OUTPUT
 
-  rubocop:
-    runs-on: ubuntu-latest
-    needs: [export_variables]
-
-    container:
-      image: ${{ needs.export_variables.outputs.app_image }}-3.4.4
-      volumes:
-        - .:/app
-
-    steps:
-      - name: Checkout repository
-        uses: actions/checkout@v4
-
-      - name: Run RuboCop
-        run: bundle exec rubocop
-
-  rspec:
+  benchmark_cache_stores:
     needs: [export_variables]
     runs-on: ubuntu-latest
 
@@ -95,25 +66,23 @@ jobs:
         BUNDLE_GEMFILE: gemfiles/ar_${{ matrix.ar }}.gemfile
         RUBY_VERSION: ${{ matrix.ruby }}
         RAILS_VERSION: ${{ matrix.ar }}
+        REDIS_URL: "redis://redis:6379/0"
+        MEMCACHED_URL: "memcached:11211"
 
     strategy:
       matrix:
         ruby:
-          - 3.2.7
-          - 3.3.8
           - 3.4.4
         ar:
-          - "7.0"
-          - 7.1
-          - 7.2
           - "8.0"
-        include:
-          - ruby: 3.1.7
-            ar: "7.0"
-          - ruby: 3.1.7
-            ar: 7.1
+        cache_store:
+          - "null"
+          - memory
+          - file
+          - redis
+          - memcached
 
-    name: Ruby ${{ matrix.ruby }} / ActiveRecord ${{ matrix.ar }}
+    name: Benchmark ${{ matrix.cache_store }} cache.
     services:
       postgres_primary:
         image: ${{ needs.export_variables.outputs.primary_image }}
@@ -143,67 +112,22 @@ jobs:
           --health-timeout 5s
           --health-retries 5
 
-      mysql:
-        image: mariadb:11.4
-        env:
-          MARIADB_HOST: mysql
-          MARIADB_DATABASE: mysql
-          MARIADB_ROOT_PASSWORD: root
-        options: >-
-          --health-cmd "mariadb-admin ping"
-          --health-interval 10s
-          --health-timeout 5s
-          --health-retries 5
+      redis:
+        image: redis:latest
+        ports:
+          - "6379:6379"
+
+      memcached:
+        image: memcached:latest
+        ports:
+          - "11211:11211"
 
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: Run RSpec tests
-        run: |
-          bundle exec rake db:setup
-          bundle exec rspec --format progress
+      - name: Prepare databases
+        run: bundle exec appraisal ar-${{ matrix.ar }} rake db:setup:postgresql
 
-      - name: Upload Coverage Report
-        uses: actions/upload-artifact@v4
-        with:
-          name: coverage_ruby_${{ matrix.ruby }}_ar_${{ matrix.ar }}
-          path: coverage/
-          include-hidden-files: true
-          if-no-files-found: error
-
-  coverage_report:
-    needs:
-      - export_variables
-      - rspec
-    runs-on: ubuntu-latest
-    permissions: write-all
-
-    container:
-      image: ${{ needs.export_variables.outputs.app_image }}-3.4.4
-      volumes:
-        - .:/app
-
-    steps:
-      - name: Checkout Repository
-        uses: actions/checkout@v4
-
-      - name: Download Partial Coverage Resultsets
-        uses: actions/download-artifact@v4
-        with:
-          path: coverage/
-
-      - name: Collate Partial Coverage Resultsets
-        run: bundle exec rake coverage:report
-
-      - name: Upload Full Coverage Report
-        uses: actions/upload-artifact@v4
-        with:
-          name: coverage
-          path: coverage/
-          include-hidden-files: true
-          if-no-files-found: error
-
-      - uses: joshmfrankel/simplecov-check-action@main
-        with:
-          github_token: ${{ secrets.GITHUB_TOKEN }}
+      - name: Run Benchmark
+        run: bundle exec appraisal ar-${{ matrix.ar }} rake benchmark:cache_store:${{ matrix.cache_store }}:run[1000000] || true

@@ -12,6 +12,7 @@ module ActiveRecordProxyAdapters
       delegate_missing_to :new
     end
 
+    # rubocop:disable Naming/PredicateMethod
     NullConnectionHandlingContext = Class.new do
       def legacy_connection_handling
         false
@@ -21,6 +22,7 @@ module ActiveRecordProxyAdapters
         nil
       end
     end
+    # rubocop:enable Naming/PredicateMethod
 
     def connection_class_for(connection)
       return connection.connection_descriptor.name.constantize if active_record_v8_0_2_or_greater?
