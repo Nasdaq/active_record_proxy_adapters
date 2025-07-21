@@ -1,6 +1,7 @@
 ## [Unreleased]
 
 - Add support for configuring a Context API
+- Fix Hijackable methods for ActiveRecord 7.1 or greather [97c5dbc](https://github.com/Nasdaq/active_record_proxy_adapters/commit/97c5dbc46ad9ab19ecc21d16cdc79fcea4158378)
 
 ## [0.6.1, 0.5.1, 0.4.7] - 2025-06-27
 
