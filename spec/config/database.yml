@@ -61,3 +61,16 @@ test:
   trilogy_database_tasks:
     <<: *trilogy_primary
     database: trilogy_primary_replica_proxy_database_tasks_test
+
+  sqlite3_primary: &sqlite3_primary
+    adapter: sqlite3_proxy
+    database: db/test.sqlite3
+
+  sqlite3_replica:
+    adapter: sqlite3
+    database: db/test.sqlite3
+    replica: true
+
+  sqlite3_database_tasks:
+    <<: *sqlite3_primary
+    database: db/database_tasks_test.sqlite3

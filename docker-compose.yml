@@ -16,6 +16,7 @@ services:
     build:
       args:
         - RUBY_VERSION=${RUBY_VERSION:-3.3.6}
+        - DOCKER_REGISTRY=${DOCKER_REGISTRY:-docker.io}
     container_name: app
     image: active_record_proxy_adapters-app:${ENV_TAG:-latest}
     tty: true

@@ -1,8 +1,5 @@
 # frozen_string_literal: true
 
-require "active_record/tasks/postgresql_proxy_database_tasks"
-require "active_record/connection_adapters/postgresql_adapter"
-
 module ActiveRecordProxyAdapters
   # Defines mixins to delegate specific methods from the proxy to the adapter.
   module Hijackable
@@ -55,8 +52,6 @@ module ActiveRecordProxyAdapters
         "_unproxied"
       end
 
-      private
-
       def proxy_method_name_for(method_name)
         :"#{method_name}#{unproxied_method_suffix}"
       end
@@ -65,6 +60,10 @@ module ActiveRecordProxyAdapters
     included do
       def unproxied_method_suffix
         self.class.unproxied_method_suffix
+      end
+
+      def proxy_method_name_for(method_name)
+        self.class.proxy_method_name_for(method_name)
       end
     end
   end

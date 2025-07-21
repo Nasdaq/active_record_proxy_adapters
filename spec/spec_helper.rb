@@ -52,6 +52,7 @@ adapter_loaded = proc { |adapter| $stdout.puts "#{adapter} loaded" }
 ActiveSupport.on_load(:active_record_postgresqlproxyadapter, &adapter_loaded)
 ActiveSupport.on_load(:active_record_mysql2proxyadapter, &adapter_loaded)
 ActiveSupport.on_load(:active_record_trilogyproxyadapter, &adapter_loaded)
+ActiveSupport.on_load(:active_record_sqlite3proxyadapter, &adapter_loaded)
 
 require_relative "test_helper"
 

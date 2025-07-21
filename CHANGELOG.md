@@ -1,5 +1,20 @@
 ## [Unreleased]
 
+- Add SQLite3ProxyAdapter
+
+## [0.4.6, 0.3.6] - 2025-04-28
+
+- Fix loading of non PostgreSQL adapters https://github.com/Nasdaq/active_record_proxy_adapters/commit/1bf5ee9c6a21cb81d928e82b988c0a6e79ff878b
+
+## [0.4.5, 0.3.5, 0.2.6, 0.1.9] - 2025-03-31
+
+- Fix CTEs for a write being wrongly sent to the replica https://github.com/Nasdaq/active_record_proxy_adapters/commit/551204e7a9beec4ce920268bb95203498f49ec61
+
+## [0.4.4, 0.3.4, 0.2.5, 0.1.8] - 2025-03-19
+
+- Fix ActiveRecord 8 hijacked methods https://github.com/Nasdaq/active_record_proxy_adapters/commit/bef1de414dbe7c523c32d3f4bce1b266ab3286f1
+- Add Rails 8.0.2 compatibility https://github.com/Nasdaq/active_record_proxy_adapters/commit/f3b2d8c2da266cc5ab4d0e5fe5a8c04d589b661e
+
 ## [0.4.3, 0.3.3, 0.2.4, 0.1.7] - 2025-03-03
 
 - Call verify! on primary connection before running any query against it https://github.com/Nasdaq/active_record_proxy_adapters/commit/0c9bafe363280ce32db25e08756e7ff6395c5c91

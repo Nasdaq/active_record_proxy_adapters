@@ -1,0 +1,6 @@
+**/.git
+**/.github
+**/*.sqlite3
+**/*.sqlite3-*
+.irbrc
+.irb_history

@@ -12,6 +12,9 @@ module ActiveRecordProxyAdapters
         autoloader.inflector.inflect(
           "postgresql_proxy_adapter" => "PostgreSQLProxyAdapter"
         )
+        autoloader.inflector.inflect(
+          "sqlite3_proxy_adapter" => "SQLite3ProxyAdapter"
+        )
       end
     end
   end

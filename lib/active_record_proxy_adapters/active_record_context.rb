@@ -47,6 +47,10 @@ module ActiveRecordProxyAdapters
       active_record_version >= Gem::Version.new("7.0") && active_record_version < Gem::Version.new("8.0")
     end
 
+    def active_record_v7_0?
+      active_record_version >= Gem::Version.new("7.0") && active_record_version < Gem::Version.new("7.1")
+    end
+
     def active_record_v7_1_or_greater?
       active_record_version >= Gem::Version.new("7.1")
     end

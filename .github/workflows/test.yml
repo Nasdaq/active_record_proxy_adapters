@@ -7,6 +7,8 @@ on:
       - v0.1
       - v0.2
       - v0.3
+      - v-0-4-stable
+      - v-0-5-stable
   push:
     branches:
       - main
@@ -18,6 +20,7 @@ jobs:
     runs-on: ubuntu-latest
 
     outputs:
+      app_image: ${{ steps.compute_container_registry_name.outputs.CR_NAME }}/app:${{ steps.read_app_image_tag.outputs.APP_IMAGE_TAG }}
       primary_image: ${{ steps.compute_container_registry_name.outputs.CR_NAME }}/postgres_primary:${{ steps.calculate_primary_sha.outputs.PRIMARY_SHA }}
       replica_image: ${{ steps.compute_container_registry_name.outputs.CR_NAME }}/postgres_replica:${{ steps.calculate_replica_sha.outputs.REPLICA_SHA }}
 
@@ -28,6 +31,10 @@ jobs:
     - name: Compute container registry name
       id: compute_container_registry_name
       run: echo "CR_NAME=$(echo ghcr.io/${{ github.repository }} | tr '[:upper:]' '[:lower:]')" >> $GITHUB_OUTPUT
+
+    - name: Read app image tag
+      id: read_app_image_tag
+      run: echo "APP_IMAGE_TAG=$(cat .app-image-tag)" >> $GITHUB_OUTPUT
 
     - name: Calculate SHA256 for docker/postgres_primary.dockerfile
       id: calculate_primary_sha
@@ -45,20 +52,17 @@ jobs:
 
   rubocop:
     runs-on: ubuntu-latest
+    needs: [export_variables]
+
+    container:
+      image: ${{ needs.export_variables.outputs.app_image }}-3.4.1
+      volumes:
+        - .:/app
 
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: Set up Ruby
-        uses: ruby/setup-ruby@v1
-        with:
-          ruby-version: 3.1.6
-
-      - name: Install dependencies
-        run: |
-          gem install bundler
-          bundle install
       - name: Run RuboCop
         run: bundle exec rubocop
 
@@ -66,29 +70,53 @@ jobs:
     needs: [export_variables]
     runs-on: ubuntu-latest
 
+    container:
+      image: ${{ needs.export_variables.outputs.app_image }}-${{ matrix.ruby }}
+      volumes:
+        - .:/app
+      env:
+        RAILS_ENV: test
+        PG_PRIMARY_USER: postgres_primary_test
+        PG_PRIMARY_PASSWORD: postgres_primary_test
+        PG_PRIMARY_HOST: postgres_primary
+        PG_PRIMARY_PORT: 5432
+        PG_REPLICA_USER: postgres_primary_test
+        PG_REPLICA_PASSWORD: postgres_primary_test
+        PG_REPLICA_HOST: postgres_replica
+        PG_REPLICA_PORT: 5432
+        MYSQL_PRIMARY_USER: root
+        MYSQL_PRIMARY_PASSWORD: root
+        MYSQL_PRIMARY_HOST: mysql
+        MYSQL_PRIMARY_PORT: 3306
+        MYSQL_REPLICA_USER: root
+        MYSQL_REPLICA_PASSWORD: root
+        MYSQL_REPLICA_HOST: mysql
+        MYSQL_REPLICA_PORT: 3306
+        BUNDLE_GEMFILE: gemfiles/ar_${{ matrix.ar }}.gemfile
+        RUBY_VERSION: ${{ matrix.ruby }}
+        RAILS_VERSION: ${{ matrix.ar }}
+
     strategy:
       matrix:
         ruby:
           - 3.2.6
           - 3.3.6
           - 3.4.1
-        rails:
+        ar:
           - "7.0"
           - 7.1
           - 7.2
           - "8.0"
         include:
           - ruby: 3.1.6
-            rails: "7.0"
+            ar: "7.0"
           - ruby: 3.1.6
-            rails: 7.1
+            ar: 7.1
 
-    name: Ruby ${{ matrix.ruby }} / ActiveRecord ${{ matrix.rails }}
+    name: Ruby ${{ matrix.ruby }} / ActiveRecord ${{ matrix.ar }}
     services:
       postgres_primary:
         image: ${{ needs.export_variables.outputs.primary_image }}
-        ports:
-          - 5432:5432
         env:
           POSTGRES_DB: postgres_primary_test
           POSTGRES_USER: postgres_primary_test
@@ -103,8 +131,6 @@ jobs:
 
       postgres_replica:
         image: ${{ needs.export_variables.outputs.replica_image }}
-        ports:
-          - 5433:5432
         env:
           PGUSER: replicator
           PGPASSWORD: replicator
@@ -119,14 +145,10 @@ jobs:
 
       mysql:
         image: mariadb:11.4
-        ports:
-          - 3306:3306
         env:
-          MARIADB_HOST: 127.0.0.1
+          MARIADB_HOST: mysql
           MARIADB_DATABASE: mysql
-          MARIADB_ALLOW_EMPTY_ROOT_PASSWORD: true
-          MARIADB_USER: root
-          MARIADB_PASSWORD:
+          MARIADB_ROOT_PASSWORD: root
         options: >-
           --health-cmd "mariadb-admin ping"
           --health-interval 10s
@@ -137,59 +159,7 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: Set up Ruby
-        uses: ruby/setup-ruby@v1
-        with:
-          ruby-version: ${{ matrix.ruby }}
-
-
-      - name: Add PostgreSQL 17 repository
-        run: |
-          sudo sh -c 'echo "deb http://apt.postgresql.org/pub/repos/apt/ $(lsb_release -cs)-pgdg main" > /etc/apt/sources.list.d/pgdg.list'
-          wget --quiet -O - https://www.postgresql.org/media/keys/ACCC4CF8.asc | sudo apt-key add -
-
-      - name: Update apt-get index
-        run: sudo apt-get update
-
-      # Install PostgreSQL 17 client tools
-      - name: Install PostgreSQL 17 client
-        run: sudo apt-get install -y postgresql-client-17
-
-      - name: Install MySQL client
-        run: sudo apt-get install -y mariadb-client libmariadb-dev
-
-      - name: Install dependencies
-        env:
-          RAILS_VERSION: ${{ matrix.rails }}
-          BUNDLE_GEMFILE: gemfiles/rails_${{ matrix.rails }}.gemfile
-        run: |
-          gem install bundler
-          bundle install
-
-
       - name: Run RSpec tests
-        env:
-          RAILS_ENV: test
-          PG_PRIMARY_USER: postgres_primary_test
-          PG_PRIMARY_PASSWORD: postgres_primary_test
-          PG_PRIMARY_HOST: localhost
-          PG_PRIMARY_PORT: 5432
-          PG_REPLICA_USER: postgres_primary_test
-          PG_REPLICA_PASSWORD: postgres_primary_test
-          PG_REPLICA_HOST: localhost
-          PG_REPLICA_PORT: 5433
-          MYSQL_PRIMARY_USER: root
-          MYSQL_PRIMARY_PASSWORD:
-          MYSQL_PRIMARY_HOST: 127.0.0.1
-          MYSQL_PRIMARY_PORT: 3306
-          MYSQL_REPLICA_USER: root
-          MYSQL_REPLICA_PASSWORD:
-          MYSQL_REPLICA_HOST: 127.0.0.1
-          MYSQL_REPLICA_PORT: 3306
-          BUNDLE_GEMFILE: gemfiles/rails_${{ matrix.rails }}.gemfile
-          RUBY_VERSION: ${{ matrix.ruby }}
-          RAILS_VERSION: ${{ matrix.rails }}
-
         run: |
           bundle exec rake db:setup
           bundle exec rspec --format progress
@@ -197,29 +167,26 @@ jobs:
       - name: Upload Coverage Report
         uses: actions/upload-artifact@v4
         with:
-          name: coverage_ruby_${{ matrix.ruby }}_rails_${{ matrix.rails }}
+          name: coverage_ruby_${{ matrix.ruby }}_ar_${{ matrix.ar }}
           path: coverage/
           include-hidden-files: true
           if-no-files-found: error
 
   coverage_report:
-    needs: [rspec]
+    needs:
+      - export_variables
+      - rspec
     runs-on: ubuntu-latest
     permissions: write-all
+
+    container:
+      image: ${{ needs.export_variables.outputs.app_image }}-3.4.1
+      volumes:
+        - .:/app
 
     steps:
       - name: Checkout Repository
         uses: actions/checkout@v4
-
-      - name: Set up Ruby
-        uses: ruby/setup-ruby@v1
-        with:
-          ruby-version: 3.3.5
-
-      - name: Install Dependencies
-        run: |
-          gem install bundler
-          bundle install
 
       - name: Download Partial Coverage Resultsets
         uses: actions/download-artifact@v4

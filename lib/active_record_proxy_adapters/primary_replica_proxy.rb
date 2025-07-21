@@ -18,16 +18,28 @@ module ActiveRecordProxyAdapters
       /\A\s*select.+for update\Z/i, /select.+lock in share mode\Z/i,
       /\A\s*select.+(nextval|currval|lastval|get_lock|release_lock|pg_advisory_lock|pg_advisory_unlock)\(/i
     ].map(&:freeze).freeze
+
+    CTE_MATCHER = /\A\s*WITH\s+(?<CTE>\S+\s+AS\s+\(\s?[\s\S]*\))/i
     # All queries that match these patterns should be sent to the replica database
-    SQL_REPLICA_MATCHERS     = [/\A\s*(select|with\s[\s\S]*\)\s*select)\s/i].map(&:freeze).freeze
+    SQL_REPLICA_MATCHERS = [
+      /\A\s*(select)\s/i,
+      /#{CTE_MATCHER.source}\s*select/i
+    ].map(&:freeze).freeze
     # All queries that match these patterns should be sent to all databases
     SQL_ALL_MATCHERS         = [/\A\s*set\s/i].map(&:freeze).freeze
     # Local sets queries should not be sent to all datbases
     SQL_SKIP_ALL_MATCHERS    = [/\A\s*set\s+local\s/i].map(&:freeze).freeze
     # These patterns define which database statments are considered write statments, so we can shortly re-route all
     # requests to the primary database so the replica has time to replicate
-    WRITE_STATEMENT_MATCHERS = [/\ABEGIN/i, /\ACOMMIT/i, /INSERT\sINTO\s/i, /UPDATE\s/i, /DELETE\sFROM\s/i,
-                                /DROP\s/i].map(&:freeze).freeze
+    WRITE_STATEMENT_MATCHERS = [
+      /\ABEGIN/i,
+      /\ACOMMIT/i,
+      /\AROLLBACK/i,
+      /INSERT\s[\s\S]*INTO\s[\s\S]*/i,
+      /UPDATE\s[\s\S]*/i,
+      /DELETE\s[\s\S]*FROM\s[\s\S]*/i,
+      /DROP\s/i
+    ].map(&:freeze).freeze
 
     # Abstract adapter methods that should be proxied.
     hijack_method(*ActiveRecordContext.hijackable_methods)
@@ -171,14 +183,19 @@ module ActiveRecordProxyAdapters
     # @return [TrueClass] if there has been a write within the last {#proxy_delay} seconds
     # @return [TrueClass] if sql_string matches a write statement (i.e. INSERT, UPDATE, DELETE, SELECT FOR UPDATE)
     # @return [FalseClass] if sql_string matches a read statement (i.e. SELECT)
-    def need_primary?(sql_string)
-      return true if recent_write_to_primary?
-
+    def need_primary?(sql_string) # rubocop:disable Metrics/CyclomaticComplexity
+      return true  if recent_write_to_primary?
       return true  if in_transaction?
+      return true  if cte_for_write?(sql_string)
       return true  if SQL_PRIMARY_MATCHERS.any?(&match_sql?(sql_string))
       return false if SQL_REPLICA_MATCHERS.any?(&match_sql?(sql_string))
 
       true
+    end
+
+    def cte_for_write?(sql_string)
+      CTE_MATCHER.match?(sql_string) &&
+        WRITE_STATEMENT_MATCHERS.any?(&match_sql?(sql_string))
     end
 
     def need_all?(sql_string)
