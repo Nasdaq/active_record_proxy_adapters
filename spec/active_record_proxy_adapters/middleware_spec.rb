@@ -68,6 +68,16 @@ RSpec.describe ActiveRecordProxyAdapters::Middleware do
 
         expect(from_cookie_string(headers["Set-Cookie"])["value"]).to eq(cookie_hash)
       end
+
+      context "when cookie is malformed" do
+        it "initializes the cookie with an empty hash" do
+          env = { "HTTP_COOKIE" => "arpa_context=malformed_json" }
+
+          _, headers, = middleware.call(env)
+
+          expect(headers["Set-Cookie"]).to include("arpa_context=#{CGI.escape("{}")}")
+        end
+      end
     end
 
     context "when query is a write" do
@@ -81,6 +91,32 @@ RSpec.describe ActiveRecordProxyAdapters::Middleware do
         cookie_expiry = from_cookie_string(headers["Set-Cookie"])["expires"]
 
         expect(Time.parse(cookie_expiry)).to eq((2 + 5).seconds.from_now) # proxy delay + cookie buffer
+      end
+    end
+
+    context "when request comes from rails asset prefix" do
+      before do
+        rails       = double("Rails") # rubocop:disable RSpec/VerifiedDoubles
+        application = double
+        config      = double
+        assets      = double
+
+        allow(rails).to receive(:try).with(:application).and_return(application)
+        allow(application).to receive(:try).with(:config).and_return(config)
+        allow(config).to receive(:try).with(:assets).and_return(assets)
+        allow(assets).to receive(:try).with(:prefix).and_return("/assets")
+
+        stub_const("Rails", rails)
+      end
+
+      it "does not set current context" do
+        env = {
+          "PATH_INFO" => "/assets/application.js", "HTTP_COOKIE" => to_cookie_string({ "sqlite3_primary" => 0 })
+        }
+
+        middleware.call(env)
+
+        expect(middleware.send(:current_context).to_h).to eq({})
       end
     end
   end
