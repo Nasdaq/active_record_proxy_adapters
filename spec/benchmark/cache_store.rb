@@ -32,13 +32,14 @@ module CacheStoreBenchmark
     VALUES ('John Doe', 'john.doe@gmail.com')
   SQL5
 
-  class User < TestHelper::PostgreSQLRecord
+  class PostgreSQLUser < TestHelper::PostgreSQLRecord
+    self.table_name = "users"
   end
 
   def run(cache_store, iterations: nil) # rubocop:disable Metrics/AbcSize,Metrics/MethodLength
     ActiveRecordProxyAdapters.configure { |config| config.cache.store = cache_store }
 
-    connection = User.connection
+    connection = PostgreSQLUser.connection
     proxy      = connection.send(:proxy)
 
     ActiveRecord::Base.logger ||= Logger.new($stdout)
