@@ -5,6 +5,7 @@ require "simplecov_json_formatter"
 require "active_support/core_ext/object/blank"
 require "simple_cov_groups"
 require "active_record"
+require "active_support/testing/time_helpers"
 
 simple_cov_formatters = [SimpleCov::Formatter::JSONFormatter]
 simple_cov_formatters << SimpleCov::Formatter::HTMLFormatter unless ENV["CI"]
@@ -61,6 +62,7 @@ ActiveRecord::Base.logger = Logger.new(Tempfile.create)
 ENV["RAILS_ENV"] ||= TestHelper.env_name
 
 RSpec.configure do |config|
+  config.include(ActiveSupport::Testing::TimeHelpers)
   # Enable flags like --only-failures and --next-failure
   config.example_status_persistence_file_path = ".rspec_status"
 
