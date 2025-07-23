@@ -7,12 +7,8 @@ module ActiveRecordProxyAdapters
     include SynchronizableConfiguration
 
     # Sets the cache store to use for caching SQL statements.
-    #
-    # @param store [ActiveSupport::Cache::Store] The cache store to use for caching SQL statements.
-    #   Defaults to ActiveSupport::Cache::NullStore, which does not cache anything.
-    #   Thread safe.
+    #   Defaults to {ActiveSupport::Cache::NullStore}, which does not cache anything.
     # @return [ActiveSupport::Cache::Store] The cache store to use for caching SQL statements.
-    #   Defaults to ActiveSupport::Cache::NullStore, which does not cache anything.
     #   Thread safe.
     attr_reader :store
 
