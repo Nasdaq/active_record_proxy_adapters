@@ -7,8 +7,6 @@ module ActiveRecordProxyAdapters
     included do
       private
 
-      attr_reader :lock
-
       def synchronize_update(attribute, from:, to:, &block)
         ActiveSupport::Notifications.instrument(
           "active_record_proxy_adapters.configuration_update",

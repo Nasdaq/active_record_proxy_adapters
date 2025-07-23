@@ -10,17 +10,35 @@ module ActiveRecordProxyAdapters
     # Provides helpers to access to reduce boilerplate while retrieving configuration properties.
     module Configuration
       # Helper to retrieve the proxy delay from the configuration stored in
-      # {ActiveRecordProxyAdapters::Configuration#proxy_delay}.
+      # {ActiveRecordProxyAdapters::DatabaseConfiguration#log_subscriber_primary_prefix}.
+      # @param database_name [Symbol, String] The name of the database to retrieve the prefix.
+      # @return [Proc]
+      def log_subscriber_primary_prefix(database_name)
+        database_config(database_name).log_subscriber_primary_prefix
+      end
+
+      # Helper to retrieve the proxy delay from the configuration stored in
+      # {ActiveRecordProxyAdapters::DatabaseConfiguration#log_subscriber_replica_prefix}.
+      # @param database_name [Symbol, String] The name of the database to retrieve the prefix.
+      # @return [Proc]
+      def log_subscriber_replica_prefix(database_name)
+        database_config(database_name).log_subscriber_replica_prefix
+      end
+
+      # Helper to retrieve the proxy delay from the configuration stored in
+      # {ActiveRecordProxyAdapters::DatabaseConfiguration#proxy_delay}.
+      # @param database_name [Symbol, String] The name of the database to retrieve the proxy delay for.
       # @return [ActiveSupport::Duration]
-      def proxy_delay
-        proxy_config.proxy_delay
+      def proxy_delay(database_name)
+        database_config(database_name).proxy_delay
       end
 
       # Helper to retrieve the checkout timeout from the configuration stored in
-      # {ActiveRecordProxyAdapters::Configuration#checkout_timeout}.
+      # {ActiveRecordProxyAdapters::DatabaseConfiguration#checkout_timeout}.
+      # @param database_name [Symbol, String] The name of the database to retrieve the checkout timeout for.
       # @return [ActiveSupport::Duration]
-      def checkout_timeout
-        proxy_config.checkout_timeout
+      def checkout_timeout(database_name)
+        database_config(database_name).checkout_timeout
       end
 
       # Helper to retrieve the context store class from the configuration stored in
@@ -48,6 +66,11 @@ module ActiveRecordProxyAdapters
       # @!visibility private
       def cache_config
         proxy_config.cache
+      end
+
+      # @!visibility private
+      def database_config(database_name)
+        proxy_config.database(database_name)
       end
 
       # @!visibility private

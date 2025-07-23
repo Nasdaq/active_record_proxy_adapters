@@ -41,7 +41,8 @@ RSpec.describe ActiveRecordProxyAdapters::Middleware do
       stub_const("User", user_model)
 
       ActiveRecordProxyAdapters.configure do |config|
-        config.proxy_delay = 2.seconds
+        config.proxy_delay      = 2.seconds
+        config.checkout_timeout = 2.seconds
       end
 
       travel_to(Time.utc(2025))

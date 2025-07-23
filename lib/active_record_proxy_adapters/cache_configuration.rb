@@ -51,5 +51,9 @@ module ActiveRecordProxyAdapters
     def bust
       store.delete_matched("#{key_prefix}*")
     end
+
+    private
+
+    attr_reader :lock
   end
 end

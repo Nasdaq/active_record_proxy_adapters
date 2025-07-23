@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-RSpec.describe ActiveRecordProxyAdapters::Configuration do
+RSpec.describe ActiveRecordProxyAdapters::DatabaseConfiguration do
   describe ".PROXY_DELAY" do
     subject { described_class::PROXY_DELAY }
 

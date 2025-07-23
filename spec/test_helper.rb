@@ -254,6 +254,11 @@ module TestHelper # rubocop:disable Metrics/ModuleLength
     load_mysql2_configuration
     load_trilogy_configuration
     load_sqlite3_configuration
+
+    ActiveRecordProxyAdapters.configure do |config|
+      config.log_subscriber_primary_prefix = "Primary"
+      config.log_subscriber_replica_prefix = "Replica"
+    end
   end
 
   def load_postgresql_configuration
