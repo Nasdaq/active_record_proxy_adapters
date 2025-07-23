@@ -34,7 +34,7 @@ module ActiveRecordProxyAdapters
       cookie           = DEFAULT_COOKIE_OPTIONS.merge(options)
       max_value        = cookie_hash.values.max || 0
       then_time        = Time.at(max_value).utc
-      expires          = then_time + proxy_delay + COOKIE_BUFFER
+      expires          = then_time + proxy_delay(cookie_hash.key(max_value)) + COOKIE_BUFFER
       max_age          = expires - then_time
       cookie[:expires] = expires
       cookie[:max_age] = max_age

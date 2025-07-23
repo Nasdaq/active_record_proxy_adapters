@@ -181,7 +181,7 @@ module ActiveRecordProxyAdapters
     end
 
     def checkout_replica_connection
-      replica_pool.checkout(checkout_timeout)
+      replica_pool.checkout(checkout_timeout(primary_connection_name))
     # rescue NoDatabaseError to avoid crashing when running db:create rake task
     # rescue ConnectionNotEstablished to handle connectivity issues in the replica
     # (for example, replication delay)
@@ -189,7 +189,6 @@ module ActiveRecordProxyAdapters
       primary_connection
     end
 
-    # @return [TrueClass] if there has been a write within the last {#proxy_delay} seconds
     # @return [TrueClass] if sql_string matches a write statement (i.e. INSERT, UPDATE, DELETE, SELECT FOR UPDATE)
     # @return [FalseClass] if sql_string matches a read statement (i.e. SELECT)
     def need_primary?(sql_string)

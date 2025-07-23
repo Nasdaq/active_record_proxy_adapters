@@ -16,19 +16,19 @@ module ActiveRecordProxyAdapters
     end
 
     def recent_write_to_primary?(connection_name)
-      now - self[connection_name] < proxy_delay
+      now - self[connection_name.to_s] < proxy_delay(connection_name)
     end
 
     def update_for(connection_name)
-      self[connection_name] = now
+      self[connection_name.to_s] = now
     end
 
     def [](connection_name)
-      timestamp_registry[connection_name] || 0
+      timestamp_registry[connection_name.to_s] || 0
     end
 
     def []=(connection_name, timestamp)
-      timestamp_registry[connection_name] = timestamp
+      timestamp_registry[connection_name.to_s] = timestamp
     end
 
     def to_h

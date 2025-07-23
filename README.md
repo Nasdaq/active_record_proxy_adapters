@@ -150,6 +150,25 @@ ActiveRecordProxyAdapters.configure do |config|
 end
 ```
 
+### Configuring multiple connections
+General settings are automatically applied to the `primary` database by default.
+
+If your application has multiple databases that need separate proxy settings, you can use the `database` block for individual database settings.
+
+```ruby
+ActiveRecordProxyAdapters.configure do |config|
+  config.database :primary do |primary_config|
+    primary_config.proxy_delay = 2.seconds
+  end
+
+  config.database :secondary do |secondary_config|
+     secondary_config.proxy_delay = 5.seconds
+  end
+end
+```
+
+With those settings, any model that `connects_to database: { writing: :primary }` will have a 2-second delay, and any model that `connects_to database: { writing: :secondary }` will have a 5-second delay.
+
 ## Logging
 
 ```ruby
@@ -157,8 +176,8 @@ end
 require "active_record_proxy_adapters/log_subscriber"
 
 ActiveRecordProxyAdapters.configure do |config|
-  config.log_subscriber_primary_prefix = "My primary tag" # defaults to "#{adapter_name} Primary", i.e "PostgreSQL Primary"
-  config.log_subscriber_replica_prefix = "My replica tag" # defaults to "#{adapter_name} Replica", i.e "PostgreSQL Replica"
+  config.log_subscriber_primary_prefix = "My primary tag" # defaults to ActiveRecord configuration name", i.e "primary"
+  config.log_subscriber_replica_prefix = "My replica tag" # defaults to ActiveRecord configuration name", i.e "primary_replica"
 end
 
 # You may want to remove duplicate logs
