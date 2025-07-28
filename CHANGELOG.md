@@ -6,6 +6,7 @@
 - Move loading of TrilogyProxy to its own Railtie
 - Move loading of SQLite3Proxy to its own Railtie
 - Fix connection stickiness for inserts with Trilogy
+- Drop support for ActiveRecord 7.0.x
 
 ## [0.8.0] - 2025-08-28
 
