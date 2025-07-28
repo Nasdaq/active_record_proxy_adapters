@@ -3,6 +3,7 @@
 - Add support for configuring a Context API
 - Add Rack middleware to store context in session
 - Allow separate configuration blocks per database name
+- Drop support for ActiveRecord 7.0.x
 
 ## [0.6.2, 0.5.2, 0.4.8] - 2025-07-21
 
