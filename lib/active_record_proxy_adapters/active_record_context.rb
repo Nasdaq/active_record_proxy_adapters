@@ -5,36 +5,16 @@ module ActiveRecordProxyAdapters
   # versions of rails.
   class ActiveRecordContext
     delegate :reading_role, :reading_role=, :writing_role, :writing_role=, to: :ActiveRecord
-    delegate :legacy_connection_handling, :legacy_connection_handling=, to: :connection_handling_context
     delegate :version, to: :ActiveRecord, prefix: :active_record
 
     class << self
       delegate_missing_to :new
     end
 
-    # rubocop:disable Naming/PredicateMethod
-    NullConnectionHandlingContext = Class.new do
-      def legacy_connection_handling
-        false
-      end
-
-      def legacy_connection_handling=(_value)
-        nil
-      end
-    end
-    # rubocop:enable Naming/PredicateMethod
-
     def connection_class_for(connection)
       return connection.connection_descriptor.name.constantize if active_record_v8_0_2_or_greater?
 
       connection.connection_class || ActiveRecord::Base
-    end
-
-    def connection_handling_context
-      # This config option has been removed in Rails 7.1+
-      return NullConnectionHandlingContext.new if active_record_v7_1_or_greater?
-
-      ActiveRecord
     end
 
     def hijackable_methods
@@ -46,11 +26,7 @@ module ActiveRecordProxyAdapters
     end
 
     def active_record_v7?
-      active_record_version >= Gem::Version.new("7.0") && active_record_version < Gem::Version.new("8.0")
-    end
-
-    def active_record_v7_0?
-      active_record_version >= Gem::Version.new("7.0") && active_record_version < Gem::Version.new("7.1")
+      active_record_version >= Gem::Version.new("7.1") && active_record_version < Gem::Version.new("8.0")
     end
 
     def active_record_v7_1_or_greater?

@@ -10,7 +10,7 @@ RSpec.shared_examples_for "a transaction block proxy bypass" do
   end
 
   let(:transaction_method_name) do
-    TestHelper.active_record_context.active_record_v7_0? ? :execute_unproxied : :internal_execute
+    :internal_execute
   end
 
   before do
