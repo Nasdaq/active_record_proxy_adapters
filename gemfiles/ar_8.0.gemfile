@@ -4,7 +4,7 @@ source "https://rubygems.org"
 
 gem "dalli"
 gem "mysql2", "~> 0.5"
-gem "pg", "~> 1.5"
+gem "pg", "~> 1.6"
 gem "rake", "~> 13.3"
 gem "redis", "~> 5.4.1"
 gem "trilogy", "~> 2.9"
