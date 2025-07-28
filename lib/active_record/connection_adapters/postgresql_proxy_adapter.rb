@@ -13,12 +13,6 @@ module ActiveRecord
     class PostgreSQLProxyAdapter < PostgreSQLAdapter
       include ActiveRecordProxyAdapters::Hijackable
 
-      if ActiveRecordProxyAdapters::ActiveRecordContext.active_record_v7_0?
-        require "active_record_proxy_adapters/transactionable_proxy_a_r_70"
-
-        include ActiveRecordProxyAdapters::TransactionableProxyAR70
-      end
-
       ADAPTER_NAME = "PostgreSQLProxy"
 
       delegate_to_proxy(*ActiveRecordProxyAdapters::ActiveRecordContext.hijackable_methods)

@@ -558,7 +558,7 @@ To create a proxy adapter for an existing database `FoobarAdapter`, follow these
      return
    end
 
-   # This is only required for Rails 7.0 or earlier.
+   # This is only required for Rails 7.1 or earlier.
    module ActiveRecordProxyAdapters
      module Foobar
        module ConnectionHandling

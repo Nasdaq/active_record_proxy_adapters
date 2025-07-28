@@ -29,19 +29,6 @@ SimpleCov.start do
   command_name "Ruby-#{ruby_version}-AR-#{ar_version}"
 end
 
-trilogy_loaded = begin
-  require "activerecord-trilogy-adapter"
-rescue LoadError
-  false
-end
-
-if trilogy_loaded
-  ActiveSupport.on_load(:active_record) do
-    require "trilogy_adapter/connection"
-    ActiveRecord::Base.extend TrilogyAdapter::Connection
-  end
-end
-
 require "active_record_proxy_adapters"
 
 require "active_record_proxy_adapters/connection_handling"

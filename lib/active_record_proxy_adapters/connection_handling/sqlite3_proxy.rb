@@ -24,7 +24,6 @@ module ActiveRecordProxyAdapters
 
       def connection_factory_mapping
         {
-          "7.0" => ->(config) { sqlite3_proxy_connection_ar_v70(config) },
           "7.1" => ->(config) { sqlite3_proxy_connection_ar_v71(config) }
         }
       end
