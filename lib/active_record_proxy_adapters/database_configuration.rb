@@ -9,6 +9,7 @@ module ActiveRecordProxyAdapters
   # Provides a global configuration object to configure how the proxy should behave.
   class DatabaseConfiguration
     include SynchronizableConfiguration
+
     PROXY_DELAY      = 2.seconds.freeze
     CHECKOUT_TIMEOUT = 2.seconds.freeze
     DEFAULT_PREFIX   = proc do |event|
