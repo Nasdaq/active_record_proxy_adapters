@@ -1,8 +1,10 @@
 ## [Unreleased]
 
-- Add support for configuring a Context API
-- Add Rack middleware to store context in session
-- Allow separate configuration blocks per database name
+## [0.7.0] - 2025-07-30
+
+- Add support for configuring a Context API [1865e65](https://github.com/Nasdaq/active_record_proxy_adapters/commit/1865e65dff9f5e53b36e0795a29c32400315a266)
+- Add Rack middleware to store context in session [1bf2b60](https://github.com/Nasdaq/active_record_proxy_adapters/commit/1bf2b6099cbec9b4a362e3d0cb7deb8d2ca5d804)
+- Allow separate configuration blocks per database name [4325b0](https://github.com/Nasdaq/active_record_proxy_adapters/commit/4325b09c68fa4f00243a97e790d2d21ef92fc521)
 
 ## [0.6.2, 0.5.2, 0.4.8] - 2025-07-21
 
