@@ -1,15 +1,15 @@
-/.bundle/
-/.yardoc
-/_yardoc/
-/coverage/
-/doc/
-/pkg/
-/spec/reports/
-/tmp/
-.env
-gemfiles/*.lock
-db/*.sqlite3
-db/*.sqlite3-*
+**/.bundle/
+**/.yardoc
+**/_yardoc/
+**/coverage/
+**/doc/
+**/pkg/
+**/spec/reports/
+**/tmp/
+**/.env
+**/gemfiles/*.lock
+*/db/*.sqlite3
+*/db/*.sqlite3-*
 # rspec failure tracking
 .rspec_status
 .irb_history

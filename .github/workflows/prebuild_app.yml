@@ -3,7 +3,7 @@ name: Prebuild App Image
 on:
   pull_request:
     paths:
-      - '.app-image-tag'
+      - 'active_record_proxy_adapters/.app-image-tag'
   push:
     branches:
       - main
@@ -15,7 +15,7 @@ on:
       - v-0-6-stable
       - v-0-7-stable
     paths:
-      - '.app-image-tag'
+      - 'active_record_proxy_adapters/.app-image-tag'
 jobs:
   export_variables:
     runs-on: ubuntu-latest
@@ -33,11 +33,15 @@ jobs:
 
     - name: Read image tag for app
       id: read_image_tag
+      working-directory: ./active_record_proxy_adapters
       run: echo "APP_IMAGE_TAG=$(head -n1 .app-image-tag)" >> $GITHUB_OUTPUT
 
   prebuild_app:
     needs: export_variables
     runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: ./active_record_proxy_adapters
 
     strategy:
       matrix:

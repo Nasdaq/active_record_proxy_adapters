@@ -36,6 +36,7 @@ jobs:
 
     - name: Read app image tag
       id: read_app_image_tag
+      working-directory: ./active_record_proxy_adapters
       run: echo "APP_IMAGE_TAG=$(head -n1 .app-image-tag)" >> $GITHUB_OUTPUT
 
     - name: Calculate SHA256 for docker/postgres_primary.dockerfile
@@ -59,7 +60,7 @@ jobs:
     container:
       image: ${{ needs.export_variables.outputs.app_image }}-3.4.5
       volumes:
-        - .:/app
+        - ./active_record_proxy_adapters:/app
 
     steps:
       - name: Checkout repository
@@ -75,7 +76,7 @@ jobs:
     container:
       image: ${{ needs.export_variables.outputs.app_image }}-${{ matrix.ruby }}
       volumes:
-        - .:/app
+        - ./active_record_proxy_adapters:/app
       env:
         RAILS_ENV: test
         PG_PRIMARY_USER: postgres_primary_test
@@ -184,7 +185,7 @@ jobs:
     container:
       image: ${{ needs.export_variables.outputs.app_image }}-3.4.5
       volumes:
-        - .:/app
+        - ./active_record_proxy_adapters:/app
 
     steps:
       - name: Checkout Repository

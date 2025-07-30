@@ -1,7 +1,7 @@
 version: 2
 updates:
   - package-ecosystem: bundler
-    directory: "/"
+    directory: "/active_record_proxy_adapters"
     schedule:
       interval: weekly
       time: "08:00"
