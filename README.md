@@ -6,7 +6,7 @@ A set of ActiveRecord adapters that leverage Rails native multiple database setu
 
 ## Why do I need this?
 
-Maybe you don't. Rails already provides, since version 6.0, a [Rack middleware](https://guides.rubyonrails.org/active_record_multiple_databases.html#activating-automatic-role-switching) that switches between primary and replica automatically based on the HTTP request (`GET` and `HEAD` requests go the primary, everything else goes to the replica).
+Maybe you don't. Rails already provides, since version 6.0, a [Rack middleware](https://guides.rubyonrails.org/active_record_multiple_databases.html#activating-automatic-role-switching) that switches between primary and replica automatically based on the HTTP request (`GET` and `HEAD` requests go the replica, everything else goes to the primary).
 
 The caveat is: you are not allowed do any writes in any `GET` or `HEAD` requests (including controller callbacks).
 Which means, for example, your `devise` callbacks that save user metadata will now crash.
