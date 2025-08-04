@@ -4,7 +4,6 @@ FROM $DOCKER_REGISTRY/ruby:$RUBY_VERSION-alpine
 ENV RAILS_ENV=test
 
 RUN apk --update add \
-    gcompat \
     build-base \
     git \
     postgresql-dev \
