@@ -59,7 +59,7 @@ GEM
     pg (1.6.0)
     pg (1.6.0-aarch64-linux)
     prism (1.4.0)
-    puma (6.6.0)
+    puma (6.6.1)
       nio4r (~> 2.0)
     racc (1.8.1)
     rack (2.2.17)
