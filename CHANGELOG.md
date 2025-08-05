@@ -1,6 +1,8 @@
 ## [Unreleased]
 
-- Fix logic to retrieve log subscriber prefix for replicas
+## [0.7.1] - 2025-08-05
+
+- Fix logic to retrieve log subscriber prefix for replicas [77d2887](https://github.com/Nasdaq/active_record_proxy_adapters/commit/77d2887069a975ec03199168ac57434294273fe2)
 
 ## [0.7.0] - 2025-07-30
 
