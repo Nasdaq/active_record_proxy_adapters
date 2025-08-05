@@ -4,7 +4,18 @@ on:
   pull_request:
     paths:
       - '.app-image-tag'
-
+  push:
+    branches:
+      - main
+      - v0.1
+      - v0.2
+      - v0.3
+      - v-0-4-stable
+      - v-0-5-stable
+      - v-0-6-stable
+      - v-0-7-stable
+    paths:
+      - '.app-image-tag'
 jobs:
   export_variables:
     runs-on: ubuntu-latest
