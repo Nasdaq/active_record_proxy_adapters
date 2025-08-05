@@ -25,18 +25,14 @@ module ActiveRecordProxyAdapters
     #   Defaults to CHECKOUT_TIMEOUT. Thread safe.
     attr_reader :checkout_timeout
 
-    # @return [Proc] Prefix for the log subscriber when the primary database is used. Thread safe.
-    attr_reader :log_subscriber_primary_prefix
-
-    # @return [Proc] Prefix for the log subscriber when the replica database is used. Thread safe.
-    attr_reader :log_subscriber_replica_prefix
+    # @return [Proc] Prefix for the log subscriber when the database is used. Thread safe.
+    attr_reader :log_subscriber_prefix
 
     def initialize
-      @lock                              = Monitor.new
-      self.proxy_delay                   = PROXY_DELAY
-      self.checkout_timeout              = CHECKOUT_TIMEOUT
-      self.log_subscriber_primary_prefix = DEFAULT_PREFIX
-      self.log_subscriber_replica_prefix = DEFAULT_PREFIX
+      @lock                      = Monitor.new
+      self.proxy_delay           = PROXY_DELAY
+      self.checkout_timeout      = CHECKOUT_TIMEOUT
+      self.log_subscriber_prefix = DEFAULT_PREFIX
     end
 
     def proxy_delay=(proxy_delay)
@@ -51,19 +47,11 @@ module ActiveRecordProxyAdapters
       end
     end
 
-    def log_subscriber_primary_prefix=(prefix)
+    def log_subscriber_prefix=(prefix)
       prefix_proc = prefix.is_a?(Proc) ? prefix : proc { prefix.to_s }
 
-      synchronize_update(:log_subscriber_primary_prefix, from: @log_subscriber_primary_prefix, to: prefix_proc) do
-        @log_subscriber_primary_prefix = prefix_proc
-      end
-    end
-
-    def log_subscriber_replica_prefix=(prefix)
-      prefix_proc = prefix.is_a?(Proc) ? prefix : proc { prefix.to_s }
-
-      synchronize_update(:log_subscriber_replica_prefix, from: @log_subscriber_replica_prefix, to: prefix_proc) do
-        @log_subscriber_replica_prefix = prefix_proc
+      synchronize_update(:log_subscriber_prefix, from: @log_subscriber_prefix, to: prefix_proc) do
+        @log_subscriber_prefix = prefix_proc
       end
     end
 

@@ -10,19 +10,11 @@ module ActiveRecordProxyAdapters
     # Provides helpers to access to reduce boilerplate while retrieving configuration properties.
     module Configuration
       # Helper to retrieve the proxy delay from the configuration stored in
-      # {ActiveRecordProxyAdapters::DatabaseConfiguration#log_subscriber_primary_prefix}.
+      # {ActiveRecordProxyAdapters::DatabaseConfiguration#log_subscriber_prefix}.
       # @param database_name [Symbol, String] The name of the database to retrieve the prefix.
       # @return [Proc]
-      def log_subscriber_primary_prefix(database_name)
-        database_config(database_name).log_subscriber_primary_prefix
-      end
-
-      # Helper to retrieve the proxy delay from the configuration stored in
-      # {ActiveRecordProxyAdapters::DatabaseConfiguration#log_subscriber_replica_prefix}.
-      # @param database_name [Symbol, String] The name of the database to retrieve the prefix.
-      # @return [Proc]
-      def log_subscriber_replica_prefix(database_name)
-        database_config(database_name).log_subscriber_replica_prefix
+      def log_subscriber_prefix(database_name)
+        database_config(database_name).log_subscriber_prefix
       end
 
       # Helper to retrieve the proxy delay from the configuration stored in
