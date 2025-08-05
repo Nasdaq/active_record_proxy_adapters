@@ -1,5 +1,7 @@
 ## [Unreleased]
 
+- Fix logic to retrieve log subscriber prefix for replicas
+
 ## [0.7.0] - 2025-07-30
 
 - Add support for configuring a Context API [1865e65](https://github.com/Nasdaq/active_record_proxy_adapters/commit/1865e65dff9f5e53b36e0795a29c32400315a266)

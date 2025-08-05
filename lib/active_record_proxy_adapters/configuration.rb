@@ -11,7 +11,8 @@ module ActiveRecordProxyAdapters
   class Configuration
     include SynchronizableConfiguration
 
-    DEFAULT_DATABASE_NAME = :primary
+    DEFAULT_DATABASE_NAME         = :primary
+    DEFAULT_REPLICA_DATABASE_NAME = :primary_replica
 
     # @return [Class] The context that is used to store the current request's state.
     attr_reader :context_store
@@ -25,19 +26,19 @@ module ActiveRecordProxyAdapters
     end
 
     def log_subscriber_primary_prefix=(prefix)
-      default_database_config.log_subscriber_primary_prefix = prefix
+      default_database_config.log_subscriber_prefix = prefix
     end
 
     def log_subscriber_primary_prefix
-      default_database_config.log_subscriber_primary_prefix
+      default_database_config.log_subscriber_prefix
     end
 
     def log_subscriber_replica_prefix=(prefix)
-      default_database_config.log_subscriber_replica_prefix = prefix
+      default_replica_config.log_subscriber_prefix = prefix
     end
 
     def log_subscriber_replica_prefix
-      default_database_config.log_subscriber_replica_prefix
+      default_replica_config.log_subscriber_prefix
     end
 
     def proxy_delay
@@ -73,6 +74,10 @@ module ActiveRecordProxyAdapters
 
     def default_database_config
       database(DEFAULT_DATABASE_NAME)
+    end
+
+    def default_replica_config
+      database(DEFAULT_REPLICA_DATABASE_NAME)
     end
 
     def cache_configuration=(cache_configuration)

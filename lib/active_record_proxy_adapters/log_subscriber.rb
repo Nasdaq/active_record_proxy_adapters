@@ -25,11 +25,7 @@ module ActiveRecordProxyAdapters
       db_config       = connection.pool.try(:db_config) || NullConfig.new # AR 7.0.x does not support "NullConfig"
       connection_name = db_config.name
 
-      prefix = if db_config.replica?
-                 log_subscriber_replica_prefix(connection_name)
-               else
-                 log_subscriber_primary_prefix(connection_name)
-               end
+      prefix = log_subscriber_prefix(connection_name)
 
       "[#{prefix.call(event)}]"
     end
