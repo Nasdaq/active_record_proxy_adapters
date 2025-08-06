@@ -22,22 +22,12 @@ module ActiveRecordProxyAdapters
 
     def database_instance_prefix_for(event)
       connection      = event.payload[:connection]
-      db_config       = connection.pool.try(:db_config) || NullConfig.new # AR 7.0.x does not support "NullConfig"
+      db_config       = connection.pool.try(:db_config)
       connection_name = db_config.name
 
       prefix = log_subscriber_prefix(connection_name)
 
       "[#{prefix.call(event)}]"
-    end
-
-    class NullConfig # rubocop:disable Style/Documentation
-      def method_missing(...)
-        nil
-      end
-
-      def respond_to_missing?(*)
-        true
-      end
     end
   end
 end
