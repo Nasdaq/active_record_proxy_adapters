@@ -35,7 +35,9 @@ RSpec.shared_examples "a MySQL proxy" do
   it_behaves_like "a transaction block proxy bypass"
 
   describe "#execute" do
-    it_behaves_like "a proxied method", :execute
+    it_behaves_like "a proxied method", :execute do
+      it_behaves_like "a SQL pattern matching timeout"
+    end
   end
 
   describe "#exec_query" do

@@ -181,7 +181,7 @@ module ActiveRecordProxyAdapters
     end
 
     def checkout_replica_connection
-      replica_pool.checkout(checkout_timeout(primary_connection_name))
+      replica_pool.checkout(proxy_checkout_timeout)
     # rescue NoDatabaseError to avoid crashing when running db:create rake task
     # rescue ConnectionNotEstablished to handle connectivity issues in the replica
     # (for example, replication delay)
@@ -215,7 +215,15 @@ module ActiveRecordProxyAdapters
     end
 
     def match_sql?(sql_string)
-      proc { |matcher| matcher.match?(sql_string) }
+      proc do |matcher|
+        regex_with_timeout = Regexp.new(matcher.source, matcher.options, timeout: proxy_checkout_timeout.to_f)
+
+        regex_with_timeout.match?(sql_string)
+      rescue Regexp::TimeoutError
+        regexp_timeout_strategy.call(sql_string, regex_with_timeout)
+
+        false
+      end
     end
 
     # @return Boolean
@@ -233,6 +241,10 @@ module ActiveRecordProxyAdapters
 
     def primary_connection_name
       @primary_connection_name ||= primary_connection.pool.try(:db_config).try(:name).try(:to_s)
+    end
+
+    def proxy_checkout_timeout
+      checkout_timeout(primary_connection_name)
     end
 
     def proxy_context
