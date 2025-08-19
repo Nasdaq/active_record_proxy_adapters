@@ -75,11 +75,30 @@ RSpec.describe ActiveRecordProxyAdapters::PostgreSQLProxy do # rubocop:disable R
     end
   end
 
+  shared_examples_for "a ridiculously long SQL write" do
+    context "when query is a ridiculously long insert statement" do
+      let(:sql) do
+        values = 1_000_000.times.map { |i| "('User #{i}', 'user#{i}@example.com')" }
+
+        <<~SQL.squish
+          INSERT INTO users (name, email)
+          VALUES
+          #{values.join(", ")};
+        SQL
+      end
+
+      it "does not crash" do
+        expect { run_test }.not_to raise_error
+      end
+    end
+  end
+
   it_behaves_like "a transaction block proxy bypass"
 
   describe "#execute" do
     it_behaves_like "a proxied method", :execute do
       it_behaves_like "a PostgreSQL CTE"
+      it_behaves_like "a ridiculously long SQL write"
     end
   end
 
