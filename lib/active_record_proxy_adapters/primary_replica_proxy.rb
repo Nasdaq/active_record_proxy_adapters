@@ -32,13 +32,13 @@ module ActiveRecordProxyAdapters
     # These patterns define which database statments are considered write statments, so we can shortly re-route all
     # requests to the primary database so the replica has time to replicate
     WRITE_STATEMENT_MATCHERS = [
-      /\ABEGIN/i,
-      /\ACOMMIT/i,
-      /\AROLLBACK/i,
-      /INSERT\s[\s\S]*INTO\s[\s\S]*/i,
-      /UPDATE\s[\s\S]*/i,
-      /DELETE\s[\s\S]*FROM\s[\s\S]*/i,
-      /DROP\s/i
+      /(\A|\s+?)BEGIN/i,
+      /(\A|\s+?)COMMIT/i,
+      /(\A|\s+?)ROLLBACK/i,
+      /(\A|\s+?)(INSERT\s+?INTO\s+?\S+?)/i,
+      /(\A|\s+?)UPDATE\s+?\S+?/i,
+      /(\A|\s+?)DELETE\s+?FROM\s+?\S+?/i,
+      /(\A|\s+?)DROP\s/i
     ].map(&:freeze).freeze
 
     # Abstract adapter methods that should be proxied.
