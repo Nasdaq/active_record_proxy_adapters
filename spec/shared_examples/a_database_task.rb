@@ -26,7 +26,12 @@ RSpec.shared_examples_for "a database task" do
   end
 
   def schema_matches?
-    proc { temp_file.read == schema }
+    proc { cleanup_schema(temp_file.read) == cleanup_schema(schema) }
+  end
+
+  def cleanup_schema(schema)
+    # Remove /restrict and /unrestrict tags from the sql file as those are randomly generated
+    schema.gsub(/^\\(un)?restrict.*\n/, "")
   end
 
   def with_master_connection(&)
