@@ -1,5 +1,9 @@
 ## [Unreleased]
 
+## [0.7.2, 0.6.3, 0.5.3] - 2025-08-19
+
+- Fix greedy regexes causing timeout with long SQL writes [f3ddd1e](https://github.com/Nasdaq/active_record_proxy_adapters/commit/f3ddd1e07b80f598f8d315637bd48bfc27c19621)
+
 ## [0.7.1] - 2025-08-05
 
 - Fix logic to retrieve log subscriber prefix for replicas [77d2887](https://github.com/Nasdaq/active_record_proxy_adapters/commit/77d2887069a975ec03199168ac57434294273fe2)
