@@ -1,3 +1,8 @@
+\restrict zGivfEEm1yYWH9gib0zMaNJYhcKbd6GHEJlhJbCLgvEb47093CPDKNFQUsbRkyj
+
+-- Dumped from database version 17.6
+-- Dumped by pg_dump version 17.6
+
 SET statement_timeout = 0;
 SET lock_timeout = 0;
 SET idle_in_transaction_session_timeout = 0;
@@ -81,6 +86,8 @@ CREATE UNIQUE INDEX unique_schema_migrations ON public.schema_migrations USING b
 --
 -- PostgreSQL database dump complete
 --
+
+\unrestrict zGivfEEm1yYWH9gib0zMaNJYhcKbd6GHEJlhJbCLgvEb47093CPDKNFQUsbRkyj
 
 SET search_path TO "$user", public;
 

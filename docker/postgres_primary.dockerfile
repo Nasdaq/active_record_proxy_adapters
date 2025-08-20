@@ -1,4 +1,4 @@
-FROM docker.io/postgres:17-alpine
+FROM docker.io/postgres:17.6-alpine
 
 ARG REPLICA_USER=replicator
 ARG REPLICA_PASSWORD=replicator
