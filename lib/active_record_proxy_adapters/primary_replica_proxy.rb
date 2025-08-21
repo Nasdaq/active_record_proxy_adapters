@@ -7,6 +7,7 @@ require "active_record_proxy_adapters/hijackable"
 require "active_record_proxy_adapters/mixin/configuration"
 require "active_support/core_ext/module/delegation"
 require "active_support/core_ext/object/blank"
+require "timeout"
 
 module ActiveRecordProxyAdapters
   # This is the base class for all proxies. It defines the methods that should be proxied
@@ -216,11 +217,10 @@ module ActiveRecordProxyAdapters
 
     def match_sql?(sql_string)
       proc do |matcher|
-        regex_with_timeout = Regexp.new(matcher.source, matcher.options, timeout: proxy_checkout_timeout.to_f)
-
-        regex_with_timeout.match?(sql_string)
-      rescue Regexp::TimeoutError
-        regexp_timeout_strategy.call(sql_string, regex_with_timeout)
+        # TODO: switch to regexp timeout once Ruby 3.1 support is dropped.
+        Timeout.timeout(proxy_checkout_timeout.to_f) { matcher.match?(sql_string) }
+      rescue Timeout::Error
+        regexp_timeout_strategy.call(sql_string, matcher)
 
         false
       end
