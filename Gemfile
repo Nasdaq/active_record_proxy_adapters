@@ -18,7 +18,7 @@ gem "yard"
 
 group :test do
   gem "rspec", "~> 3.13"
-  gem "rubocop", "~> 1.79"
+  gem "rubocop", "~> 1.80"
   gem "rubocop-rspec", "~> 3.6.0"
   gem "simplecov"
   gem "simplecov-cobertura"
