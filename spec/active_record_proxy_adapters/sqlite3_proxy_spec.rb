@@ -30,7 +30,9 @@ RSpec.describe ActiveRecordProxyAdapters::SQLite3Proxy do # rubocop:disable RSpe
   end
 
   describe "#execute" do
-    it_behaves_like "a proxied method", :execute
+    it_behaves_like "a proxied method", :execute do
+      it_behaves_like "a SQL pattern matching timeout"
+    end
   end
 
   describe "#exec_query" do

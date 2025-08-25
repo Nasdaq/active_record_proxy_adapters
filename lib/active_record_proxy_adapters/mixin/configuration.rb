@@ -40,6 +40,20 @@ module ActiveRecordProxyAdapters
         proxy_config.context_store
       end
 
+      # Helper to retrieve the logger from the configuration stored in
+      # {ActiveRecordProxyAdapters::Configuration#logger}.
+      # @return [Logger]
+      def logger
+        proxy_config.logger
+      end
+
+      # Helper to retrieve the timeout strategy from the configuration stored in
+      # {ActiveRecordProxyAdapters::Configuration#regexp_timeout_strategy}.
+      # @return [Proc]
+      def regexp_timeout_strategy
+        proxy_config.regexp_timeout_strategy
+      end
+
       # Helper to retrieve the cache store from the configuration stored in
       # {ActiveRecordProxyAdapters::CacheConfiguration#store}.
       # @return [ActiveSupport::Cache::Store]

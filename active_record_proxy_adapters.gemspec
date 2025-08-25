@@ -40,6 +40,8 @@ Gem::Specification.new do |spec|
   spec.add_dependency "activesupport", rails_version_restrictions
   spec.add_dependency "digest", ">= 3.1.0"
   spec.add_dependency "json"
+  spec.add_dependency "logger"
+  spec.add_dependency "timeout"
 
   # For more information and examples about making a new gem, check out our
   # guide at: https://bundler.io/guides/creating_gem.html

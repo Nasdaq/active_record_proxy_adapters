@@ -62,6 +62,10 @@ ActiveRecord::Base.logger = Logger.new(Tempfile.create)
 ENV["RAILS_ENV"] ||= TestHelper.env_name
 
 RSpec.configure do |config|
+  proxy_config                         = ActiveRecordProxyAdapters.config
+  proxy_config.logger                  = ActiveRecord::Base.logger
+  proxy_config.regexp_timeout_strategy = :log
+
   config.include(ActiveSupport::Testing::TimeHelpers)
   # Enable flags like --only-failures and --next-failure
   config.example_status_persistence_file_path = ".rspec_status"
@@ -78,7 +82,7 @@ RSpec.configure do |config|
   end
 
   config.before do
-    ActiveRecordProxyAdapters::Contextualizer.current_context = ActiveRecordProxyAdapters.config.context_store.new({})
+    ActiveRecordProxyAdapters::Contextualizer.current_context = proxy_config.context_store.new({})
   end
 
   wrap_test_case_in_transaction = proc do |example|

@@ -6,6 +6,8 @@ PATH
       activesupport (>= 7.0.0, < 8.1)
       digest (>= 3.1.0)
       json
+      logger
+      timeout
 
 GEM
   remote: https://rubygems.org/
@@ -36,6 +38,7 @@ GEM
     json (2.13.2)
     language_server-protocol (3.17.0.5)
     lint_roller (1.1.0)
+    logger (1.7.0)
     minitest (5.25.4)
     mysql2 (0.5.6)
     nio4r (2.7.4)
@@ -99,6 +102,7 @@ GEM
     simplecov-html (0.13.1)
     simplecov_json_formatter (0.1.4)
     thor (1.4.0)
+    timeout (0.4.3)
     trilogy (2.9.0)
     tzinfo (2.0.6)
       concurrent-ruby (~> 1.0)

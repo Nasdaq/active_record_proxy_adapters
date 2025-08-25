@@ -99,6 +99,7 @@ RSpec.describe ActiveRecordProxyAdapters::PostgreSQLProxy do # rubocop:disable R
     it_behaves_like "a proxied method", :execute do
       it_behaves_like "a PostgreSQL CTE"
       it_behaves_like "a ridiculously long SQL write"
+      it_behaves_like "a SQL pattern matching timeout"
     end
   end
 

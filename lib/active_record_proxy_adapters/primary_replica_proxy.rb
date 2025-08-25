@@ -7,6 +7,7 @@ require "active_record_proxy_adapters/hijackable"
 require "active_record_proxy_adapters/mixin/configuration"
 require "active_support/core_ext/module/delegation"
 require "active_support/core_ext/object/blank"
+require "timeout"
 
 module ActiveRecordProxyAdapters
   # This is the base class for all proxies. It defines the methods that should be proxied
@@ -181,7 +182,7 @@ module ActiveRecordProxyAdapters
     end
 
     def checkout_replica_connection
-      replica_pool.checkout(checkout_timeout(primary_connection_name))
+      replica_pool.checkout(proxy_checkout_timeout)
     # rescue NoDatabaseError to avoid crashing when running db:create rake task
     # rescue ConnectionNotEstablished to handle connectivity issues in the replica
     # (for example, replication delay)
@@ -215,7 +216,14 @@ module ActiveRecordProxyAdapters
     end
 
     def match_sql?(sql_string)
-      proc { |matcher| matcher.match?(sql_string) }
+      proc do |matcher|
+        # TODO: switch to regexp timeout once Ruby 3.1 support is dropped.
+        Timeout.timeout(proxy_checkout_timeout.to_f) { matcher.match?(sql_string) }
+      rescue Timeout::Error
+        regexp_timeout_strategy.call(sql_string, matcher)
+
+        false
+      end
     end
 
     # @return Boolean
@@ -233,6 +241,10 @@ module ActiveRecordProxyAdapters
 
     def primary_connection_name
       @primary_connection_name ||= primary_connection.pool.try(:db_config).try(:name).try(:to_s)
+    end
+
+    def proxy_checkout_timeout
+      checkout_timeout(primary_connection_name)
     end
 
     def proxy_context
