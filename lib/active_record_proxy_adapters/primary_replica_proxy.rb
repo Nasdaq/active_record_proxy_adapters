@@ -114,8 +114,9 @@ module ActiveRecordProxyAdapters
       end.last
     end
 
-    def roles_for(sql_string) # rubocop:disable Metrics/MethodLength,Metrics/AbcSize
-      return [top_of_connection_stack_role] if top_of_connection_stack_role.present?
+    def roles_for(sql_string) # rubocop:disable Metrics/MethodLength
+      top_of_stack_role = top_of_connection_stack_role
+      return [top_of_stack_role] if top_of_stack_role.present?
       return [writing_role] if recent_write_to_primary? || in_transaction?
 
       cache_key = cache_key_for(sql_string)
@@ -137,17 +138,23 @@ module ActiveRecordProxyAdapters
       return if connected_to_stack.empty?
 
       top = connected_to_stack.last
-      role = top[:role]
+      role, klasses = top.values_at(:role, :klasses)
       return unless role.present?
 
-      [reading_role, writing_role].include?(role) ? role : nil
+      # ActiveRecord::Base is the parent record for all models so,
+      # if the top of the stack includes it, we should respect it.
+      role_for_current_class = klasses.include?(connection_class) || klasses.include?(ActiveRecord::Base)
+
+      [reading_role, writing_role].include?(role) && role_for_current_class ? role : nil
     end
 
     def connected_to_stack
       return connection_class.connected_to_stack if connection_class.respond_to?(:connected_to_stack)
 
       # handle Rails 7.2+ pending migrations Connection
-      return [{ role: writing_role }] if pending_migration_connection?
+      if pending_migration_connection?
+        return [{ role: writing_role, shard: nil, prevent_writes: false, klasses: [connection_class] }]
+      end
 
       []
     end

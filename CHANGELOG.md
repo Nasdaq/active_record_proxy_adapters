@@ -1,6 +1,7 @@
 ## [Unreleased]
 
 - Wrap regex matching in a `timeout` block to prevent ReDoS
+- Return top of stack role only if its classes include the proxy connection class
 
 ## [0.7.2, 0.6.3, 0.5.3] - 2025-08-19
 
