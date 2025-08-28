@@ -1,6 +1,21 @@
 # frozen_string_literal: true
 
 SIMPLE_COV_GROUPS = proc do
+  add_group "Core" do |src_file|
+    [
+      /active_record_context/,
+      /configuration/,
+      /context/,
+      /contextualizer/,
+      %r{/database_tasks},
+      /errors/,
+      /hijackable/,
+      /middleware/,
+      /mixin/,
+      /primary_replica_proxy/
+    ].any? { |pattern| pattern.match?(src_file.filename) }
+  end
+
   add_group "PostgreSQL" do |src_file|
     [/postgresql/, /postgre_sql/].any? { |pattern| pattern.match?(src_file.filename) }
   end
