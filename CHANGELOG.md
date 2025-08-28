@@ -1,7 +1,9 @@
 ## [Unreleased]
 
-- Wrap regex matching in a `timeout` block to prevent ReDoS
-- Return top of stack role only if its classes include the proxy connection class
+## [0.8.0] - 2025-08-28
+
+- Return top of stack role only if it includes the proxy connection class [afbbc50](https://github.com/Nasdaq/active_record_proxy_adapters/commit/afbbc50cc4a793a0266a2d903c76acfc45f8cbbd)
+- Wrap regex matching in a `timeout` block to prevent ReDoS [faeca49](https://github.com/Nasdaq/active_record_proxy_adapters/commit/faeca491c42c55476161c845f77dda4ddf2ce893)
 
 ## [0.7.2, 0.6.3, 0.5.3] - 2025-08-19
 
