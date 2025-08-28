@@ -6,8 +6,6 @@ require "active_record_proxy_adapters/configuration"
 
 # The gem namespace.
 module ActiveRecordProxyAdapters
-  class Error < StandardError; end
-
   module_function
 
   def configure
