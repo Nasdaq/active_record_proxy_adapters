@@ -14,6 +14,7 @@ on:
       - v-0-5-stable
       - v-0-6-stable
       - v-0-7-stable
+      - v-0-8-stable
     paths:
       - '.app-image-tag'
 jobs:
