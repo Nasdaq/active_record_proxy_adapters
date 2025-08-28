@@ -1,5 +1,7 @@
 ## [Unreleased]
 
+- Add ability to require only core files
+
 ## [0.8.0] - 2025-08-28
 
 - Return top of stack role only if it includes the proxy connection class [afbbc50](https://github.com/Nasdaq/active_record_proxy_adapters/commit/afbbc50cc4a793a0266a2d903c76acfc45f8cbbd)

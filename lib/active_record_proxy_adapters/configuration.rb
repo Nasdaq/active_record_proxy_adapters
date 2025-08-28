@@ -8,7 +8,21 @@ require "active_record_proxy_adapters/synchronizable_configuration"
 require "active_support/core_ext/integer/time"
 require "logger"
 
-module ActiveRecordProxyAdapters
+module ActiveRecordProxyAdapters # rubocop:disable Style/Documentation
+  module_function
+
+  def configure
+    yield(config)
+  end
+
+  def bust_query_cache
+    config.cache.bust
+  end
+
+  def config
+    @config ||= Configuration.new
+  end
+
   # Provides a global configuration object to configure how the proxy should behave.
   class Configuration
     include SynchronizableConfiguration
