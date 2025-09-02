@@ -1,6 +1,7 @@
 ## [Unreleased]
 
 - Add ability to require only core files
+- Move loading of PostgreSQLProxy to its own Railtie
 
 ## [0.8.0] - 2025-08-28
 
