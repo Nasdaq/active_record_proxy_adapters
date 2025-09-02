@@ -60,7 +60,6 @@ GEM
     redis-client (0.25.1)
       connection_pool
     regexp_parser (2.11.2)
-    rexml (3.4.1)
     rspec (3.13.1)
       rspec-core (~> 3.13.0)
       rspec-expectations (~> 3.13.0)
@@ -96,9 +95,6 @@ GEM
       docile (~> 1.1)
       simplecov-html (~> 0.11)
       simplecov_json_formatter (~> 0.1)
-    simplecov-cobertura (3.0.0)
-      rexml
-      simplecov (~> 0.19)
     simplecov-html (0.13.1)
     simplecov_json_formatter (0.1.4)
     thor (1.4.0)
@@ -129,7 +125,6 @@ DEPENDENCIES
   rubocop (~> 1.80)
   rubocop-rspec (~> 3.6.0)
   simplecov
-  simplecov-cobertura
   trilogy (~> 2.9)
   yard
 

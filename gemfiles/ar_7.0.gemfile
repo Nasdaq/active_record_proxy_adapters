@@ -25,7 +25,6 @@ group :test do
   gem "rubocop", "~> 1.80"
   gem "rubocop-rspec", "~> 3.6.0"
   gem "simplecov"
-  gem "simplecov-cobertura"
 end
 
 gemspec path: "../"
