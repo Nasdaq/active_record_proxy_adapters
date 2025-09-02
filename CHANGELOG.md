@@ -1,6 +1,7 @@
 ## [Unreleased]
 
 - Add ability to require only core files
+- Drop support for ActiveRecord 7.0.x
 
 ## [0.8.0] - 2025-08-28
 
