@@ -2,5 +2,5 @@
 
 require "active_record_proxy_adapters/connection_handling/postgresql_proxy"
 require "active_record_proxy_adapters/connection_handling/mysql2_proxy"
-require "active_record_proxy_adapters/connection_handling/trilogy"
+require "active_record_proxy_adapters/connection_handling/trilogy_proxy"
 require "active_record_proxy_adapters/connection_handling/sqlite3"

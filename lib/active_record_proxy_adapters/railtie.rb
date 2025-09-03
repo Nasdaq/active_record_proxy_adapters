@@ -3,11 +3,11 @@
 require "active_support"
 require "active_record_proxy_adapters/railties/postgresql"
 require "active_record_proxy_adapters/railties/mysql2"
+require "active_record_proxy_adapters/railties/trilogy"
 
 module ActiveRecordProxyAdapters
   # Hooks into rails boot process to extend ActiveRecord with the proxy adapter.
   class Railtie < Rails::Railtie
-    require "active_record_proxy_adapters/connection_handling/trilogy"
     require "active_record_proxy_adapters/connection_handling/sqlite3"
     require "active_record_proxy_adapters/middleware"
 
