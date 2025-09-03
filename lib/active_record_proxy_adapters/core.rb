@@ -1,5 +1,7 @@
 # frozen_string_literal: true
 
+require "active_record"
+require "active_record_proxy_adapters/version"
 require "active_record_proxy_adapters/active_record_context"
 require "active_record_proxy_adapters/configuration"
 require "active_record_proxy_adapters/context"
