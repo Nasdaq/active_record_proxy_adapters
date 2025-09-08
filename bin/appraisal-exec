@@ -1,0 +1,12 @@
+#!/usr/bin/env sh
+set -o pipefail
+IFS=$'\n\t'
+
+ar_version=$1
+shift 1
+ar_args="$@"
+
+bundle exec appraisal ar-$ar_version $ar_args
+
+unset ar_version
+unset ar_args
