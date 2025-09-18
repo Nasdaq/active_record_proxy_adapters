@@ -1,4 +1,8 @@
 #!/usr/bin/env sh
+
+# Usage example
+# bin/appraisal-exec 8.0 rspec (translates to bundle exec appraisal ar-8.0 rspec)
+
 set -o pipefail
 IFS=$'\n\t'
 
