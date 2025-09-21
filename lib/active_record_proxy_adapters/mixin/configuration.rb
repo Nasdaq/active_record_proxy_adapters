@@ -3,7 +3,6 @@
 require "active_support/core_ext/integer/time"
 require "active_record_proxy_adapters/synchronizable_configuration"
 require "active_record_proxy_adapters/cache_configuration"
-require "active_record_proxy_adapters/context"
 
 module ActiveRecordProxyAdapters
   module Mixin
