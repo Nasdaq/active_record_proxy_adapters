@@ -5,6 +5,7 @@
 - Move loading of Mysql2Proxy to its own Railtie
 - Move loading of TrilogyProxy to its own Railtie
 - Move loading of SQLite3Proxy to its own Railtie
+- Fix connection stickiness for inserts with Trilogy
 
 ## [0.8.0] - 2025-08-28
 
