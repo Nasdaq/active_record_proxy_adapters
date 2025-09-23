@@ -31,7 +31,10 @@ RSpec.shared_examples_for "a database task" do
 
   def cleanup_schema(schema)
     # Remove /restrict and /unrestrict tags from the sql file as those are randomly generated
-    schema.gsub(/^\\(un)?restrict.*\n/, "")
+    # Remove "Dumped from/by comments"
+    schema
+      .gsub(/^\\(un)?restrict.*\n+/, "")
+      .gsub(/^--\s+Dumped.+\n+/, "")
   end
 
   def with_master_connection(&)
