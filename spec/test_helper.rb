@@ -42,7 +42,6 @@ module TestHelper # rubocop:disable Metrics/ModuleLength
   end
 
   def setup_active_record_config
-    active_record_context.legacy_connection_handling = false
     active_record_context.writing_role = :writing
     active_record_context.reading_role = :reading
 

@@ -34,7 +34,7 @@ Gem::Specification.new do |spec|
   spec.executables = spec.files.grep(%r{\Aexe/}) { |f| File.basename(f) }
   spec.require_paths = ["lib"]
 
-  rails_version_restrictions = [">= 7.0.0", "< 8.1"]
+  rails_version_restrictions = [">= 7.1.0", "< 8.1"]
 
   spec.add_dependency "activerecord", rails_version_restrictions
   spec.add_dependency "activesupport", rails_version_restrictions
