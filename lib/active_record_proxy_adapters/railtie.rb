@@ -1,6 +1,7 @@
 # frozen_string_literal: true
 
 require "active_support"
+require "active_record_proxy_adapters/core"
 require "active_record_proxy_adapters/railties/postgresql"
 require "active_record_proxy_adapters/railties/mysql2"
 require "active_record_proxy_adapters/railties/trilogy"
