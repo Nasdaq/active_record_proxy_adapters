@@ -25,6 +25,18 @@ Install the gem and add to the application's Gemfile by executing:
 
     $ bundle add 'active_record_proxy_adapters'
 
+That will install and load the proxies for all Rails-supported adapters (i.e. `postgresql_proxy`, `mysql2_proxy`, `sqlite3_proxy` and `trilogy_proxy`).
+
+If you wish to load only one specific adapter for a faster application boot, use:
+
+    $ bundle add 'active_record_proxy_adapters' --require 'active_record_proxy_adapters/railties/<postgresql|mysql2|sqlite3|trilogy>'
+
+Or, in your Gemfile, use:
+
+```ruby
+  gem "active_record_proxy_adapters", require: 'active_record_proxy_adapters/railties/<postgresql|mysql2|sqlite3|trilogy>'
+```
+
 If bundler is not being used to manage dependencies, install the gem by executing:
 
     $ gem install active_record_proxy_adapters
