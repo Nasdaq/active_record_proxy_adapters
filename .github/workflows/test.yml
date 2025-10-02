@@ -12,6 +12,7 @@ on:
       - v-0-6-stable
       - v-0-7-stable
       - v-0-8-stable
+      - v-0-9-stable
   push:
     branches:
       - main
