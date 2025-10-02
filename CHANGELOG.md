@@ -1,5 +1,7 @@
 ## [Unreleased]
 
+## [0.9.0] - 2025-10-02
+
 - Add ability to require only core files
 - Move loading of PostgreSQLProxy to its own Railtie
 - Move loading of Mysql2Proxy to its own Railtie
