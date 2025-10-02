@@ -17,6 +17,7 @@ desc "Prepares the database environment for use"
 task :environment do
   $LOAD_PATH << File.expand_path("lib", __dir__)
   require "active_record_proxy_adapters"
+  require "active_record_proxy_adapters/core"
   require_relative "spec/test_helper"
 
   require "active_record_proxy_adapters/connection_handling"

@@ -30,6 +30,7 @@ SimpleCov.start do
 end
 
 require "active_record_proxy_adapters"
+require "active_record_proxy_adapters/core"
 
 require "active_record_proxy_adapters/connection_handling"
 ActiveSupport.on_load(:active_record) do
