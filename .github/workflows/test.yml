@@ -103,13 +103,14 @@ jobs:
     strategy:
       matrix:
         ruby:
-          - 3.2.9
-          - 3.3.9
-          - 3.4.6
+          - "3.2.9"
+          - "3.3.9"
+          - "3.4.6"
         ar:
-          - 7.1
-          - 7.2
+          - "7.1"
+          - "7.2"
           - "8.0"
+          - "8.1"
 
     name: Ruby ${{ matrix.ruby }} / ActiveRecord ${{ matrix.ar }}
     services:
