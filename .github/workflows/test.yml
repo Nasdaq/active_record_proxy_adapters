@@ -110,6 +110,7 @@ jobs:
           - 7.1
           - 7.2
           - "8.0"
+          - 8.1
 
     name: Ruby ${{ matrix.ruby }} / ActiveRecord ${{ matrix.ar }}
     services:

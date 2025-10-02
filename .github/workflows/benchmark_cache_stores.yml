@@ -74,7 +74,7 @@ jobs:
         ruby:
           - 3.4.6
         ar:
-          - "8.0"
+          - 8.1
         cache_store:
           - "null"
           - memory
