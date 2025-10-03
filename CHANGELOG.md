@@ -1,5 +1,7 @@
 ## [Unreleased]
 
+- Add support for ActiveRecord 8.1
+
 ## [0.9.0] - 2025-10-02
 
 - Add ability to require only core files
