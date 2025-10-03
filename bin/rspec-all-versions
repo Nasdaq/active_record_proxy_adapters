@@ -1,0 +1,41 @@
+#!/usr/bin/env sh
+
+# Usage example
+# bin/rspec-all-versions (runs tests for all supported AR versions in parallel)
+
+set -euo pipefail
+
+bin_dir=$(dirname "$0")
+root_dir="$(dirname "$bin_dir")"
+
+echo "Cleaning up previous coverage data"
+rm -rf $root_dir/coverage
+
+run_tests() {
+    ar=$1
+    local env_number=${ar//./_}
+
+    TEST_ENV_NUMBER=$env_number $bin_dir/appraisal-exec $ar rake db:drop db:setup
+    TEST_ENV_NUMBER=$env_number $bin_dir/appraisal-exec $ar rspec -fp --fail-fast
+}
+
+active_record_versions() {
+    cat $root_dir/Appraisals | grep -oE "ar-\d+(.\d+)+" | sed -E 's/(ar-)(.*)/\2/g' | xargs echo -n
+}
+
+echo "Running tests for Active Record versions: $(active_record_versions)"
+
+start_time=$(date +%s)
+
+for ar in $(active_record_versions); do
+    run_tests $ar &
+done
+
+wait
+
+end_time=$(date +%s)
+duration=$((end_time - start_time))
+echo "All tests completed in $duration seconds"
+
+echo "Generating coverage report"
+$bin_dir/appraisal-exec 8.1 rake coverage:report
