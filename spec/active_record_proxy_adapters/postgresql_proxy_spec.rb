@@ -113,11 +113,7 @@ RSpec.describe ActiveRecordProxyAdapters::PostgreSQLProxy do # rubocop:disable R
     describe "#exec_no_cache" do
       it_behaves_like "a proxied method", :exec_no_cache do
         subject(:run_test) do
-          if ActiveRecord.version < Gem::Version.new("7.1")
-            proxy.exec_no_cache(sql, "SQL", [])
-          else
-            proxy.exec_no_cache(sql, "SQL", [], async: false, allow_retry: false, materialize_transactions: false)
-          end
+          proxy.exec_no_cache(sql, "SQL", [], async: false, allow_retry: false, materialize_transactions: false)
         end
 
         let(:read_only_error_class) { ActiveRecord::StatementInvalid }
@@ -129,11 +125,7 @@ RSpec.describe ActiveRecordProxyAdapters::PostgreSQLProxy do # rubocop:disable R
     describe "#exec_cache" do
       it_behaves_like "a proxied method", :exec_cache do
         subject(:run_test) do
-          if ActiveRecord.version < Gem::Version.new("7.1")
-            proxy.exec_cache(sql, "SQL", [])
-          else
-            proxy.exec_cache(sql, "SQL", [], async: false, allow_retry: false, materialize_transactions: false)
-          end
+          proxy.exec_cache(sql, "SQL", [], async: false, allow_retry: false, materialize_transactions: false)
         end
 
         let(:read_only_error_class) { ActiveRecord::StatementInvalid }
@@ -143,11 +135,9 @@ RSpec.describe ActiveRecordProxyAdapters::PostgreSQLProxy do # rubocop:disable R
     end
   end
 
-  if TestHelper.active_record_context.active_record_v7_1_or_greater?
-    describe "#internal_exec_query" do
-      it_behaves_like "a proxied method", :internal_exec_query do
-        it_behaves_like "a PostgreSQL CTE"
-      end
+  describe "#internal_exec_query" do
+    it_behaves_like "a proxied method", :internal_exec_query do
+      it_behaves_like "a PostgreSQL CTE"
     end
   end
 end
