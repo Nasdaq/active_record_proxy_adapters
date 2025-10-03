@@ -1,6 +1,7 @@
 ## [Unreleased]
 
 - Add support for ActiveRecord 8.1
+- Remove ActiveRecord 7.0 boilerplate
 
 ## [0.9.0] - 2025-10-02
 

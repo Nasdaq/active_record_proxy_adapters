@@ -18,19 +18,11 @@ module ActiveRecordProxyAdapters
     end
 
     def hijackable_methods
-      hijackable = %i[execute exec_query]
-
-      hijackable << :internal_exec_query if active_record_v7_1_or_greater?
-
-      hijackable
+      %i[execute exec_query internal_exec_query]
     end
 
     def active_record_v7?
       active_record_version >= Gem::Version.new("7.1") && active_record_version < Gem::Version.new("8.0")
-    end
-
-    def active_record_v7_1_or_greater?
-      active_record_version >= Gem::Version.new("7.1")
     end
 
     def active_record_v7_2_or_greater?
