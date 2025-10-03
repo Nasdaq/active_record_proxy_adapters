@@ -232,17 +232,9 @@ module TestHelper # rubocop:disable Metrics/ModuleLength
   end
 
   def configuration_for(name:, include_hidden: false)
-    configurations = ActiveRecord::Base.configurations
-
-    options = { env_name: env_name.to_s, name: }
-
-    if ActiveRecord.version < Gem::Version.new("7.1")
-      options.merge!(include_replicas: include_hidden)
-    else
-      options.merge!(include_hidden:)
-    end
-
-    configurations.configs_for(**options)
+    ActiveRecord::Base
+      .configurations
+      .configs_for(env_name: env_name.to_s, name:, include_hidden:)
   end
 
   def load_configurations
@@ -323,10 +315,8 @@ module TestHelper # rubocop:disable Metrics/ModuleLength
     config = model_class.connection_db_config
     if active_record_context.active_record_v7_2_or_greater?
       with_rails_v7_2_or_greater_temporary_pool(config, &)
-    elsif active_record_context.active_record_v7_1_or_greater?
-      with_rails_v7_1_temporary_pool(config, &)
     else
-      with_rails_v7_0_temporary_pool(model_class, &)
+      with_rails_v7_1_temporary_pool(config, &)
     end
   end
 
@@ -340,12 +330,6 @@ module TestHelper # rubocop:disable Metrics/ModuleLength
     ActiveRecord::PendingMigrationConnection.establish_temporary_connection(config) do |conn|
       yield(conn.pool, conn.schema_migration, conn.internal_metadata)
     end
-  end
-
-  def with_rails_v7_0_temporary_pool(model_class)
-    conn = model_class.connection
-
-    yield(conn.pool, conn.schema_migration, nil)
   end
 
   def active_record_context

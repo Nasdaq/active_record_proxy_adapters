@@ -39,9 +39,7 @@ RSpec.describe ActiveRecordProxyAdapters::SQLite3Proxy do # rubocop:disable RSpe
     it_behaves_like "a proxied method", :exec_query
   end
 
-  if TestHelper.active_record_context.active_record_v7_1_or_greater?
-    describe "#internal_exec_query" do
-      it_behaves_like "a proxied method", :internal_exec_query
-    end
+  describe "#internal_exec_query" do
+    it_behaves_like "a proxied method", :internal_exec_query
   end
 end

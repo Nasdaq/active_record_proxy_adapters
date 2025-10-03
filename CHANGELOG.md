@@ -1,5 +1,7 @@
 ## [Unreleased]
 
+- Remove ActiveRecord 7.0 boilerplate
+
 ## [0.9.0] - 2025-10-02
 
 - Add ability to require only core files

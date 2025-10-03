@@ -160,8 +160,7 @@ module ActiveRecordProxyAdapters
     end
 
     def pending_migration_connection?
-      active_record_context.active_record_v7_1_or_greater? &&
-        connection_class.name == "ActiveRecord::PendingMigrationConnection"
+      connection_class.name == "ActiveRecord::PendingMigrationConnection"
     end
 
     def connection_for(role, sql_string)
