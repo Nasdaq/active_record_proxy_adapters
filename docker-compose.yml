@@ -93,7 +93,8 @@ services:
       PGPASSWORD: replicator
       PRIMARY_DATABASE_HOST: postgres_primary
     depends_on:
-      - postgres_primary
+      postgres_primary:
+        condition: service_healthy
   # TODO: create mysql replica images
   mariadb:
     image: mariadb:11.4
