@@ -110,6 +110,8 @@ services:
     environment:
       MARIADB_ROOT_PASSWORD: mysql
       MARIADB_DATABASE: mysql
+    volumes:
+      - mariadb:/var/lib/mysql
     ports:
       - "3306:3306"
     networks:
@@ -158,6 +160,7 @@ networks:
 
 volumes:
   bundle:
+  mariadb:
   postgres_primary:
   postgres_replica:
   yard:
