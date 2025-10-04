@@ -4,9 +4,9 @@ x-app-common: &app-common
   image: active_record_proxy_adapters-app:${ENV_TAG:-latest}
 
 x-healthcheck_common: &healthcheck-common
-  interval: 30s
+  interval: 5s
   timeout: 10s
-  retries: 5
+  retries: 30
 
 x-postgres-common: &postgres-common
   restart: always
