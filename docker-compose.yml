@@ -54,9 +54,12 @@ services:
       - MEMCACHED_PORT=11211
       - MEMCACHED_URL=${MEMCACHED_URL:-${MEMCACHED_HOST:-memcached}:${MEMCACHED_PORT:-11211}}
     depends_on:
-      - postgres_primary
-      - postgres_replica
-      - mariadb
+      postgres_primary:
+        condition: service_healthy
+      postgres_replica:
+        condition: service_healthy
+      mariadb:
+        condition: service_healthy
     networks:
       - app
       - postgres
