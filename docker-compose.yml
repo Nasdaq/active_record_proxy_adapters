@@ -72,8 +72,7 @@ services:
   postgres_primary:
     <<: *postgres-common
     build:
-      context: .
-      dockerfile: docker/postgres_primary.dockerfile
+      context: docker/postgres_primary
       args:
         - POSTGRES_LOGGING_COLLECTOR=${POSTGRES_LOGGING_COLLECTOR:-}
         - POSTGRES_LOG_DESTINATION=${POSTGRES_LOG_DESTINATION:-}
@@ -87,17 +86,20 @@ services:
       POSTGRES_PASSWORD: postgres_primary_test
       POSTGRES_HOST_AUTH_METHOD: "scram-sha-256\nhost replication all 0.0.0.0/0 md5"
       POSTGRES_INITDB_ARGS: "--auth-host=scram-sha-256"
+    volumes:
+      - postgres_primary:/var/lib/postgresql/data
 
   postgres_replica:
     <<: *postgres-common
     build:
-      context: .
-      dockerfile: docker/postgres_replica.dockerfile
+      context: docker/postgres_replica
     container_name: postgres_replica
     environment:
       PGUSER: replicator
       PGPASSWORD: replicator
       PRIMARY_DATABASE_HOST: postgres_primary
+    volumes:
+      - postgres_replica:/var/lib/postgresql/data
     depends_on:
       postgres_primary:
         condition: service_healthy
@@ -156,4 +158,6 @@ networks:
 
 volumes:
   bundle:
+  postgres_primary:
+  postgres_replica:
   yard:
