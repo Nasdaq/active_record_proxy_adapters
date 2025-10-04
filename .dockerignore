@@ -1,7 +1,19 @@
+.ash_history
+.env
+.irb_history
+.irb_history
+.irbrc
+.rspec_status
+.yardoc
 **/.git
 **/.github
 **/*.sqlite3
 **/*.sqlite3-*
-.irbrc
-.irb_history
-.yardoc
+# rspec failure tracking
+coverage
+docker
+Dockerfile
+gemfiles/*.lock
+pkg
+spec/reports
+tmp
