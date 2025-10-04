@@ -3,14 +3,17 @@ name: active_record_proxy_adapters
 x-app-common: &app-common
   image: active_record_proxy_adapters-app:${ENV_TAG:-latest}
 
+x-healthcheck_common: &healthcheck-common
+  interval: 30s
+  timeout: 10s
+  retries: 5
+
 x-postgres-common: &postgres-common
   restart: always
   user: postgres
   healthcheck:
+    <<: *healthcheck-common
     test: 'pg_isready -U postgres_primary_test --dbname=postgres'
-    interval: 10s
-    timeout: 5s
-    retries: 5
   networks:
     - postgres
 
@@ -106,6 +109,9 @@ services:
       - "3306:3306"
     networks:
       - mariadb
+    healthcheck:
+      <<: *healthcheck-common
+      test: 'mariadb-admin -pmysql ping'
 
   redis:
     image: redis:latest
