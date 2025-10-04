@@ -3,7 +3,7 @@ name: Build Postgres Primary Image
 on:
   pull_request:
     paths:
-      - 'docker/postgres_primary.dockerfile'
+      - 'docker/postgres_primary/Dockerfile'
 
 jobs:
   export_variables:
@@ -20,9 +20,9 @@ jobs:
       id: compute_container_registry_name
       run: echo "CR_NAME=$(echo ghcr.io/${{ github.repository }} | tr '[:upper:]' '[:lower:]')" >> $GITHUB_OUTPUT
 
-    - name: Calculate SHA256 for docker/postgres_primary.dockerfile
+    - name: Calculate SHA256 for docker/postgres_primary/Dockerfile
       id: calculate_primary_sha
-      run: echo "PRIMARY_SHA=$(sha256sum docker/postgres_primary.dockerfile | awk '{ print substr($1, 1, 12) }')" >> $GITHUB_OUTPUT
+      run: echo "PRIMARY_SHA=$(sha256sum docker/postgres_primary/Dockerfile | awk '{ print substr($1, 1, 12) }')" >> $GITHUB_OUTPUT
 
   prebuild_primary:
     needs: export_variables
@@ -40,7 +40,7 @@ jobs:
         password: ${{ secrets.GITHUB_TOKEN }}
 
     - name: Build and tag primary Docker image
-      run: docker build -f docker/postgres_primary.dockerfile -t ${{ needs.export_variables.outputs.primary_image }} .
+      run: docker build -t ${{ needs.export_variables.outputs.primary_image }} docker/postgres_primary
 
     - name: Push primary Docker image
       run: docker push ${{ needs.export_variables.outputs.primary_image }}
