@@ -5,11 +5,11 @@ ENV PRIMARY_DATABASE_PORT=5432
 ENV PRIMARY_REPLICATION_SLOT=replication_slot
 
 
-COPY docker/postgres_replica/cmd.sh cmd.sh
+COPY start_server start_server
 
 USER root
-RUN chown -R postgres:postgres cmd.sh
+RUN chown -R postgres:postgres start_server
 USER postgres
-RUN chmod u+x cmd.sh
+RUN chmod u+x start_server
 
-CMD [ "./cmd.sh" ]
+CMD [ "./start_server" ]

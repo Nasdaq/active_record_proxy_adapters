@@ -40,18 +40,18 @@ jobs:
       id: read_app_image_tag
       run: echo "APP_IMAGE_TAG=$(head -n1 .app-image-tag)" >> $GITHUB_OUTPUT
 
-    - name: Calculate SHA256 for docker/postgres_primary.dockerfile
+    - name: Calculate SHA256 for docker/postgres_primary/Dockerfile
       id: calculate_primary_sha
-      run: echo "PRIMARY_SHA=$(sha256sum docker/postgres_primary.dockerfile | awk '{ print substr($1, 1, 12) }')" >> $GITHUB_OUTPUT
+      run: echo "PRIMARY_SHA=$(sha256sum docker/postgres_primary/Dockerfile | awk '{ print substr($1, 1, 12) }')" >> $GITHUB_OUTPUT
 
-    - name: Calculate SHA256 for docker/postgres_replica.dockerfile
+    - name: Calculate SHA256 for docker/postgres_replica/Dockerfile
       id: calculate_replica_sha
       run: |
         checksum () {
           sha256sum $@ | awk '{print substr($1, 1, 12)}'
         }
-        REPLICA_DOCKERFILE_SHA=$(checksum docker/postgres_replica.dockerfile)
-        REPLICA_CMD_SHA=$(checksum docker/postgres_replica/cmd.sh)
+        REPLICA_DOCKERFILE_SHA=$(checksum docker/postgres_replica/Dockerfile)
+        REPLICA_CMD_SHA=$(checksum docker/postgres_replica/start_server)
         echo "REPLICA_SHA=$(echo \"${REPLICA_DOCKERFILE_SHA}-${REPLICA_CMD_SHA}\" | checksum)" >> $GITHUB_OUTPUT
 
   rubocop:
