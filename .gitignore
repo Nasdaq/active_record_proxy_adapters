@@ -1,16 +1,16 @@
+.ash_history
+.env
+.irb_history
+# rspec failure tracking
+.rspec_status
+/_yardoc/
 /.bundle/
 /.yardoc
-/_yardoc/
 /coverage/
 /doc/
 /pkg/
 /spec/reports/
 /tmp/
-.env
-gemfiles/*.lock
 db/*.sqlite3
 db/*.sqlite3-*
-# rspec failure tracking
-.rspec_status
-.irb_history
-.ash_history
+gemfiles/*.lock

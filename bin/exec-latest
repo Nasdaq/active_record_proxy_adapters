@@ -1,0 +1,11 @@
+#!/usr/bin/env sh
+
+# Execs a command against the latest Active Record version defined in the Appraisals file
+# Usage example
+# bin/exec-latest irb (starts an IRB session with the latest AR version)
+
+set -euo pipefail
+
+latest_ar_version=$(cat Appraisals | grep -oE "ar-\d+(.\d+)+" | tail -n1 | sed -E 's/(ar-)(.*)/\2/g')
+
+bin/appraisal-exec $latest_ar_version "$@"

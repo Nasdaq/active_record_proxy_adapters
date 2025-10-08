@@ -3,14 +3,17 @@ name: active_record_proxy_adapters
 x-app-common: &app-common
   image: active_record_proxy_adapters-app:${ENV_TAG:-latest}
 
+x-healthcheck_common: &healthcheck-common
+  interval: 5s
+  timeout: 10s
+  retries: 30
+
 x-postgres-common: &postgres-common
   restart: always
   user: postgres
   healthcheck:
+    <<: *healthcheck-common
     test: 'pg_isready -U postgres_primary_test --dbname=postgres'
-    interval: 10s
-    timeout: 5s
-    retries: 5
   networks:
     - postgres
 
@@ -51,9 +54,12 @@ services:
       - MEMCACHED_PORT=11211
       - MEMCACHED_URL=${MEMCACHED_URL:-${MEMCACHED_HOST:-memcached}:${MEMCACHED_PORT:-11211}}
     depends_on:
-      - postgres_primary
-      - postgres_replica
-      - mariadb
+      postgres_primary:
+        condition: service_healthy
+      postgres_replica:
+        condition: service_healthy
+      mariadb:
+        condition: service_healthy
     networks:
       - app
       - postgres
@@ -66,8 +72,7 @@ services:
   postgres_primary:
     <<: *postgres-common
     build:
-      context: .
-      dockerfile: docker/postgres_primary.dockerfile
+      context: docker/postgres_primary
       args:
         - POSTGRES_LOGGING_COLLECTOR=${POSTGRES_LOGGING_COLLECTOR:-}
         - POSTGRES_LOG_DESTINATION=${POSTGRES_LOG_DESTINATION:-}
@@ -81,19 +86,23 @@ services:
       POSTGRES_PASSWORD: postgres_primary_test
       POSTGRES_HOST_AUTH_METHOD: "scram-sha-256\nhost replication all 0.0.0.0/0 md5"
       POSTGRES_INITDB_ARGS: "--auth-host=scram-sha-256"
+    volumes:
+      - postgres_primary:/var/lib/postgresql/data
 
   postgres_replica:
     <<: *postgres-common
     build:
-      context: .
-      dockerfile: docker/postgres_replica.dockerfile
+      context: docker/postgres_replica
     container_name: postgres_replica
     environment:
       PGUSER: replicator
       PGPASSWORD: replicator
       PRIMARY_DATABASE_HOST: postgres_primary
+    volumes:
+      - postgres_replica:/var/lib/postgresql/data
     depends_on:
-      - postgres_primary
+      postgres_primary:
+        condition: service_healthy
   # TODO: create mysql replica images
   mariadb:
     image: mariadb:11.4
@@ -101,10 +110,15 @@ services:
     environment:
       MARIADB_ROOT_PASSWORD: mysql
       MARIADB_DATABASE: mysql
+    volumes:
+      - mariadb:/var/lib/mysql
     ports:
       - "3306:3306"
     networks:
       - mariadb
+    healthcheck:
+      <<: *healthcheck-common
+      test: 'mariadb-admin -pmysql ping'
 
   redis:
     image: redis:latest
@@ -146,4 +160,7 @@ networks:
 
 volumes:
   bundle:
+  mariadb:
+  postgres_primary:
+  postgres_replica:
   yard:

@@ -1,0 +1,35 @@
+#!/usr/bin/env sh
+
+set -e
+
+# Path to the PGDATA directory used inside the container
+DATA_DIR="/var/lib/postgresql/data"
+
+# Ensure the data directory exists
+mkdir -p "$DATA_DIR"
+
+# If the data directory is empty, perform an initial base backup from the primary.
+# We intentionally DO NOT delete existing data so that container restarts keep the
+# current replica state and avoid a full re-copy unless explicitly desired.
+if [ -z "$(ls -A "$DATA_DIR" 2>/dev/null)" ]; then
+  echo "[replica-init] Data directory is empty - starting pg_basebackup from primary..."
+  # Retry until the primary becomes available.
+  until pg_basebackup \
+      --pgdata="$DATA_DIR" \
+      -R \
+      --slot="${PRIMARY_REPLICATION_SLOT}" \
+      --host="${PRIMARY_DATABASE_HOST}" \
+      --port="${PRIMARY_DATABASE_PORT}"; do
+    echo "[replica-init] Primary not ready yet, retrying in 1s..."
+    sleep 1
+  done
+  echo "[replica-init] Base backup completed."
+else
+  echo "[replica-init] Data directory not empty - skipping pg_basebackup."
+fi
+
+# Tighten permissions (required by PostgreSQL if not already 0700)
+chmod 0700 "$DATA_DIR" || true
+
+echo "[replica-init] Starting PostgreSQL replica..."
+exec postgres
