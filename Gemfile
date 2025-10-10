@@ -13,7 +13,7 @@ gem "appraisal"
 
 # for documentation server
 gem "puma"
-gem "rack", "~> 2.2.19"
+gem "rack", "~> 2.2.20"
 gem "yard"
 
 group :test do
