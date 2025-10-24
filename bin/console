@@ -2,10 +2,55 @@
 # frozen_string_literal: true
 
 require "bundler/setup"
-require "active_record_proxy_adapters"
+require "logger"
+require "pry"
 
-# You can add fixtures and/or initialization code here to make experimenting
-# with your gem easier. You can also use a different console, if you like.
+load "Rakefile"
+Rake::Task["environment"].invoke
 
-require "irb"
-IRB.start(__FILE__)
+require "active_record_proxy_adapters/log_subscriber"
+
+ActiveRecord::Base.logger = Logger.new($stdout)
+ActiveRecord::LogSubscriber.detach_from(:active_record)
+
+ActiveRecordProxyAdapters.configure do |config|
+  config.proxy_delay      = 2.seconds
+  config.checkout_timeout = 2.seconds
+  config.cache do |cache|
+    cache.store = ActiveSupport::Cache::MemoryStore.new(size: ENV.fetch("ARPA_CACHE_SIZE", "1024").to_i.megabytes,
+                                                        expires_in: 1.hour)
+    cache.key_builder = proc { |sql_string| Digest::MD5.hexdigest(sql_string.downcase) }
+  end
+
+  config.regexp_timeout_strategy = :raise
+
+  config.database :primary do |db_config|
+    db_config.checkout_timeout = 3.seconds
+    db_config.proxy_delay      = 3.seconds
+    db_config.log_subscriber_prefix = "Primary"
+  end
+
+  config.database :primary_replica do |db_config|
+    db_config.log_subscriber_prefix = "Replica"
+  end
+end
+
+# rubocop:disable Style/Documentation
+class PostgreSQLUser < TestHelper::PostgreSQLRecord
+  self.table_name = "users"
+end
+
+class Mysql2User < TestHelper::Mysql2Record
+  self.table_name = "users"
+end
+
+class TrilogyUser < TestHelper::TrilogyRecord
+  self.table_name = "users"
+end
+
+class SQLite3User < TestHelper::SQLite3Record
+  self.table_name = "users"
+end
+# rubocop:enable Style/Documentation
+
+pry # rubocop:disable Lint/Debugger
