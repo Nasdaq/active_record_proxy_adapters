@@ -20,4 +20,4 @@ RUN gem install bundler -v $(cat Gemfile.lock | grep "BUNDLED WITH" -A1 | tail -
 RUN bundle install
 RUN bundle exec appraisal install
 
-CMD [ "bin/exec-latest", "irb" ]
+CMD [ "bin/exec-latest", "bin/console" ]
