@@ -59,7 +59,7 @@ jobs:
     needs: [export_variables]
 
     container:
-      image: ${{ needs.export_variables.outputs.app_image }}-3.4.6
+      image: ${{ needs.export_variables.outputs.app_image }}-3.4.7
       volumes:
         - .:/app
 
@@ -104,8 +104,8 @@ jobs:
       matrix:
         ruby:
           - "3.2.9"
-          - "3.3.9"
-          - "3.4.6"
+          - "3.3.10"
+          - "3.4.7"
         ar:
           - "7.2"
           - "8.0"
@@ -178,7 +178,7 @@ jobs:
     permissions: write-all
 
     container:
-      image: ${{ needs.export_variables.outputs.app_image }}-3.4.6
+      image: ${{ needs.export_variables.outputs.app_image }}-3.4.7
       volumes:
         - .:/app
 
