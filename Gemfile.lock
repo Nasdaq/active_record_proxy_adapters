@@ -43,7 +43,7 @@ GEM
     connection_pool (2.5.3)
     dalli (3.2.8)
     diff-lcs (1.6.2)
-    digest (3.2.0)
+    digest (3.2.1)
     docile (1.4.1)
     drb (2.2.3)
     i18n (1.14.7)
