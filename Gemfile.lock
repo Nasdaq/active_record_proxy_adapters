@@ -70,7 +70,7 @@ GEM
     puma (7.1.0)
       nio4r (~> 2.0)
     racc (1.8.1)
-    rack (2.2.20)
+    rack (2.2.21)
     rainbow (3.1.1)
     rake (13.3.1)
     redis (5.4.1)
@@ -138,7 +138,7 @@ DEPENDENCIES
   pg (~> 1.6)
   pry (~> 0.15.2)
   puma
-  rack (~> 2.2.20)
+  rack (~> 2.2.21)
   rake (~> 13.3)
   redis (~> 5.4.1)
   rspec (~> 3.13)
