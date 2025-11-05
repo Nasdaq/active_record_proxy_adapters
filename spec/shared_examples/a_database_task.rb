@@ -5,6 +5,25 @@ RSpec.shared_examples_for "a database task" do
   let(:configuration) { nil }
   let(:model_class) { nil }
   let(:structure_path) { nil }
+  let(:migration_context) do
+    active_record_context = ActiveRecordProxyAdapters::ActiveRecordContext.new
+    migration_context_store = if active_record_context.active_record_v7_2_or_greater?
+                                ActiveRecord::Tasks::DatabaseTasks.migration_connection_pool
+                              else
+                                ActiveRecord::Base.connection
+                              end
+    migration_context_store.migration_context
+  end
+
+  def migration_target_version
+    Dir[File.expand_path("../db/database_tasks_migrate/*.rb", __dir__)]
+      .first
+      .split("/")
+      .last
+      .split("_")
+      .first
+      .to_i
+  end
 
   def database_exists?
     raise NoMethodError, "database_exists? must be implemented in the including context"
@@ -128,6 +147,139 @@ RSpec.shared_examples_for "a database task" do
 
     it "recreates the database with an empty schema" do
       expect { purge }.to change(&schema_loaded?).from(true).to(false)
+    end
+  end
+
+  describe "#forward" do
+    subject(:forward) { migration_context.forward(1) }
+
+    before do
+      ActiveRecord::Tasks::DatabaseTasks.create(configuration)
+      ActiveRecord::Tasks::DatabaseTasks.structure_load(configuration, structure_path)
+      ActiveRecord::Base.establish_connection(configuration)
+    end
+
+    after do
+      ActiveRecord::Tasks::DatabaseTasks.drop(configuration)
+    end
+
+    it "reroutes requests to the primary" do
+      allow(migration_context).to receive(:sticking_to_primary).and_call_original
+
+      forward
+
+      expect(migration_context).to have_received(:sticking_to_primary)
+    end
+  end
+
+  describe "#rollback" do
+    subject(:rollback) { migration_context.rollback(1) }
+
+    before do
+      ActiveRecord::Tasks::DatabaseTasks.create(configuration)
+      ActiveRecord::Tasks::DatabaseTasks.structure_load(configuration, structure_path)
+      ActiveRecord::Base.establish_connection(configuration)
+    end
+
+    after do
+      ActiveRecord::Tasks::DatabaseTasks.drop(configuration)
+    end
+
+    it "reroutes requests to the primary" do
+      allow(migration_context).to receive(:sticking_to_primary).and_call_original
+
+      rollback
+
+      expect(migration_context).to have_received(:sticking_to_primary)
+    end
+  end
+
+  describe "#up" do
+    subject(:up) { migration_context.run(:up, migration_target_version) }
+
+    before do
+      ActiveRecord::Tasks::DatabaseTasks.create(configuration)
+      ActiveRecord::Tasks::DatabaseTasks.structure_load(configuration, structure_path)
+      ActiveRecord::Base.establish_connection(configuration)
+    end
+
+    after do
+      ActiveRecord::Tasks::DatabaseTasks.drop(configuration)
+    end
+
+    it "reroutes requests to the primary" do
+      allow(migration_context).to receive(:sticking_to_primary).and_call_original
+
+      up
+
+      expect(migration_context).to have_received(:sticking_to_primary)
+    end
+  end
+
+  describe "#down" do
+    subject(:down) { migration_context.run(:down, migration_target_version) }
+
+    before do
+      ActiveRecord::Tasks::DatabaseTasks.create(configuration)
+      ActiveRecord::Tasks::DatabaseTasks.structure_load(configuration, structure_path)
+      ActiveRecord::Base.establish_connection(configuration)
+      migration_context.run(:up, "20250102000000".to_i)
+    end
+
+    after do
+      ActiveRecord::Tasks::DatabaseTasks.drop(configuration)
+    end
+
+    it "reroutes requests to the primary" do
+      allow(migration_context).to receive(:sticking_to_primary).and_call_original
+
+      down
+
+      expect(migration_context).to have_received(:sticking_to_primary)
+    end
+  end
+
+  describe "#migrate" do
+    subject(:migrate) { ActiveRecord::Tasks::DatabaseTasks.migrate }
+
+    before do
+      ActiveRecord::Tasks::DatabaseTasks.create(configuration)
+      ActiveRecord::Tasks::DatabaseTasks.structure_load(configuration, structure_path)
+      ActiveRecord::Base.establish_connection(configuration)
+    end
+
+    after do
+      ActiveRecord::Tasks::DatabaseTasks.drop(configuration)
+    end
+
+    it "reroutes requests to the primary" do
+      allow(ActiveRecord::Tasks::DatabaseTasks).to receive(:sticking_to_primary).and_call_original
+
+      migrate
+
+      expect(ActiveRecord::Tasks::DatabaseTasks).to have_received(:sticking_to_primary)
+    end
+  end
+
+  describe "#migrate_status" do
+    subject(:migrate_status) { ActiveRecord::Tasks::DatabaseTasks.migrate_status }
+
+    before do
+      ActiveRecord::Tasks::DatabaseTasks.create(configuration)
+      ActiveRecord::Tasks::DatabaseTasks.structure_load(configuration, structure_path)
+      ActiveRecord::Base.establish_connection(configuration)
+    end
+
+    after do
+      ActiveRecord::Tasks::DatabaseTasks.drop(configuration)
+    end
+
+    it "reroutes requests to the primary" do
+      allow(ActiveRecord::Tasks::DatabaseTasks).to receive(:sticking_to_primary).and_call_original
+
+      migrate_status
+
+      expect(ActiveRecord::Tasks::DatabaseTasks).to have_received(:sticking_to_primary)
     end
   end
 end

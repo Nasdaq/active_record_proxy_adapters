@@ -1,4 +1,7 @@
 test:
+  database_tasks_defaults: &database_tasks_defaults
+    migrations_paths: spec/db/database_tasks_migrate
+
   postgresql_primary: &postgresql_primary
     adapter: postgresql_proxy
     username: <%= ENV.fetch("PG_PRIMARY_USER", "postgres") %>
@@ -17,7 +20,7 @@ test:
     replica: true
 
   postgresql_database_tasks:
-    <<: *postgresql_primary
+    <<: [*postgresql_primary, *database_tasks_defaults]
     database: postgresql_primary_replica_proxy_database_tasks_test
 
   mysql2_primary: &mysql_primary
@@ -38,7 +41,7 @@ test:
     replica: true
 
   mysql2_database_tasks:
-    <<: *mysql_primary
+    <<: [*mysql_primary, *database_tasks_defaults]
     database: mysql_primary_replica_proxy_database_tasks_test
 
   trilogy_primary: &trilogy_primary
@@ -59,7 +62,7 @@ test:
     replica: true
 
   trilogy_database_tasks:
-    <<: *trilogy_primary
+    <<: [*trilogy_primary, *database_tasks_defaults]
     database: trilogy_primary_replica_proxy_database_tasks_test
 
   sqlite3_primary: &sqlite3_primary
@@ -72,5 +75,5 @@ test:
     replica: true
 
   sqlite3_database_tasks:
-    <<: *sqlite3_primary
+    <<: [*sqlite3_primary, *database_tasks_defaults]
     database: db/database_tasks_test.sqlite3

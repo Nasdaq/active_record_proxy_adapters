@@ -11,6 +11,7 @@ SIMPLE_COV_GROUPS = proc do
       /errors/,
       /hijackable/,
       /middleware/,
+      /migration_database_tasks/,
       /mixin/,
       /primary_replica_proxy/
     ].any? { |pattern| pattern.match?(src_file.filename) }
