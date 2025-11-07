@@ -7,7 +7,6 @@ PATH
       digest (>= 3.1.0)
       json
       logger
-      timeout
 
 GEM
   remote: https://rubygems.org/
