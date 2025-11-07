@@ -21,6 +21,6 @@ end
 namespace :db do
   desc "Mock task for testing"
   task fake_migrate: :fake_environment do
-    puts "Mock db:migrate task executed"
+    $stdout.puts "Mock db:migrate task executed"
   end
 end

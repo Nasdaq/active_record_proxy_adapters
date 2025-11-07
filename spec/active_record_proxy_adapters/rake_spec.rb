@@ -2,7 +2,6 @@
 
 require "active_record_proxy_adapters/rake"
 
-# The gem namespace.
 RSpec.describe ActiveRecordProxyAdapters::Rake do
   let(:fake_rake_tasks_path) { File.join(__dir__, "mock_tasks.rake") }
   let(:fake_db_task) { Rake::Task["db:fake_migrate"] }
