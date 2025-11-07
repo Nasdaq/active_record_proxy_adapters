@@ -1,11 +1,15 @@
 ## [Unreleased]
 
 - Add support for ActiveRecord 8.1
-- Remove ActiveRecord 7.0 boilerplate
 - Drop support for ActiveRecord 7.1.x
 - Use regexp timeout for matching
 
-## [0.9.1, 0.8.1] - 2025-11-07
+## [0.9.1] - 2025-11-07
+
+- Remove ActiveRecord 7.0 boilerplate
+- Wrap all database tasks in a writing role block [f4d853b](https://github.com/Nasdaq/active_record_proxy_adapters/commit/f4d853bc10fad9d11a45d39d700f1c529b0fdf57)
+
+## [0.8.1] - 2025-11-07
 
 - Wrap all database tasks in a writing role block [f4d853b](https://github.com/Nasdaq/active_record_proxy_adapters/commit/f4d853bc10fad9d11a45d39d700f1c529b0fdf57)
 
