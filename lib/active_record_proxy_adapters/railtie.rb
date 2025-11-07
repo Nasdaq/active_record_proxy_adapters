@@ -7,6 +7,7 @@ module ActiveRecordProxyAdapters
   class Railtie < Rails::Railtie
     require "active_record_proxy_adapters/connection_handling"
     require "active_record_proxy_adapters/middleware"
+    require "active_record_proxy_adapters/rake"
 
     config.to_prepare do
       Rails.autoloaders.each do |autoloader|
@@ -21,6 +22,11 @@ module ActiveRecordProxyAdapters
 
     initializer "active_record_proxy_adapters.configure_rails_initialization" do |app|
       app.middleware.use ActiveRecordProxyAdapters::Middleware
+    end
+
+    rake_tasks do
+      ActiveRecordProxyAdapters::Rake.load_tasks
+      ActiveRecordProxyAdapters::Rake.enhance_db_tasks
     end
   end
 end
