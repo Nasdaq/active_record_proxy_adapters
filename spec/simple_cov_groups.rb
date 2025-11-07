@@ -7,13 +7,14 @@ SIMPLE_COV_GROUPS = proc do
       /configuration/,
       /context/,
       /contextualizer/,
+      /core/,
       %r{/database_tasks},
       /errors/,
       /hijackable/,
       /middleware/,
       /mixin/,
       /primary_replica_proxy/,
-      /core/
+      /rake/
     ].any? { |pattern| pattern.match?(src_file.filename) }
   end
 
