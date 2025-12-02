@@ -1,12 +1,14 @@
 ## [Unreleased]
 
-- Add support for ActiveRecord 8.1
-- Drop support for ActiveRecord 7.1.x
-- Use regexp timeout for matching
+## [0.10.0] - 2025-12-02
+
+- Add support for ActiveRecord 8.1 [69b2231](https://github.com/Nasdaq/active_record_proxy_adapters/commit/69b2231ccdc1568f67b578ddd4d90030bf89c0b8)
+- Drop support for ActiveRecord 7.1.x [d37514d](https://github.com/Nasdaq/active_record_proxy_adapters/commit/d37514d33f949b02ff6779fc975834baa9953b28)
+- Use regexp timeout for matching [b1a9408](https://github.com/Nasdaq/active_record_proxy_adapters/commit/b1a9408bc4053bf610e3b13f090b4419a9257adf)
 
 ## [0.9.1] - 2025-11-07
 
-- Remove ActiveRecord 7.0 boilerplate
+- Remove ActiveRecord 7.0 boilerplate [d6eaea4](https://github.com/Nasdaq/active_record_proxy_adapters/commit/d6eaea4fa1f6812a2675eac07752684f8bb2ad59)
 - Wrap all database tasks in a writing role block [f4d853b](https://github.com/Nasdaq/active_record_proxy_adapters/commit/f4d853bc10fad9d11a45d39d700f1c529b0fdf57)
 
 ## [0.8.1] - 2025-11-07
@@ -15,14 +17,14 @@
 
 ## [0.9.0] - 2025-10-02
 
-- Add ability to require only core files
-- Move loading of PostgreSQLProxy to its own Railtie
-- Move loading of Mysql2Proxy to its own Railtie
-- Move loading of TrilogyProxy to its own Railtie
-- Move loading of SQLite3Proxy to its own Railtie
-- Fix connection stickiness for inserts with Trilogy
-- Drop support for ActiveRecord 7.0.x
-- Drop support for Ruby 3.1.x
+- Add ability to require only core files [fd6f635](https://github.com/Nasdaq/active_record_proxy_adapters/commit/fd6f635b6832c46307d69a4d8c6c2bcc64308cdd)
+- Move loading of PostgreSQLProxy to its own Railtie [d9f4b14](https://github.com/Nasdaq/active_record_proxy_adapters/commit/d9f4b14f1200f09da011a150a2f3d29a3454d5ab)
+- Move loading of Mysql2Proxy to its own Railtie [3a958e1](https://github.com/Nasdaq/active_record_proxy_adapters/commit/3a958e1816cfac563f078b5ae30b24ac5c161977)
+- Move loading of TrilogyProxy to its own Railtie [57f0c25](https://github.com/Nasdaq/active_record_proxy_adapters/commit/57f0c2531a86f74c3e98d5c6be6c473b2f9fe819)
+- Move loading of SQLite3Proxy to its own Railtie [81778ce](https://github.com/Nasdaq/active_record_proxy_adapters/commit/81778ce6c2457ae9265884f4ce5152b8dd0ae268)
+- Fix connection stickiness for inserts with Trilogy [5746bd4](https://github.com/Nasdaq/active_record_proxy_adapters/commit/5746bd47d0e6eaded4e0a1b0cfc110e401109e45), [ce33e50](https://github.com/Nasdaq/active_record_proxy_adapters/commit/ce33e50ffd0e6b86abcb5c06fba314d2771f6df5)
+- Drop support for ActiveRecord 7.0.x [1a3c845](https://github.com/Nasdaq/active_record_proxy_adapters/commit/1a3c84564b03782b27c9be43174df7438383b19f)
+- Drop support for Ruby 3.1.x [b5f15b9](https://github.com/Nasdaq/active_record_proxy_adapters/commit/b5f15b9f1500169bd7caccb21444a23fb82b8b74)
 
 ## [0.8.0] - 2025-08-28
 
