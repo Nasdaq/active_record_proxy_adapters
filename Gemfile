@@ -11,7 +11,7 @@ gem "trilogy", "~> 2.9"
 
 gem "appraisal"
 
-gem "pry", "~> 0.15.2"
+gem "pry", "~> 0.16.0"
 
 # for documentation server
 gem "puma"
