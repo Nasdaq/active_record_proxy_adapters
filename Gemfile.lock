@@ -47,6 +47,7 @@ GEM
     drb (2.2.3)
     i18n (1.14.7)
       concurrent-ruby (~> 1.0)
+    io-console (0.8.2)
     json (2.18.0)
     language_server-protocol (3.17.0.5)
     lint_roller (1.1.0)
@@ -63,9 +64,10 @@ GEM
     pg (1.6.2)
     pg (1.6.2-aarch64-linux-musl)
     prism (1.6.0)
-    pry (0.15.2)
+    pry (0.16.0)
       coderay (~> 1.1)
       method_source (~> 1.0)
+      reline (>= 0.6.0)
     puma (7.1.0)
       nio4r (~> 2.0)
     racc (1.8.1)
@@ -77,6 +79,8 @@ GEM
     redis-client (0.25.1)
       connection_pool
     regexp_parser (2.11.3)
+    reline (0.6.3)
+      io-console (~> 0.5)
     rspec (3.13.2)
       rspec-core (~> 3.13.0)
       rspec-expectations (~> 3.13.0)
@@ -135,7 +139,7 @@ DEPENDENCIES
   dalli
   mysql2 (~> 0.5)
   pg (~> 1.6)
-  pry (~> 0.15.2)
+  pry (~> 0.16.0)
   puma
   rack (~> 2.2.21)
   rake (~> 13.3)
