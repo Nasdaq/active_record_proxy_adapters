@@ -61,8 +61,8 @@ GEM
     parser (3.3.10.0)
       ast (~> 2.4.1)
       racc
-    pg (1.6.2)
-    pg (1.6.2-aarch64-linux-musl)
+    pg (1.6.3)
+    pg (1.6.3-aarch64-linux-musl)
     prism (1.7.0)
     pry (0.16.0)
       coderay (~> 1.1)
