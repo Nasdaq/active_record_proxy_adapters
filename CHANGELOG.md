@@ -1,5 +1,7 @@
 ## [Unreleased]
 
+- Add Ruby 4.0.0 to test matrix
+
 ## [0.10.0] - 2025-12-02
 
 - Add support for ActiveRecord 8.1 [69b2231](https://github.com/Nasdaq/active_record_proxy_adapters/commit/69b2231ccdc1568f67b578ddd4d90030bf89c0b8)
