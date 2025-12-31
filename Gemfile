@@ -28,6 +28,7 @@ group :test do
   gem "rubocop", "~> 1.82"
   gem "rubocop-rspec", "~> 3.8.0"
   gem "simplecov"
+  gem "timecop"
 end
 
 # Specify your gem's dependencies in active_record_proxy_adapters.gemspec
