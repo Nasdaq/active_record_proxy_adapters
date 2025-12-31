@@ -28,7 +28,7 @@ RSpec.describe ActiveRecordProxyAdapters::Middleware do
     end
   end
 
-  describe "#call" do
+  describe "#call", freeze_time: { to: Time.utc(2025) } do
     let(:middleware) { described_class.new(app, {}) }
 
     let(:app) do
@@ -44,11 +44,7 @@ RSpec.describe ActiveRecordProxyAdapters::Middleware do
         config.proxy_delay      = 2.seconds
         config.checkout_timeout = 2.seconds
       end
-
-      travel_to(Time.utc(2025))
     end
-
-    after { travel_back }
 
     context "when context cookie is not set" do
       it "initializes the cookie with an empty hash" do
