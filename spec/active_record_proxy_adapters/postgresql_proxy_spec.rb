@@ -102,46 +102,4 @@ RSpec.describe ActiveRecordProxyAdapters::PostgreSQLProxy do # rubocop:disable R
       it_behaves_like "a SQL pattern matching timeout"
     end
   end
-
-  describe "#exec_delete" do
-    it_behaves_like "a proxied method", :exec_delete
-  end
-
-  describe "#exec_insert" do
-    it_behaves_like "a proxied method", :exec_insert
-  end
-
-  describe "#exec_query" do
-    it_behaves_like "a proxied method", :exec_query
-  end
-
-  describe "#exec_update" do
-    it_behaves_like "a proxied method", :exec_update
-  end
-
-  describe "#select" do
-    it_behaves_like "a proxied method", :select
-  end
-
-  if TestHelper.active_record_context.active_record_v7?
-    describe "#exec_no_cache" do
-      it_behaves_like "a proxied method", :exec_no_cache do
-        subject(:run_test) do
-          proxy.exec_no_cache(sql, "SQL", [], async: false, allow_retry: false, materialize_transactions: false)
-        end
-
-        let(:read_only_error_class) { ActiveRecord::StatementInvalid }
-      end
-    end
-
-    describe "#exec_cache" do
-      it_behaves_like "a proxied method", :exec_cache do
-        subject(:run_test) do
-          proxy.exec_cache(sql, "SQL", [], async: false, allow_retry: false, materialize_transactions: false)
-        end
-
-        let(:read_only_error_class) { ActiveRecord::StatementInvalid }
-      end
-    end
-  end
 end

@@ -17,9 +17,24 @@ module ActiveRecordProxyAdapters
       connection.connection_class || ActiveRecord::Base
     end
 
+    # rubocop:disable Style/TrailingCommaInArrayLiteral
     def hijackable_methods
-      %i[exec_delete exec_insert exec_query exec_update execute select]
+      [
+        # Create
+        :insert,
+        :exec_insert_all, # this one is an exception to the rule. there's no higher-level equivalent method to be called
+        # Retrieve
+        :select,
+        # Update
+        :update,
+        # Delete
+        :delete,
+        # Generic
+        :exec_query,
+        :execute,
+      ]
     end
+    # rubocop:enable Style/TrailingCommaInArrayLiteral
 
     def active_record_v7?
       active_record_version >= Gem::Version.new("7.2") && active_record_version < Gem::Version.new("8.0")
