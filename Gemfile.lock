@@ -75,6 +75,8 @@ GEM
     rack (2.2.21)
     rainbow (3.1.1)
     rake (13.3.1)
+    readline (0.0.4)
+      reline
     redis (5.4.1)
       redis-client (>= 0.22.0)
     redis-client (0.25.1)
@@ -137,13 +139,16 @@ PLATFORMS
 DEPENDENCIES
   active_record_proxy_adapters!
   appraisal
+  benchmark
   dalli
+  logger
   mysql2 (~> 0.5)
   pg (~> 1.6)
   pry (~> 0.16.0)
   puma
   rack (~> 2.2.21)
   rake (~> 13.3)
+  readline
   redis (~> 5.4.1)
   rspec (~> 3.13)
   rubocop (~> 1.82)

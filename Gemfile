@@ -11,6 +11,11 @@ gem "trilogy", "~> 2.9"
 
 gem "appraisal"
 
+# Gems that used to be default gems in Ruby 3.7.x but aren't anymore
+gem "benchmark"
+gem "logger"
+gem "readline"
+
 gem "pry", "~> 0.16.0"
 
 # for documentation server
