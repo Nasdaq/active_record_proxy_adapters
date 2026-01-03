@@ -15,7 +15,7 @@ module ActiveRecord
 
       ADAPTER_NAME = "TrilogyProxy"
 
-      delegate_to_proxy(*ActiveRecordProxyAdapters::ActiveRecordContext.hijackable_methods, :exec_insert)
+      delegate_to_proxy(*ActiveRecordProxyAdapters::ActiveRecordContext.hijackable_methods)
 
       def initialize(...)
         @proxy = ActiveRecordProxyAdapters::TrilogyProxy.new(self)

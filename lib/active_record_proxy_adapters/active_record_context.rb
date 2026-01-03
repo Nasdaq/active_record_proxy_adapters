@@ -18,7 +18,7 @@ module ActiveRecordProxyAdapters
     end
 
     def hijackable_methods
-      %i[execute exec_query internal_exec_query]
+      %i[exec_delete exec_insert exec_query exec_update execute select]
     end
 
     def active_record_v7?
