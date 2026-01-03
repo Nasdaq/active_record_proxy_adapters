@@ -102,7 +102,8 @@ module ActiveRecordProxyAdapters
     end
 
     def coerce_query_to_string(sql_or_arel)
-      sql_or_arel.respond_to?(:to_sql) ? sql_or_arel.to_sql : sql_or_arel.to_s
+      # TODO: implement custom Proxy arel parser
+      sql_or_arel.respond_to?(:to_sql) ? sql_or_arel.to_sql(connection_class) : sql_or_arel.to_s
     end
 
     def appropriate_connection(sql_string, &block)
