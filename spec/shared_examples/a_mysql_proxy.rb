@@ -34,17 +34,64 @@ RSpec.shared_examples "a MySQL proxy" do
 
   it_behaves_like "a transaction block proxy bypass"
 
+  describe "#exec_delete" do
+    include_context "a proxied method setup" do
+      let(:method_name) { :exec_delete }
+    end
+
+    it_behaves_like "a SQL write statement" do
+      let(:sql) do
+        <<~SQL.strip
+          DELETE FROM users
+          WHERE  email = 'john.doe@example.com';
+        SQL
+      end
+    end
+  end
+
+  describe "#exec_insert" do
+    it_behaves_like "a proxied method", :exec_insert do
+      before do
+        # exec_insert in trilogy does not adhere to the standard method signature. These /exec_/ methods will be
+        # deprecated in future rails releases so we are skipping tests for now.
+        if adapter_class == ActiveRecord::ConnectionAdapters::TrilogyAdapter
+          skip "trilogy adapter does not support standard exec_insert signature"
+        end
+      end
+    end
+  end
+
+  describe "#exec_query" do
+    include_context "a proxied method setup" do
+      let(:method_name) { :exec_query }
+    end
+
+    it_behaves_like "a proxied method", :exec_query
+  end
+
+  describe "#exec_update" do
+    include_context "a proxied method setup" do
+      let(:method_name) { :exec_update }
+    end
+
+    it_behaves_like "a SQL write statement" do
+      let(:sql) do
+        <<~SQL.strip
+          UPDATE users
+          SET    name  = 'Johnny Doe'
+          WHERE  email = 'john.doe@example.com';
+        SQL
+      end
+    end
+  end
+
   describe "#execute" do
     it_behaves_like "a proxied method", :execute do
       it_behaves_like "a SQL pattern matching timeout"
     end
   end
 
-  describe "#exec_query" do
-    it_behaves_like "a proxied method", :exec_query
-  end
-
-  describe "#internal_exec_query" do
-    it_behaves_like "a proxied method", :internal_exec_query
+  describe "#select" do
+    it_behaves_like "a proxied method", :select
   end
 end
