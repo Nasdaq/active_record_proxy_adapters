@@ -1,6 +1,7 @@
 ## [Unreleased]
 
 - Add Ruby 4.0.0 to test matrix
+- Fix hijacked methods for all supported ActiveRecord version
 
 ## [0.10.0] - 2025-12-02
 
