@@ -5,6 +5,7 @@ CREATE TABLE users (
     id integer PRIMARY KEY NOT NULL,
     name text NOT NULL,
     email text NOT NULL,
+    age integer not null default 0,
     created_at timestamp DEFAULT CURRENT_TIMESTAMP NOT NULL,
     updated_at timestamp DEFAULT CURRENT_TIMESTAMP NOT NULL
 );
