@@ -26,7 +26,7 @@ RSpec.describe ActiveRecordProxyAdapters::PostgreSQLProxy do # rubocop:disable R
   def create_dummy_user
     primary_adapter.execute_unproxied <<~SQL.strip
       INSERT INTO users (name, email)
-      VALUES ('John Doe', 'john.doe@example.com');
+      VALUES ('John Doe', 'john.doe@example.com')
     SQL
   end
 
@@ -65,7 +65,7 @@ RSpec.describe ActiveRecordProxyAdapters::PostgreSQLProxy do # rubocop:disable R
               SELECT users.*
               FROM users
               INNER JOIN user_ids ON users.id = user_ids.id
-              INNER JOIN user_emails ON users.email = user_emails.email;
+              INNER JOIN user_emails ON users.email = user_emails.email
             SQL
           end
 
@@ -83,7 +83,7 @@ RSpec.describe ActiveRecordProxyAdapters::PostgreSQLProxy do # rubocop:disable R
         <<~SQL.squish
           INSERT INTO users (name, email)
           VALUES
-          #{values.join(", ")};
+          #{values.join(", ")}
         SQL
       end
 
@@ -103,10 +103,24 @@ RSpec.describe ActiveRecordProxyAdapters::PostgreSQLProxy do # rubocop:disable R
     end
   end
 
+  describe "#exec_delete" do
+    it_behaves_like "a proxied method", :exec_delete
+  end
+
+  describe "#exec_insert" do
+    it_behaves_like "a proxied method", :exec_insert
+  end
+
   describe "#exec_query" do
-    it_behaves_like "a proxied method", :exec_query do
-      it_behaves_like "a PostgreSQL CTE"
-    end
+    it_behaves_like "a proxied method", :exec_query
+  end
+
+  describe "#exec_update" do
+    it_behaves_like "a proxied method", :exec_update
+  end
+
+  describe "#select" do
+    it_behaves_like "a proxied method", :select
   end
 
   if TestHelper.active_record_context.active_record_v7?
@@ -117,8 +131,6 @@ RSpec.describe ActiveRecordProxyAdapters::PostgreSQLProxy do # rubocop:disable R
         end
 
         let(:read_only_error_class) { ActiveRecord::StatementInvalid }
-
-        it_behaves_like "a PostgreSQL CTE"
       end
     end
 
@@ -129,15 +141,7 @@ RSpec.describe ActiveRecordProxyAdapters::PostgreSQLProxy do # rubocop:disable R
         end
 
         let(:read_only_error_class) { ActiveRecord::StatementInvalid }
-
-        it_behaves_like "a PostgreSQL CTE"
       end
-    end
-  end
-
-  describe "#internal_exec_query" do
-    it_behaves_like "a proxied method", :internal_exec_query do
-      it_behaves_like "a PostgreSQL CTE"
     end
   end
 end
