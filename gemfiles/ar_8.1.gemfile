@@ -2,6 +2,7 @@
 
 source "https://rubygems.org"
 
+gem "connection_pool", "< 3"
 gem "dalli"
 gem "mysql2", "~> 0.5"
 gem "pg", "~> 1.6"
