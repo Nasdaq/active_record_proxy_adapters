@@ -28,7 +28,7 @@ RSpec.describe ActiveRecordProxyAdapters::Middleware do
     end
   end
 
-  describe "#call", freeze_time: { to: Time.utc(2025) } do
+  describe "#call", freeze_time: { to: Time.utc(2026) } do
     let(:middleware) { described_class.new(app, {}) }
 
     let(:app) do
