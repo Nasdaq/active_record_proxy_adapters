@@ -16,7 +16,11 @@ run_tests() {
     local env_number=${ar//./_}
 
     TEST_ENV_NUMBER=$env_number $bin_dir/appraisal-exec $ar rake db:drop db:setup
-    TEST_ENV_NUMBER=$env_number $bin_dir/appraisal-exec $ar rspec -fp --fail-fast
+    TEST_ENV_NUMBER=$env_number $bin_dir/appraisal-exec $ar rspec -fp --fail-fast --tag ~integration
+    TEST_ENV_NUMBER=$env_number \
+    PG_REPLICA_HOST=$PG_PRIMARY_HOST \
+    PG_REPLICA_PORT=$PG_PRIMARY_PORT \
+    $bin_dir/appraisal-exec $ar rspec -fp --fail-fast --tag integration
 }
 
 active_record_versions() {

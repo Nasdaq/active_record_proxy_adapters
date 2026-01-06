@@ -159,10 +159,17 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
+      - name: Setup database
+        run: bundle exec rake db:setup
+
       - name: Run RSpec tests
-        run: |
-          bundle exec rake db:setup
-          bundle exec rspec --format progress
+        run: bundle exec rspec --format progress --tag ~integration
+
+      - name: Run RSpec integration tests
+        env:
+          PG_REPLICA_HOST: postgres_primary
+          PG_REPLICA_PORT: 5432
+        run: bundle exec rspec --format progress --tag integration
 
       - name: Upload Coverage Report
         uses: actions/upload-artifact@v4
