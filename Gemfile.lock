@@ -141,6 +141,7 @@ DEPENDENCIES
   active_record_proxy_adapters!
   appraisal
   benchmark
+  connection_pool (< 3)
   dalli
   logger
   mysql2 (~> 0.5)
