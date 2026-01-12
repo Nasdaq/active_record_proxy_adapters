@@ -40,7 +40,8 @@ GEM
     coderay (1.1.3)
     concurrent-ruby (1.3.5)
     connection_pool (2.5.3)
-    dalli (3.2.8)
+    dalli (4.0.0)
+      logger
     diff-lcs (1.6.2)
     digest (3.2.1)
     docile (1.4.1)
