@@ -22,7 +22,7 @@ services:
     <<: *app-common
     build:
       args:
-        - RUBY_VERSION=${RUBY_VERSION:-4.0.0}
+        - RUBY_VERSION=${RUBY_VERSION:-4.0.1}
         - DOCKER_REGISTRY=${DOCKER_REGISTRY:-docker.io}
     container_name: app
     tty: true

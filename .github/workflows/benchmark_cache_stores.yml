@@ -72,7 +72,7 @@ jobs:
     strategy:
       matrix:
         ruby:
-          - "4.0.0"
+          - "4.0.1"
         ar:
           - "8.1"
         cache_store:
