@@ -1,0 +1,90 @@
+name: Dependabot Auto Update
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened]
+  push:
+    branches-ignore:
+      - main
+
+jobs:
+  export_variables:
+    runs-on: ubuntu-latest
+
+    outputs:
+      app_image: ${{ steps.compute_container_registry_name.outputs.CR_NAME }}/app:${{ steps.read_app_image_tag.outputs.APP_IMAGE_TAG }}
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Compute container registry name
+        id: compute_container_registry_name
+        run: echo "CR_NAME=$(echo ghcr.io/${{ github.repository }} | tr '[:upper:]' '[:lower:]')" >> $GITHUB_OUTPUT
+
+      - name: Read app image tag
+        id: read_app_image_tag
+        run: echo "APP_IMAGE_TAG=$(head -n1 .app-image-tag)" >> $GITHUB_OUTPUT
+
+  auto-update:
+    # Only run on pull requests created by dependabot
+    if: github.actor == 'dependabot[bot]'
+    needs: [export_variables]
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      pull-requests: write
+
+    container:
+      image: ${{ needs.export_variables.outputs.app_image }}-4.0.1
+      volumes:
+        - .:/app
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.head_ref }}
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Bump version in .app-image-tag
+        run: |
+          current_version=$(cat .app-image-tag | tr -d '\n')
+          echo "Current version: $current_version"
+
+          # Extract version components (e.g., v0.10.1.10 -> 0.10.1.10)
+          version_without_v="${current_version#v}"
+
+          # Split by dots
+          IFS='.' read -ra parts <<< "$version_without_v"
+
+          # Increment the last part (patch version)
+          last_index=$((${#parts[@]} - 1))
+          parts[$last_index]=$((${parts[$last_index]} + 1))
+
+          # Reconstruct version
+          new_version="v$(IFS=.; echo "${parts[*]}")"
+          echo "New version: $new_version"
+
+          # Write new version
+          echo "$new_version" > .app-image-tag
+
+      - name: Run bundle install
+        run: bundle install
+
+      - name: Run bundle exec appraisal install
+        run: bundle exec appraisal install
+
+      - name: Commit and push changes
+        run: |
+          git config --local user.email "github-actions[bot]@users.noreply.github.com"
+          git config --local user.name "github-actions[bot]"
+
+          # Check if there are any changes to commit
+          if [[ -n $(git status --porcelain) ]]; then
+            git add .
+            git commit -m "chore: update dependencies and bump version"
+            git push
+          else
+            echo "No changes to commit"
+          fi
