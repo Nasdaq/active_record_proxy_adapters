@@ -53,18 +53,11 @@ jobs:
           current_version=$(cat .app-image-tag | tr -d '\n')
           echo "Current version: $current_version"
 
-          # Extract version components (e.g., v0.10.1.10 -> 0.10.1.10)
+          # Remove 'v' prefix
           version_without_v="${current_version#v}"
 
-          # Split by dots
-          IFS='.' read -ra parts <<< "$version_without_v"
-
-          # Increment the last part (patch version)
-          last_index=$((${#parts[@]} - 1))
-          parts[$last_index]=$((${parts[$last_index]} + 1))
-
-          # Reconstruct version
-          new_version="v$(IFS=.; echo "${parts[*]}")"
+          # Use awk to increment the last part
+          new_version="v$(echo "$version_without_v" | awk -F. '{$NF = $NF + 1; print}' OFS='.')"
           echo "New version: $new_version"
 
           # Write new version
