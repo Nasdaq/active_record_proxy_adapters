@@ -34,6 +34,7 @@ jobs:
     permissions:
       contents: write
       pull-requests: write
+      packages: read
 
     container:
       image: ${{ needs.export_variables.outputs.app_image }}-4.0.1
