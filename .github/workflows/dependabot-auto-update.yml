@@ -10,6 +10,11 @@ jobs:
     if: github.actor == 'dependabot[bot]'
     runs-on: ubuntu-latest
 
+    permissions:
+      contents: write
+      pull-requests: read
+      packages: read
+
     outputs:
       app_image: ${{ steps.compute_container_registry_name.outputs.CR_NAME }}/app:${{ steps.read_app_image_tag.outputs.APP_IMAGE_TAG }}
 
@@ -36,6 +41,7 @@ jobs:
     defaults:
       run:
         working-directory: ${{ github.workspace }}
+
     permissions:
       contents: write
       pull-requests: write
