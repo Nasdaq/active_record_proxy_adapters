@@ -3,12 +3,11 @@ name: Dependabot Auto Update
 on:
   pull_request:
     types: [opened, synchronize, reopened]
-  push:
-    branches-ignore:
-      - main
 
 jobs:
   export_variables:
+    # Only run on pull requests created by dependabot
+    if: github.actor == 'dependabot[bot]'
     runs-on: ubuntu-latest
 
     outputs:
@@ -16,7 +15,10 @@ jobs:
 
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
+        with:
+          ref: ${{ github.head_ref }}
+          token: ${{ secrets.AUTO_UPDATE_ACCESS_TOKEN }}
 
       - name: Compute container registry name
         id: compute_container_registry_name
@@ -31,6 +33,9 @@ jobs:
     if: github.actor == 'dependabot[bot]'
     needs: [export_variables]
     runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: ${{ github.workspace }}
     permissions:
       contents: write
       pull-requests: write
@@ -43,10 +48,10 @@ jobs:
 
     steps:
       - name: Checkout code
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
         with:
           ref: ${{ github.head_ref }}
-          token: ${{ secrets.GITHUB_TOKEN }}
+          token: ${{ secrets.AUTO_UPDATE_ACCESS_TOKEN }}
 
       - name: Bump version in .app-image-tag
         run: |
@@ -69,16 +74,27 @@ jobs:
       - name: Run bundle exec appraisal install
         run: bundle exec appraisal install
 
-      - name: Commit and push changes
+      - name: git status
         run: |
-          git config --local user.email "github-actions[bot]@users.noreply.github.com"
-          git config --local user.name "github-actions[bot]"
+          git config --global --add safe.directory $GITHUB_WORKSPACE
+          git status --verbose
 
-          # Check if there are any changes to commit
-          if [[ -n $(git status --porcelain) ]]; then
-            git add .
-            git commit -m "chore: update dependencies and bump version"
-            git push
-          else
-            echo "No changes to commit"
-          fi
+      - name: Install bash and gpg to support git-auto-commit-action with signed commits
+        run: apk add bash gpg gpg-agent
+
+      - name: "Import GPG key"
+        id: import-gpg
+        uses: crazy-max/ghaction-import-gpg@v6
+        with:
+          gpg_private_key: ${{ secrets.GPG_PRIVATE_KEY }}
+          passphrase: ${{ secrets.GPG_PASSPHRASE }}
+          git_user_signingkey: true
+          git_commit_gpgsign: true
+
+      - uses: stefanzweifel/git-auto-commit-action@v7
+        with:
+          commit_message: "chore: Bump image tag and update lockfiles"
+          commit_user_name: ${{ secrets.COMMIT_USER_NAME }}
+          commit_user_email: ${{ secrets.COMMIT_USER_EMAIL }}
+          commit_author: Github Actions <actions@github.com>
+          branch: ${{ github.head_ref }}
