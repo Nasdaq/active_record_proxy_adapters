@@ -13,6 +13,9 @@ Style/StringLiterals:
 Style/StringLiteralsInInterpolation:
   EnforcedStyle: double_quotes
 
+Style/EmptyClassDefinition:
+  Enabled: false
+
 RSpec/NestedGroups:
   Enabled: true
   Max: 5
