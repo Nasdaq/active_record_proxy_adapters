@@ -51,11 +51,15 @@ module ActiveRecordProxyAdapters
     def call(env)
       return @app.call(env) if ignore_request?(env)
 
-      self.current_context = context_store.new(COOKIE_READER.call(env))
+      self.current_context = if stickiness_cookie_enabled
+                               context_store.new(COOKIE_READER.call(env))
+                             else
+                               context_store.new({})
+                             end
 
       status, headers, body = @app.call(env)
 
-      update_cookie_from_context(headers)
+      update_cookie_from_context(headers) if stickiness_cookie_enabled
 
       [status, headers, body]
     end

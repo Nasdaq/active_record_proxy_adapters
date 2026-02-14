@@ -91,6 +91,39 @@ RSpec.describe ActiveRecordProxyAdapters::Middleware do
       end
     end
 
+    context "when stickiness_cookie_enabled is false" do
+      before do
+        ActiveRecordProxyAdapters.config.stickiness_cookie_enabled = false
+      end
+
+      after do
+        ActiveRecordProxyAdapters.config.stickiness_cookie_enabled = true
+      end
+
+      it "does not write a Set-Cookie header" do
+        env = {}
+        _, headers, = middleware.call(env)
+
+        expect(headers["Set-Cookie"]).to be_nil
+      end
+
+      it "creates a fresh context for the request" do
+        env = {}
+        middleware.call(env)
+
+        expect(middleware.send(:current_context)).to be_a(ActiveRecordProxyAdapters::Context)
+      end
+
+      it "does not read a previous request's cookie into the context" do
+        cookie_hash = { "sqlite3_primary" => Time.current.utc.to_f }
+        env = { "HTTP_COOKIE" => to_cookie_string(cookie_hash) }
+
+        middleware.call(env)
+
+        expect(middleware.send(:current_context).to_h).to eq({})
+      end
+    end
+
     context "when request comes from rails asset prefix" do
       before do
         rails       = double("Rails") # rubocop:disable RSpec/VerifiedDoubles

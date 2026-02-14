@@ -45,22 +45,19 @@ module ActiveRecordProxyAdapters # rubocop:disable Style/Documentation
     }.freeze
 
     # @return [Class] The context that is used to store the current request's state.
-    attr_reader :context_store
-
     # @return [Proc] The timeout strategy to use for regex matching.
-    attr_reader :regexp_timeout_strategy
-
     # @return [Logger] The logger to use for logging messages.
-    attr_reader :logger
+    # @return [Boolean] Whether to use cookies for cross-request stickiness.
+    attr_reader :context_store, :regexp_timeout_strategy, :logger, :stickiness_cookie_enabled
 
     def initialize
       @lock = Monitor.new
-
-      self.cache_configuration     = CacheConfiguration.new(@lock)
-      self.context_store           = ActiveRecordProxyAdapters::Context
-      self.regexp_timeout_strategy = :log
-      self.logger                  = ActiveRecord::Base.logger || Logger.new($stdout)
-      @database_configurations     = {}
+      self.cache_configuration       = CacheConfiguration.new(@lock)
+      self.context_store             = ActiveRecordProxyAdapters::Context
+      self.regexp_timeout_strategy   = :log
+      self.logger                    = ActiveRecord::Base.logger || Logger.new($stdout)
+      self.stickiness_cookie_enabled = true
+      @database_configurations       = {}
     end
 
     def log_subscriber_primary_prefix=(prefix)
@@ -93,6 +90,12 @@ module ActiveRecordProxyAdapters # rubocop:disable Style/Documentation
 
     def checkout_timeout=(checkout_timeout)
       default_database_config.checkout_timeout = checkout_timeout
+    end
+
+    def stickiness_cookie_enabled=(enabled)
+      synchronize_update(:stickiness_cookie_enabled, from: @stickiness_cookie_enabled, to: enabled) do
+        @stickiness_cookie_enabled = enabled
+      end
     end
 
     def logger=(logger)

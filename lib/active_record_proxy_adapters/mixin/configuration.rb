@@ -46,6 +46,13 @@ module ActiveRecordProxyAdapters
         proxy_config.logger
       end
 
+      # Helper to retrieve whether stickiness cookies are enabled from the configuration stored in
+      # {ActiveRecordProxyAdapters::Configuration#stickiness_cookie_enabled}.
+      # @return [Boolean]
+      def stickiness_cookie_enabled
+        proxy_config.stickiness_cookie_enabled
+      end
+
       # Helper to retrieve the timeout strategy from the configuration stored in
       # {ActiveRecordProxyAdapters::Configuration#regexp_timeout_strategy}.
       # @return [Proc]
