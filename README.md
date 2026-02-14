@@ -159,6 +159,11 @@ ActiveRecordProxyAdapters.configure do |config|
 
   # How long proxy should wait for replica to connect.
   config.checkout_timeout = 5.seconds # defaults to 2.seconds
+
+  # Whether to persist write timestamps in a cookie for cross-request stickiness.
+  # When false, the middleware still creates a fresh context per request (preventing
+  # thread-local leaks in multi-threaded servers) but skips reading/writing the cookie.
+  config.stickiness_cookie_enabled = false # defaults to true
 end
 ```
 
