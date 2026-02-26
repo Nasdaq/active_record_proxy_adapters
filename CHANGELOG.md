@@ -3,6 +3,7 @@
 - Add Ruby 4.0.0 to test matrix
 - Hijack only higher-level active record adapter methods [1d7eae3](https://github.com/Nasdaq/active_record_proxy_adapters/commit/1d7eae3a9c7a75cc4adebe64a1fdc1289205bfe)
 - Add ActiveRecord model integration tests [2ab16e1](https://github.com/Nasdaq/active_record_proxy_adapters/commit/2ab16e196410b9985d29a976fb64d58171f483e3)
+- Fix middleware context thread variable leak [9f175ff](https://github.com/Nasdaq/active_record_proxy_adapters/commit/9f175ff092151a05b832b0c380e04b32ffc02bde)
 
 ## [0.10.1, 0.9.2] - 2026-01-02
 - Fix hijacked methods for all supported ActiveRecord versions [bc0501a](https://github.com/Nasdaq/active_record_proxy_adapters/commit/bc0501af613193db4d0e67c44234b8ea6e7038e4)
