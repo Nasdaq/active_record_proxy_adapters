@@ -1,6 +1,7 @@
 # frozen_string_literal: true
 
 require "rack"
+require "rack/events"
 require "json"
 require "active_record_proxy_adapters/context"
 require "active_record_proxy_adapters/contextualizer"
@@ -42,6 +43,16 @@ module ActiveRecordProxyAdapters
 
       Rack::Utils.set_cookie_header!(headers, COOKIE_NAME, cookie)
     end.freeze
+
+    class EventHandler # rubocop:disable Style/Documentation
+      include Rack::Events::Abstract
+      include Mixin::Configuration
+      include Contextualizer
+
+      def on_finish(_request, _response)
+        self.current_context = context_store.new({})
+      end
+    end
 
     def initialize(app, cookie_options = {})
       @app = app
