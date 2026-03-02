@@ -35,7 +35,7 @@ ActiveRecordProxyAdapters.configure do |config|
   end
 end
 
-# rubocop:disable Style/Documentation
+# rubocop:disable Style/Documentation, Style/OneClassPerFile
 class PostgreSQLUser < TestHelper::PostgreSQLRecord
   self.table_name = "users"
 end
@@ -51,6 +51,6 @@ end
 class SQLite3User < TestHelper::SQLite3Record
   self.table_name = "users"
 end
-# rubocop:enable Style/Documentation
+# rubocop:enable Style/Documentation, Style/OneClassPerFile
 
 pry # rubocop:disable Lint/Debugger
