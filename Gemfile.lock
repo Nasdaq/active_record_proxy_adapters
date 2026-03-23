@@ -135,7 +135,7 @@ GEM
     thor (1.4.0)
     timecop (0.9.10)
     timeout (0.4.4)
-    trilogy (2.10.0)
+    trilogy (2.11.0)
       bigdecimal
     tzinfo (2.0.6)
       concurrent-ruby (~> 1.0)
@@ -168,7 +168,7 @@ DEPENDENCIES
   rubocop-rspec (~> 3.9.0)
   simplecov
   timecop
-  trilogy (~> 2.10)
+  trilogy (~> 2.11)
   yard
 
 BUNDLED WITH
