@@ -134,7 +134,7 @@ GEM
     thor (1.4.0)
     timecop (0.9.10)
     timeout (0.6.1)
-    trilogy (2.11.0)
+    trilogy (2.11.1)
       bigdecimal
     tzinfo (2.0.6)
       concurrent-ruby (~> 1.0)
