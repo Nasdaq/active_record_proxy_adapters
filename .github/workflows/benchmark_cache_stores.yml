@@ -13,7 +13,7 @@ jobs:
 
     steps:
     - name: Checkout repository
-      uses: actions/checkout@v4
+      uses: actions/checkout@v6
 
     - name: Compute container registry name
       id: compute_container_registry_name
@@ -124,7 +124,7 @@ jobs:
 
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
 
       - name: Prepare databases
         run: bundle exec appraisal ar-${{ matrix.ar }} rake db:setup:postgresql
