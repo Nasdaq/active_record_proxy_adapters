@@ -48,7 +48,7 @@ jobs:
       packages: read
 
     container:
-      image: ${{ needs.export_variables.outputs.app_image }}-4.0.1
+      image: ${{ needs.export_variables.outputs.app_image }}-4.0.2
       volumes:
         - .:/app
 
