@@ -174,7 +174,14 @@ module ActiveRecordProxyAdapters
 
       result
     ensure
-      replica_connection?(connection) && replica_pool.checkin(connection)
+      # Check the connection back into its own pool, not whatever pool currently
+      # answers to the :reading role. In Rails system tests,
+      # ActiveRecord::TestFixtures#setup_shared_connection_pool reassigns the
+      # :reading role's pool_config on every transactional-fixture test's
+      # before_setup, so re-resolving `replica_pool` here can return a pool
+      # different from the one the connection was checked out of — which would
+      # check a replica adapter into the primary pool and poison it.
+      connection.pool.checkin(connection) if replica_connection?(connection)
     end
 
     def connected_to(role:, &block)
