@@ -40,17 +40,22 @@ RSpec.describe ActiveRecordProxyAdapters::PrimaryReplicaProxy do
       end
 
       before do
-        # Simulate `setup_shared_connection_pool` firing between the proxy's
-        # checkout_replica_connection and the ensure-block `replica_pool.checkin`.
-        # The proxy calls `replica_pool` more than once per `connection_for` — we
-        # return the real replica pool for the checkout-side calls and the primary
-        # pool for the final checkin call, which is exactly what a mid-flight
-        # pool_config swap produces.
+        # A single `connection_for` resolves `replica_pool` twice on the
+        # checkout side:
+        #   1. `replica_pool_unavailable?` — to decide whether to use a replica
+        #   2. `checkout_replica_connection` — for `replica_pool.checkout`
+        # Any subsequent resolution would be the ensure-block re-resolving the
+        # pool to check the connection back in — which is exactly the call that
+        # `setup_shared_connection_pool` corrupts when it swaps the :reading
+        # pool_config between checkout and checkin. We reproduce that swap by
+        # returning the real replica pool for the two checkout-side calls and
+        # the primary pool for anything after.
+        checkout_side_calls = 2
         call_count = 0
         allow(proxy).to receive(:replica_pool).and_wrap_original do |original, *args, **kwargs|
           call_count += 1
-          last_call = call_count >= 3
-          last_call ? primary_pool : original.call(*args, **kwargs)
+          after_checkout = call_count > checkout_side_calls
+          after_checkout ? primary_pool : original.call(*args, **kwargs)
         end
       end
 
