@@ -12,7 +12,7 @@ RSpec.shared_examples_for "a SQL read statement" do
   end
 
   it "checks replica connection back in to the pool" do
-    conn = instance_double(adapter_class, method_name => nil)
+    conn = instance_double(adapter_class, method_name => nil, pool: replica_pool)
     allow(replica_pool).to receive(:checkout).and_return(conn)
     allow(replica_pool).to receive(:checkin)
 
