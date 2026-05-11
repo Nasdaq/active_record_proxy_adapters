@@ -1,6 +1,7 @@
 ## [Unreleased]
 
-- Add Ruby 4.0.0 to test matrix
+## [0.11.0] - 2026-05-11
+- Add Ruby 4.0.0 to test matrix [41fed47](https://github.com/Nasdaq/active_record_proxy_adapters/commit/41fed47ec556dd763e5e87b726d2fe59249af0aa)
 - Hijack only higher-level active record adapter methods [1d7eae3](https://github.com/Nasdaq/active_record_proxy_adapters/commit/1d7eae3a9c7a75cc4adebe64a1fdc1289205bfe)
 - Add ActiveRecord model integration tests [2ab16e1](https://github.com/Nasdaq/active_record_proxy_adapters/commit/2ab16e196410b9985d29a976fb64d58171f483e3)
 - Fix cross-pool replica checkin when `:reading` pool_config is swapped mid-flight [58a52a0](https://github.com/Nasdaq/active_record_proxy_adapters/commit/58a52a0)
