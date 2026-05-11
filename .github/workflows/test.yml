@@ -60,7 +60,7 @@ jobs:
     needs: [export_variables]
 
     container:
-      image: ${{ needs.export_variables.outputs.app_image }}-4.0.2
+      image: ${{ needs.export_variables.outputs.app_image }}-4.0.3
       volumes:
         - .:/app
 
@@ -107,7 +107,7 @@ jobs:
           - "3.2.11"
           - "3.3.11"
           - "3.4.9"
-          - "4.0.2"
+          - "4.0.3"
         ar:
           - "7.2"
           - "8.0"
@@ -187,7 +187,7 @@ jobs:
     permissions: write-all
 
     container:
-      image: ${{ needs.export_variables.outputs.app_image }}-4.0.2
+      image: ${{ needs.export_variables.outputs.app_image }}-4.0.3
       volumes:
         - .:/app
 
