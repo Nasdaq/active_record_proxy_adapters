@@ -157,7 +157,7 @@ DEPENDENCIES
   rspec (~> 3.13)
   rubocop (~> 1.88)
   rubocop-rspec (~> 3.10.2)
-  simplecov
+  simplecov (~> 0.22.0)
   timecop
   trilogy (~> 2.12)
   yard
