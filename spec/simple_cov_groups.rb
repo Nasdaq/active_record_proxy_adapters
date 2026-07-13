@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 SIMPLE_COV_GROUPS = proc do
-  add_group "Core" do |src_file|
+  SimpleCov.group "Core" do |src_file|
     [
       /active_record_context/,
       /configuration/,
@@ -18,19 +18,19 @@ SIMPLE_COV_GROUPS = proc do
     ].any? { |pattern| pattern.match?(src_file.filename) }
   end
 
-  add_group "PostgreSQL" do |src_file|
+  SimpleCov.group "PostgreSQL" do |src_file|
     [/postgresql/, /postgre_sql/].any? { |pattern| pattern.match?(src_file.filename) }
   end
 
-  add_group "MySQL2" do |src_file|
+  SimpleCov.group "MySQL2" do |src_file|
     /mysql2/.match?(src_file.filename)
   end
 
-  add_group "Trilogy" do |src_file|
+  SimpleCov.group "Trilogy" do |src_file|
     /trilogy/.match?(src_file.filename)
   end
 
-  add_group "SQLite3" do |src_file|
+  SimpleCov.group "SQLite3" do |src_file|
     /sqlite3/.match?(src_file.filename)
   end
 end

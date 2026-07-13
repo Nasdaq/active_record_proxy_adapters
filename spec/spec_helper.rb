@@ -1,7 +1,6 @@
 # frozen_string_literal: true
 
 require "simplecov"
-require "simplecov_json_formatter"
 require "active_support/core_ext/object/blank"
 require "simple_cov_groups"
 require "active_record"
