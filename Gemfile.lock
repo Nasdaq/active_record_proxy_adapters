@@ -44,7 +44,6 @@ GEM
       logger
     diff-lcs (1.6.2)
     digest (3.2.1)
-    docile (1.4.1)
     drb (2.2.3)
     i18n (1.14.8)
       concurrent-ruby (~> 1.0)
@@ -117,12 +116,7 @@ GEM
       rubocop (~> 1.86, >= 1.86.2)
     ruby-progressbar (1.13.0)
     securerandom (0.4.1)
-    simplecov (0.22.0)
-      docile (~> 1.1)
-      simplecov-html (~> 0.11)
-      simplecov_json_formatter (~> 0.1)
-    simplecov-html (0.13.1)
-    simplecov_json_formatter (0.1.4)
+    simplecov (1.0.0)
     thor (1.4.0)
     timecop (0.9.11)
     timeout (0.6.1)
@@ -157,7 +151,7 @@ DEPENDENCIES
   rspec (~> 3.13)
   rubocop (~> 1.88)
   rubocop-rspec (~> 3.10.2)
-  simplecov (~> 0.22.0)
+  simplecov (~> 1.0.0)
   timecop
   trilogy (~> 2.12)
   yard
