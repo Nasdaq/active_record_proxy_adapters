@@ -7,7 +7,7 @@ gem "dalli"
 gem "mysql2", "~> 0.5"
 gem "pg", "~> 1.6"
 gem "rake", "~> 13.4"
-gem "redis", "~> 5.4.1"
+gem "redis", "~> 6.0.0"
 gem "trilogy", "~> 2.12"
 
 gem "appraisal"
