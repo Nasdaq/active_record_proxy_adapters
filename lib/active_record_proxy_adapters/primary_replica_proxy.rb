@@ -173,15 +173,6 @@ module ActiveRecordProxyAdapters
       update_primary_latest_write_timestamp if !replica_connection?(connection) && write_statement?(sql_string)
 
       result
-    ensure
-      # Check the connection back into its own pool, not whatever pool currently
-      # answers to the :reading role. In Rails system tests,
-      # ActiveRecord::TestFixtures#setup_shared_connection_pool reassigns the
-      # :reading role's pool_config on every transactional-fixture test's
-      # before_setup, so re-resolving `replica_pool` here can return a pool
-      # different from the one the connection was checked out of — which would
-      # check a replica adapter into the primary pool and poison it.
-      connection.pool.checkin(connection) if replica_connection?(connection)
     end
 
     def connected_to(role:, &block)
@@ -195,7 +186,7 @@ module ActiveRecordProxyAdapters
     end
 
     def checkout_replica_connection
-      replica_pool.checkout(proxy_checkout_timeout)
+      replica_pool.lease_connection
     # rescue NoDatabaseError to avoid crashing when running db:create rake task
     # rescue ConnectionNotEstablished to handle connectivity issues in the replica
     # (for example, replication delay)
