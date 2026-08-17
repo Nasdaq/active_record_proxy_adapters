@@ -21,7 +21,7 @@ gem "pry", "~> 0.16.0"
 
 # for documentation server
 gem "puma"
-gem "rack", "~> 2.2.23"
+gem "rack", "~> 2.2.24"
 gem "yard"
 
 group :test do
