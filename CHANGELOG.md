@@ -1,6 +1,7 @@
 ## [Unreleased]
 
 - Drop Ruby 3.2 support [d4e4bc8](https://github.com/Nasdaq/active_record_proxy_adapters/commit/d4e4bc8cd191919698ac09496af64a8cf76c0004)
+- Avoid replica connection checkout/checkin for every read query [4be5c8e](https://github.com/Nasdaq/active_record_proxy_adapters/commit/4be5c8ecf78eedf7999a4f95c98c511ee0b4e466)
 
 ## [0.11.0] - 2026-05-11
 - Add Ruby 4.0.0 to test matrix [41fed47](https://github.com/Nasdaq/active_record_proxy_adapters/commit/41fed47ec556dd763e5e87b726d2fe59249af0aa)
