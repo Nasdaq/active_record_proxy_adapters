@@ -43,6 +43,7 @@ module ActiveRecordProxyAdapters
       /(\A|\s+?)DELETE\s+?FROM\s+?\S+?/i,
       /(\A|\s+?)DROP\s/i
     ].map(&:freeze).freeze
+    LEADING_SQL_COMMENTS = %r{\A(?:\s|/\*.*?\*/|--[^\r\n]*(?:\r\n?|\n|\z))*}m
 
     # Abstract adapter methods that should be proxied.
     hijack_method(*ActiveRecordContext.hijackable_methods)
@@ -103,7 +104,10 @@ module ActiveRecordProxyAdapters
 
     def coerce_query_to_string(sql_or_arel)
       # TODO: implement custom Proxy arel parser
-      sql_or_arel.respond_to?(:to_sql) ? sql_or_arel.to_sql(connection_class) : sql_or_arel.to_s
+      sql_string = sql_or_arel.respond_to?(:to_sql) ? sql_or_arel.to_sql(connection_class) : sql_or_arel.to_s
+      normalized_sql = sql_string.sub(LEADING_SQL_COMMENTS, "")
+      normalized_sql.rstrip!
+      normalized_sql
     end
 
     def appropriate_connection(sql_string, &block)
