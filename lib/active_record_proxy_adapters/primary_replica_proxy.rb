@@ -135,17 +135,17 @@ module ActiveRecordProxyAdapters
     end
 
     def top_of_connection_stack_role
-      return if connected_to_stack.empty?
+      connected_to_stack.reverse_each do |entry|
+        role, klasses = entry.values_at(:role, :klasses)
+        next unless role.present?
 
-      top = connected_to_stack.last
-      role, klasses = top.values_at(:role, :klasses)
-      return unless role.present?
+        # A nested block for another connection class must not hide this class's role.
+        next unless klasses.include?(connection_class) || klasses.include?(ActiveRecord::Base)
 
-      # ActiveRecord::Base is the parent record for all models so,
-      # if the top of the stack includes it, we should respect it.
-      role_for_current_class = klasses.include?(connection_class) || klasses.include?(ActiveRecord::Base)
+        return [reading_role, writing_role].include?(role) ? role : nil
+      end
 
-      [reading_role, writing_role].include?(role) && role_for_current_class ? role : nil
+      nil
     end
 
     def connected_to_stack
