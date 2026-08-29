@@ -55,6 +55,7 @@ module ActiveRecordProxyAdapters
     def initialize(primary_connection)
       @primary_connection    = primary_connection
       @active_record_context = ActiveRecordContext.new
+      @regexp_matcher_cache_lock = Mutex.new
     end
 
     private
@@ -198,35 +199,60 @@ module ActiveRecordProxyAdapters
     # @return [FalseClass] if sql_string matches a read statement (i.e. SELECT)
     def need_primary?(sql_string)
       return true  if cte_for_write?(sql_string)
-      return true  if SQL_PRIMARY_MATCHERS.any?(&match_sql?(sql_string))
-      return false if SQL_REPLICA_MATCHERS.any?(&match_sql?(sql_string))
+      return true  if SQL_PRIMARY_MATCHERS.any? { |matcher| match_sql?(sql_string, matcher) }
+      return false if SQL_REPLICA_MATCHERS.any? { |matcher| match_sql?(sql_string, matcher) }
 
       true
     end
 
     def cte_for_write?(sql_string)
       CTE_MATCHER.match?(sql_string) &&
-        WRITE_STATEMENT_MATCHERS.any?(&match_sql?(sql_string))
+        WRITE_STATEMENT_MATCHERS.any? { |matcher| match_sql?(sql_string, matcher) }
     end
 
     def need_all?(sql_string)
-      return false if SQL_SKIP_ALL_MATCHERS.any?(&match_sql?(sql_string))
+      return false if SQL_SKIP_ALL_MATCHERS.any? { |matcher| match_sql?(sql_string, matcher) }
 
-      SQL_ALL_MATCHERS.any?(&match_sql?(sql_string))
+      SQL_ALL_MATCHERS.any? { |matcher| match_sql?(sql_string, matcher) }
     end
 
     def write_statement?(sql_string)
-      WRITE_STATEMENT_MATCHERS.any?(&match_sql?(sql_string))
+      WRITE_STATEMENT_MATCHERS.any? { |matcher| match_sql?(sql_string, matcher) }
     end
 
-    def match_sql?(sql_string)
-      proc do |matcher|
-        Regexp.new(matcher.source, Regexp::IGNORECASE, timeout: proxy_checkout_timeout.to_f).match?(sql_string)
-      rescue Regexp::TimeoutError
-        regexp_timeout_strategy.call(sql_string, matcher)
+    def match_sql?(sql_string, matcher)
+      matcher_with_timeout(matcher).match?(sql_string)
+    rescue Regexp::TimeoutError
+      regexp_timeout_strategy.call(sql_string, matcher)
 
-        false
+      false
+    end
+
+    def matcher_with_timeout(matcher)
+      timeout = proxy_checkout_timeout.to_f
+      cached  = cached_matcher(matcher, timeout)
+      return cached if cached
+
+      @regexp_matcher_cache_lock.synchronize do
+        cached = cached_matcher(matcher, timeout)
+        return cached if cached
+
+        cache_matcher(matcher, timeout)
       end
+    end
+
+    def cached_matcher(matcher, timeout)
+      cache = @regexp_matcher_cache
+      cache.fetch(:matchers)[matcher] if cache&.fetch(:timeout) == timeout
+    end
+
+    def cache_matcher(matcher, timeout)
+      cache    = @regexp_matcher_cache
+      matchers = cache&.fetch(:timeout) == timeout ? cache.fetch(:matchers) : {}
+      compiled = Regexp.new(matcher.source, Regexp::IGNORECASE, timeout:)
+      @regexp_matcher_cache = { timeout:, matchers: matchers.merge(matcher => compiled).freeze }.freeze
+
+      compiled
     end
 
     # @return Boolean
