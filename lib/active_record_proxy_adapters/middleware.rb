@@ -26,7 +26,16 @@ module ActiveRecordProxyAdapters
     COOKIE_READER = lambda do |rack_env|
       rack_request = Rack::Request.new(rack_env)
       arpa_cookie  = rack_request.cookies[COOKIE_NAME]
-      JSON.parse(arpa_cookie || "{}")
+      cookie_hash  = JSON.parse(arpa_cookie || "{}")
+      next {} unless cookie_hash.is_a?(Hash)
+
+      now = Time.now.utc.to_f
+      cookie_hash.each_with_object({}) do |(connection_name, value), context|
+        timestamp = Float(value, exception: false)
+        next unless timestamp&.finite? && timestamp >= 0
+
+        context[connection_name] = [timestamp, now].min
+      end
     rescue JSON::ParserError
       {}
     end.freeze
