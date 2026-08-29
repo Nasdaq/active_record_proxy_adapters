@@ -5,6 +5,19 @@ require "rake"
 module ActiveRecordProxyAdapters
   # Enhances all rails db rake tasks to stick to writer connection
   module Rake
+    # Runs a database task's actions within a balanced writing-role stack frame.
+    module WriterConnectionTask
+      def execute(args = nil)
+        pushed = false
+        ActiveRecordProxyAdapters::Rake.push_to_stack_rake_task.execute
+        pushed = true
+
+        super
+      ensure
+        ActiveRecordProxyAdapters::Rake.pop_from_stack_rake_task.execute if pushed
+      end
+    end
+
     module_function
 
     def load_tasks
@@ -19,7 +32,7 @@ module ActiveRecordProxyAdapters
       ::Rake::Task
         .tasks
         .select(&enhanceable_db_task?)
-        .each { |task| task.enhance([push_to_stack_rake_task.name], &pop_from_stack_and_reenable) }
+        .each { |task| task.extend(WriterConnectionTask) }
     end
 
     def push_to_stack_rake_task
@@ -28,13 +41,6 @@ module ActiveRecordProxyAdapters
 
     def pop_from_stack_rake_task
       ::Rake::Task["arpa:pop_from_stack"]
-    end
-
-    def pop_from_stack_and_reenable
-      proc do
-        pop_from_stack_rake_task.invoke
-        [push_to_stack_rake_task, pop_from_stack_rake_task].each(&:reenable)
-      end
     end
 
     def enhanceable_db_task?
