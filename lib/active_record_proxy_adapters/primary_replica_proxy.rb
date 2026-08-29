@@ -16,9 +16,19 @@ module ActiveRecordProxyAdapters
     include Contextualizer
     include Mixin::Configuration
 
+    LOCKING_SELECT_KEYWORD_MATCHER = /\b(?:for|lock)\b/i
+    LOCKING_SELECT_MATCHER = Regexp.new(
+      [
+        %q{\A\s*(?:select|with)\b[\s\S]*\b},
+        %q{(?:for\s+(?:no\s+key\s+update|update|key\s+share|share)\b},
+        %q{(?:\s+of\s+[\s\S]+?)?(?:\s+(?:nowait|skip\s+locked))?|lock\s+in\s+share\s+mode\b)},
+        %q{(?=\s*(?:limit\b|offset\b|fetch\b|for\b|\)|,|;|\z))}
+      ].join,
+      Regexp::IGNORECASE
+    )
+
     # All queries that match these patterns should be sent to the primary database
     SQL_PRIMARY_MATCHERS = [
-      /\A\s*select.+for update\Z/i, /select.+lock in share mode\Z/i,
       /\A\s*select.+(nextval|currval|lastval|get_lock|release_lock|pg_advisory_lock|pg_advisory_unlock)\(/i
     ].map(&:freeze).freeze
 
@@ -198,10 +208,17 @@ module ActiveRecordProxyAdapters
     # @return [FalseClass] if sql_string matches a read statement (i.e. SELECT)
     def need_primary?(sql_string)
       return true  if cte_for_write?(sql_string)
+      return true  if locking_select?(sql_string)
       return true  if SQL_PRIMARY_MATCHERS.any?(&match_sql?(sql_string))
       return false if SQL_REPLICA_MATCHERS.any?(&match_sql?(sql_string))
 
       true
+    end
+
+    def locking_select?(sql_string)
+      return false unless LOCKING_SELECT_KEYWORD_MATCHER.match?(sql_string)
+
+      match_sql?(sql_string).call(LOCKING_SELECT_MATCHER)
     end
 
     def cte_for_write?(sql_string)
